@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Amoveo3 Wallet</title>
+
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/theme.css">
+  </head>
+
+  <body>
+    <div>
+        <div id="toolbar-container" class="clearfix">
+            <div class="left">
+                <div id="back-button" class="invisible">
+                    <i class="fas fa-arrow-left fa-2x"></i>
+                </div>
+            </div>
+            <div class="left">
+                <p id="title">Amoveo3 Wallet</p>
+            </div>
+            <div class="right">
+                <div id="settings-button">
+                    <i class="fas fa-ellipsis-v fa-2x"></i>
+                </div>
+            </div>
+            <div class="right">
+                <div id="refresh-button">
+                    <i class="fas fa-sync fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-container" class='container'>
+        <div class="hidden" id="syncing-container">
+            <div>
+                <p>Syncing...</p>
+            </div>
+            <div>
+                <div class="progress">
+                  <div id="syncing-progress" class="active progress-bar progress-bar-success progress-bar-striped"
+                       role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="25000">
+                    <span class="sr-only">Syncing...</span>
+                  </div>
+                </div>
+            </div>
+            <div class="spacer"></div>
+        </div>
+
+        <div id="latest-block-container" class="right hidden">
+            <p>Latest Block: <span id="block-number"></span></p>
+        </div>
+
+        <div id="account-container" class='clearfix'>
+            <div class="clearfix">
+                <table class="center">
+                    <tr>
+                        <td></td>
+                        <td>
+                            <div class="clearfix left">
+                                <div class="left">
+                                    <p id="account-balance">--</p>
+                                </div>
+                                <div id="account-veo-label-container" class="left">
+                                    <span class="veo-label">Veo</span>
+                                </div>
+                                <div class="clear"></div>
+                            </div>
+                        </td>
+                        <td></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div>
+                <div id="main-address-wrapper" class="clearfix">
+                    <div class="left">
+                        <p id="account-icon"></p>
+                    </div>
+                    <div class="left">
+                        <p class="address" id="account-address"></p>
+                        <div class="left">
+                            <a id="account-copy">Copy</a>
+                        </div>
+                        <div class="left">
+                            <p id="copy-text" class="success invisible">Address copied to clipboard</p>
+                        </div>
+                    </div>
+                    <div class="clear">
+                    </div>
+                </div>
+            </div>
+
+            <div id="tabs-container">
+                <div id="tabs-row-container" class="clearfix">
+                    <div data-target="send" class="tab active">
+                        <p>Send</p>
+                    </div>
+                    <div data-target="transactions" class="tab">
+                        <p>Transactions</p>
+                    </div>
+                    <div data-target="markets" class="tab">
+                        <p>Markets</p>
+                    </div>
+                    <div data-target="channels" class="tab">
+                        <p>Channels</p>
+                    </div>
+                </div>
+
+                <div id="tab-content-container" class="row">
+
+                </div>
+            </div>
+
+        </div>
+
+        <div id="settings-container" class='hidden'>
+            <div>
+                <div class="section-heading">
+                    <h4>Account</h4>
+                </div>
+                <div id="settings-list">
+                    <div>
+                        <div class="settings-row">
+                            <button class="btn btn-info" id="account-switch-button">Switch Accounts &nbsp;<i class="fas fa-user-circle"></i></button>
+                        </div>
+
+                        <div class='settings-row'>
+                            <div>
+                                <button class="btn btn-primary" id="export-button">Export Private Key &nbsp;<i class="fas fa-download"></i></button>
+                            </div>
+                            <div>
+                                <p id="export-error-text" class="error invisible">Error exporting account</p>
+                            </div>
+                        </div>
+
+                        <div class='settings-row'>
+                            <div>
+                                <button class="btn btn-success" id="import-account-button">Import Account &nbsp;<i class="fas fa-upload"></i></button>
+                            </div>
+                            <div class="hidden">
+                                <input type="file" id="import-account" />
+                            </div>
+
+                            <div>
+                                &nbsp;
+                            </div>
+
+                            <div>
+                                <p>Import private key .txt file</p>
+                                <p id="import-error-text" class="error invisible">Invalid account data</p>
+                            </div>
+                        </div>
+
+                        <div class='settings-row'>
+                            <div>
+                                <button class="btn btn-warning" id="add-account-button">Add New Account &nbsp;<i class="fas fa-plus"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class='spacer'>
+                    </div>
+                    <div class='row'>
+                        <div class="section-heading">
+                            <h4>Connection Info</h4>
+                        </div>
+                        <div>
+                            <label>URL:</label>
+                            <input id="node-url" type="text" />
+                        </div>
+                        <div>
+                            <label>Port:</label>
+                            <input id="node-port" type="number" />
+                        </div>
+                        <div>
+                            <button class="btn btn-primary" id="node-connect">Connect</button>
+                        </div>
+                        <div class='row'>
+                            <p>Connected to: <span id="node-current"></span></p>
+                        </div>
+                        <div class='row'>
+                            <p><span class="hidden error" id="node-error"></span></p>
+                        </div>
+                    </div>
+                    <div class='spacer'>
+                    </div>
+                    <div>
+                        <p>Version: 1.0.0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="welcome-container" class='hidden'>
+            <div>
+                <div class="section-heading">
+                    <h4>Get Started</h4>
+                </div>
+
+               <div class='row'>
+                    <div>
+                        <button class="btn btn-success" id="welcome-create-account-button">Create New Account &nbsp;<i class="fas fa-plus"></i></button><i></i>
+                    </div>
+
+                </div>
+
+                <div>
+                    or
+                </div>
+
+                <div class='row'>
+                    <div>
+                        <button class="btn btn-warning" id="welcome-import-account-button">Import Account &nbsp;<i class="fas fa-upload"></i></button><i></i>
+                    </div>
+                    <div class="hidden">
+                        <input type="file" id="welcome-import-account" />
+                    </div>
+
+                    <div>
+                        &nbsp;
+                    </div>
+
+                    <div>
+                        <p>Import private key .txt file</p>
+                        <p id="welcome-import-error-text" class="error invisible">Invalid account data</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="account-switch-container" class='hidden'>
+            <div>
+                <div class="section-heading">
+                    <h4>Switch Accounts</h4>
+                </div>
+                <div>
+                    <div id="account-switch-rows">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="locked-container" class='hidden'>
+            <div>
+                <div>
+                    <label>Enter Password</label>
+                    <input id="locked-password" type="password" placeholder="" />
+                </div>
+                <div>
+                    <button id="locked-button" class="btn btn-primary">Unlock</button>
+                </div>
+                <div>
+                    <p id="locked-restore" class="fake-link">Restore from backup</p>
+                </div>
+                <div id="locked-error-text" class="hidden">
+                    <p class="error">Password incorrect</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="password-container" class='hidden'>
+            <div>
+                <div class="row">
+                    <label>Enter Password</label>
+                    <input id="enter-password" type="password" placeholder="" />
+                </div>
+
+                <div class="row">
+                    <label>Confirm Password</label>
+                    <input id="enter-password2" type="password" placeholder="" />
+                </div>
+                <div class="row">
+                    <button id="password-button" class="btn btn-primary">Save</button>
+                </div>
+                <div>
+                    <p id="password-error" class="error hidden">Password must be at least 6 characters</p>
+                </div>
+                <div>&nbsp;</div>
+                <div>
+                    <p id="password-notice">If you lose your password, you can back up your wallet using the private key.</p>
+                    <p id="password-notice2">
+                        PLEASE backup your private key in a safe place.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="alert-container" class="hidden">
+            <div id="alert-shadow">
+                <div>
+                    <div>
+                        <p id="alert-message"></p>
+                    </div>
+                </div>
+                <div>
+                    <p id="bet-error-text" class="error invisible">Fields must not be 0</p>
+                </div>
+                <div id="bet-button-container" class="form-row clearfix">
+                    <div class="left">
+                        <button id="alert-confirm" class="btn btn-success">OK</button>
+                    </div>
+                    <div class="right">
+                        <button id="alert-cancel" class="btn btn-danger">Cancel</button>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+  </body>
+
+  <script src="js/ui/blockies.js"></script>
+  <script src="js/ui/build/bundle.js"></script>
+
+</html>

@@ -1,0 +1,47 @@
+{
+  "name": "Amoveo Wallet",
+  "version": "1.0.4",
+  "manifest_version": 2,
+  "description": "Amoveo Wallet",
+  "icons": {
+      "16": "img/icon-16.png",
+      "128": "img/icon-128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "file://*/*",
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": [
+        "js/build/cs_bundle.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "permissions": [
+    "storage",
+    "tabs",
+    "unlimitedStorage",
+    "clipboardWrite",
+    "http://localhost:8080/",
+    "http://159.65.120.84:8080/",
+    "https://*.infura.io/"
+  ],
+  "background": {
+    "scripts": ["js/build/background_bundle.js"],
+    "persistent": true
+  },
+  "browser_action": {
+      "default_popup": "popup.html",
+      "default_icon": "img/icon-16.png"
+  },
+  "externally_connectable": {
+    "matches": [
+      "*://www.foo.com/*",
+      "*://*.amoveobook.com/*"
+    ]
+  }
+}

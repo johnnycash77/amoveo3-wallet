@@ -1,0 +1,158 @@
+<!doctype html>
+<html style="height:600px;">
+<head>
+    <meta charset="utf-8">
+    <title>Amoveo3 Confirmation</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css"
+          integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/notification.css">
+</head>
+<body class="notification">
+<div id="notification-title-container" class="center">
+    <p id="notification-title">Amoveo3 Wallet</p>
+</div>
+<div id="new-channel-container" class="hidden">
+    <div id="channel-ip-container" class="form-row">
+        <label>Channel IP Address</label>
+        <p id="channel-ip-address"></p>
+    </div>
+    <div class="form-row">
+        <div class="tooltip">
+            <i class="fas fa-info-circle"></i>
+            <span class="tooltiptext">This amount of VEO will be locked in the channel until it expires.  You can redeem any VEO you do not spend in the channel, minus the fees of keeping the channel open.</span>
+        </div>
+        <label>Amount to bet with</label>
+        <input id="new-channel-amount" type="number" min="0"/>
+    </div>
+
+    <div id="channel-advanced-button">
+        <a href="#">+ Show advanced options</a>
+    </div>
+
+    <div id="channel-advanced-container" class="hidden">
+        <div class="form-row">
+            <div class="tooltip">
+                <i class="fas fa-info-circle"></i>
+                <span class="tooltiptext">Suggested value of 100.  This is how many blocks you have to stop the other party if they are try closing at the wrong channel state.</span>
+            </div>
+            <label>Delay (in blocks)</label>
+            <input id="new-channel-delay" type="number" min="0" value="100"/>
+        </div>
+        <div class="form-row">
+            <div class="tooltip">
+                <i class="fas fa-info-circle"></i>
+                <span class="tooltiptext">The channel must last longer than the market you would like to bet on.</span>
+            </div>
+            <label>Channel length (in blocks)</label>
+            <input id="new-channel-length" type="number" min="0" value="4000"/>
+        </div>
+    </div>
+
+    <div id="channel-fee-container" class="form-row">
+        <div class="tooltip">
+            <i class="fas fa-info-circle"></i>
+            <span class="tooltiptext"><span id="total-rate" class="short"></span> x <span id="fee-block-number"></span> x <span id="fee-amount-number"></span> = <span id="total-fee2" class="short"></span></span>
+        </div>
+        <label>Channel Fee</label>
+        <p id="total-fee"></p>
+    </div>
+    <div>
+        <p id="new-channel-error-text" class="error invisible">Fields must not be 0</p>
+    </div>
+    <div id="channel-button-container" class="form-row clearfix">
+        <div class="left">
+            <button id="create-channel-button" class="btn btn-success">Create</button>
+        </div>
+        <div class="right">
+            <button id="cancel-channel-button" class="btn btn-danger">Cancel</button>
+        </div>
+        <div class="clear"></div>
+    </div>
+</div>
+
+<div id="make-bet-container" class="hidden">
+    <div id="bet-container">
+        <div class="form-row">
+            <label>Side</label>
+            <p id="bet-side"></p>
+        </div>
+        <div class="form-row">
+            <label>Amount</label>
+            <input id="bet-amount" type="number" min="0"/>
+        </div>
+        <div class="form-row">
+            <div class="tooltip">
+                <i class="fas fa-info-circle"></i>
+                <span class="tooltiptext">The price in VEO is equal to the odds</span>
+            </div>
+            <label>Price</label>
+            <input id="bet-price" type="number" min="0" value="1"/>
+        </div>
+    </div>
+    <div>
+        <p id="bet-error-text" class="error invisible">Fields must not be 0</p>
+    </div>
+    <div id="bet-button-container" class="form-row clearfix">
+        <div class="left">
+            <button id="create-bet-button" class="btn btn-success">Place Bet</button>
+        </div>
+        <div class="right">
+            <button id="cancel-bet-button" class="btn btn-danger">Cancel</button>
+        </div>
+        <div class="clear"></div>
+    </div>
+</div>
+
+<div id="cancel-container" class="hidden">
+    <div>
+        <div class="form-row">
+            <label>Side</label>
+            <p id="cancel-bet-side"></p>
+        </div>
+        <div class="form-row">
+            <label>Amount</label>
+            <p id="cancel-bet-amount"></p>
+        </div>
+        <div class="form-row">
+            <div class="tooltip">
+                <i class="fas fa-info-circle"></i>
+                <span class="tooltiptext">The price in VEO is equal to the odds</span>
+            </div>
+            <label>Price</label>
+            <p id="cancel-bet-price"></p>
+        </div>
+    </div>
+    <div>
+        <p id="cancel-error-text" class="error invisible">An error occurred, please try again later.</p>
+    </div>
+    <div id="cancel-button-container" class="form-row clearfix">
+        <div class="left">
+            <button id="cancel-button" class="btn btn-success">Yes</button>
+        </div>
+        <div class="right">
+            <button id="cancel-cancel-button" class="btn btn-danger">No</button>
+        </div>
+        <div class="clear"></div>
+    </div>
+</div>
+
+<script type="text/javascript" src="js/ui/notification/sjcl.js" ></script>
+<script type="text/javascript" src="js/ui/notification/sha256.js" ></script>
+<script type="text/javascript" src="js/ui/notification/elliptic.min.js" ></script>
+<script type="text/javascript" src="js/ui/notification/format.js" ></script>
+<script type="text/javascript" src="js/ui/notification/files.js" ></script>
+<script type="text/javascript" src="js/ui/notification/codecBytes.js" ></script>
+<script type="text/javascript" src="js/ui/notification/crypto.js" ></script>
+<script type="text/javascript" src="js/ui/notification/merkle_proofs.js" ></script>
+<script type="text/javascript" src="js/ui/notification/encryption_library.js" ></script>
+<script type="text/javascript" src="js/ui/notification/ready.js" charset="utf-8"></script>
+<script type="text/javascript" src="js/ui/notification/send.js" charset="utf-8"></script>
+<script type="text/javascript" src="js/ui/notification/notification_rpc.js" charset="utf-8"></script>
+
+<script type="text/javascript" src="js/build/notification_bundle.js" charset="utf-8"></script>
+
+</body>
+</html>

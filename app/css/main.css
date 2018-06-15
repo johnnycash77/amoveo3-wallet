@@ -1,0 +1,345 @@
+
+#title {
+    font-size: 22px;
+    font-weight: 500;
+    padding: 0;
+}
+
+.title {
+    font-size: 28px;
+    font-weight: 500;
+    padding: 0;
+    margin-top: -6px;
+}
+
+#toolbar-container {
+    padding: 16px;
+    background: #42c0fb;
+    height: 64px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.12), 0 2px 4px 0 rgba(0, 0, 0, 0.08);
+}
+
+.btn-primary {
+    background: #42c0fb;
+}
+
+.btn-info {
+    background: #3F51B5;
+    border: #3F51B5;
+}
+
+.btn-info:hover {
+    background: #1A237E;
+}
+
+#toolbar-container i {
+    font-size: 1.5em;
+    margin-top: 6px;
+}
+
+#back-button {
+    padding-right: 16px;
+    cursor: pointer;
+}
+
+#main-container {
+    text-align: center;
+    padding: 16px;
+    width: 420px;
+}
+
+#addressed-copied-container {
+
+}
+
+#pending-transactions-container {
+    min-height: 62px;
+}
+
+#account-veo-label-container {
+    padding-top: 8px;
+}
+
+#account-balance {
+    font-size: 32px;
+}
+
+#account-address {
+    width: 300px;
+    font-size: 20px;
+    margin-bottom: 0;
+    padding: 0 16px;
+    margin-top: 16px;
+}
+
+#account-container {
+
+}
+
+#send-container {
+
+}
+
+#channels-container {
+
+}
+
+#markets-container {
+
+}
+
+#settings-container {
+
+}
+
+#welcome-container {
+
+}
+
+#send-container label {
+
+}
+
+#channels-row {
+    padding: 8px 16px;
+    margin: -16px;
+}
+
+.channel-row:nth-child(even) {
+    background: #f2f2f2;
+}
+
+#channel-blank {
+    width: 180px;
+    margin: auto;
+}
+
+#new-channel {
+    width: 430px;
+    margin: auto;
+    padding: 16px;
+    margin-top: 64px;
+}
+
+#send-container input {
+    padding: 8px;
+    margin: 8px;
+}
+
+#main-address-wrapper {
+    padding: 8px;
+}
+
+#import-account {
+    margin: auto;
+    padding-left: 80px;
+}
+
+.account-switcher-row {
+    padding: 16px;
+    cursor: pointer;
+    margin: 0px -16px 0 -16px;
+    padding: 32px;
+}
+
+.account-switcher-row:hover {
+    background: #f5f5f5;
+    font-weight: 500;
+}
+
+.account-switcher-address {
+    font-size: 18px
+}
+
+.account-switcher-amount {
+
+}
+
+.top-row {
+    margin-left: 38px !important;
+    margin-right: 16px !important;
+}
+
+.tooltip {
+    opacity: 1 !important;
+}
+
+.veo-label {
+    font-size: 22px;
+    text-transform: uppercase;
+    margin: 8px;
+}
+
+#latest-block-container {
+    font-size: 11px;
+    position: absolute;
+    right: 8px;
+    top: 70px;
+}
+
+#copy-text {
+    margin-left: 8px;
+}
+
+#send-message {
+    margin-top: 12px;
+}
+
+#account-copy {
+    margin-left: 18px;
+    padding: 4px;
+    cursor: pointer;
+}
+
+#send-address {
+    width: 280px;
+}
+
+#settings-button {
+    padding: 0px 16px 0px 16px;
+    margin-right: -16px;
+    cursor: pointer;
+}
+
+#alert-container {
+    position: absolute;
+    top: 0;
+    background: rgba(0,0,0,0.5);
+    height: 100%;
+    width: 100%;
+    margin-left: -16px;
+    padding: 64px;
+    font-size: 18px;
+}
+
+#alert-shadow {
+    background: white;
+    padding: 32px;
+}
+
+#refresh-button {
+    padding: 0 8px;
+    cursor: pointer;
+}
+
+#locked-container {
+    margin: 64px;
+    text-align: center;
+}
+
+#password-container {
+    margin: 64px;
+    text-align: center;
+}
+
+#password-container .row {
+    margin: 8px;
+}
+
+#tabs-row-container {
+    margin: 0 -16px
+}
+
+#locked-button {
+    margin-top: 32px;
+    margin-bottom: 16px;
+}
+
+#syncing-container p {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+#tx-fee {
+    width: 100px;
+}
+
+.channel-cell {
+    float: left;
+    padding: 4px;
+    width: 95px;
+}
+
+.channel-cell:first-child {
+    width: 388px;
+}
+
+.fake-link {
+    color: #428bca;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.fake-link:hover, .fake-link:focus {
+    color: #2a6496;
+    text-decoration: underline;
+}
+
+.address {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.settings-row {
+    margin: 32px;
+    height: 64px;
+}
+
+.section-heading {
+    text-align: center;
+}
+
+.section {
+    margin-bottom: 64px;
+}
+
+.spacer {
+    background-color: #dcdcdc;
+    height: 2px;
+    margin-bottom: 32px;
+}
+
+.hidden {
+    display: none;
+}
+
+.invisible {
+    visibility: hidden;
+}
+
+.error {
+    color: #a94442;
+}
+
+.success {
+    color: #444444;
+}
+
+.left {
+    float: left;
+}
+
+
+.right {
+    float: right;
+}
+
+.center {
+    text-align: center;
+    margin: auto;
+}
+
+.clear {
+    clear: both;
+}
+
+.clearfix:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+
+
+
+

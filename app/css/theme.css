@@ -1,0 +1,91 @@
+body {
+
+}
+
+input {
+    padding: 8px;
+    margin: 8px;
+}
+
+p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+a {
+    cursor: pointer;
+}
+
+.btn {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.12), 0 2px 4px 0 rgba(0, 0, 0, 0.42);
+    border-radius: 0px;
+    font-weight: 400;
+}
+
+.active {
+    font-weight: 500;
+}
+
+.row {
+    margin: 16px 0;
+}
+
+.tab {
+    width: 25%;
+    float: left;
+    background: #dfdfdf;
+    padding-top: 8px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.12), 0 2px 4px 0 rgba(0, 0, 0, 0.08);
+    cursor: pointer;
+}
+
+.tab:hover {
+    background: #cccccc;
+}
+
+.tab p {
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.tab.active {
+    background: #3c763d;
+    color: white;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.12), 0 2px 4px 0 rgba(0, 0, 0, 0.42);
+    margin-top: 1px;
+}
+
+.tx-row {
+    padding: 16px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.12), 0 2px 4px 0 rgba(0, 0, 0, 0.22);
+    background: #f8f8f8;
+}
+
+.tx-row-type {
+    font-weight: bold;
+    float: left;
+    padding-right: 8px;
+}
+
+.tx-row-amount {
+    float: left;
+    padding-right: 8px;
+}
+
+.tx-row-address {
+    width: 300px;
+    white-space: nowrap;
+    float: left;
+    padding-right: 8px;
+}
+
+#pending-transactions-container.tx-row:nth-child(2n - 1) {
+    background-color: #f2f2f2;
+}
