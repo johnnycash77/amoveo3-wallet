@@ -13,7 +13,7 @@ function initChannels(account) {
         }
     });
 
-    initImportChannel();
+    initImportChannel(account);
 }
 
 function showChannels(channels, account) {
@@ -121,7 +121,7 @@ function makeChannelCell(labelText, valueText, className) {
     return container;
 }
 
-function initImportChannel() {
+function initImportChannel(account) {
     views.find(views.ids.channels.import);
     var importFile = views.find(views.ids.channels.import);
     var importButton = views.find(views.ids.channels.importButton);
@@ -151,7 +151,7 @@ function initImportChannel() {
                             storage.setChannels(channels, function () {
                                 console.log("Channel imported");
 
-                                showChannels(channels);
+                                showChannels(channels, account);
                             });
                             console.log("Duplicate channel - Overwriting");
                             // showImportError("This channel has already been imported");
@@ -160,14 +160,14 @@ function initImportChannel() {
                             storage.setChannels(channels, function () {
                                 console.log("Channel imported");
 
-                                showChannels(channels);
+                                showChannels(channels, account);
                             });
                         }
                     } else {
                         storage.setChannels([channel], function () {
                             console.log("Channel imported");
 
-                            showChannels([channel]);
+                            showChannels([channel], account);
                         });
                     }
                 });

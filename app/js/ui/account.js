@@ -60,7 +60,7 @@ function refresh(account, callback) {
 
 function updateBlockNumber(height) {
     var blockNumber = views.find(views.ids.account.blockNumber);
-    views.show(views.ids.account.blockNumber);
+    views.show(views.ids.latestBlock);
     if (height) {
         blockNumber.innerHTML = height;
     } else {

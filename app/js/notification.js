@@ -2,7 +2,10 @@ var NotificationManager = require('./lib/notification-manager.js');
 var notificationManager = new NotificationManager();
 const { pull_channel_state } = require('./ui/spk');
 const formatUtility = require('./lib/format-utility');
+const storage = require('./lib/storage');
 const userController = require('./controller/user-controller');
+const passwordController = require('./controller/password-controller');
+const merkle = require('./lib/merkle-proofs');
 
 const fee = 152050;
 
@@ -233,34 +236,38 @@ function makeChannel(amount, delay, length, timeValue) {
     variable_public_get(["pubkey"], function(pubkey) {
         // return refresh_channels_interfaces(pubkey);
 
-        getStorage({topHeader: 0}, function(result) {
-            var topHeader = result.topHeader;
+        storage.getTopHeader(function(error, topHeader) {
             if (topHeader !== 0) {
-                getStorage({accounts: []}, function(result) {
-                    var accounts = result.accounts;
-                    if (accounts.length === 0) {
-                        showChannelError("Please open the wallet and create an account.")
+                passwordController.getPassword(function(password) {
+                    if (!password) {
+                        showChannelError("Your wallet is locked.  Please unlock your wallet and try again.")
                     } else {
-                        var account = accounts[0];
-                        amount = Math.floor(parseFloat(amount, 10) * 100000000) - fee;
-                        delay = parseInt(delay, 10);
-                        var expiration = parseInt(length, 10) + topHeader[1];
-                        var bal2 = amount - 1;
-
-                        var acc1 = account.publicKey;
-                        var acc2 = pubkey;
-
-                        userController.getBalance(account, topHeader, function (error, balance) {
-                            if (amount > balance) {
-                                showChannelError("You do not have enough VEO.")
+                        storage.getAccounts(password, function(error, accounts) {
+                            if (accounts.length === 0) {
+                                showChannelError("Please open the wallet and create an account.")
                             } else {
-                                variable_public_get(["new_channel_tx", acc1, pubkey, amount, bal2, delay, fee],
-                                    function (x) {
-                                        make_channel_func2(x, amount, bal2, acc1, acc2, delay, expiration, pubkey, topHeader, timeValue);
+                                var account = accounts[0];
+                                amount = Math.floor(parseFloat(amount, 10) * 100000000) - fee;
+                                delay = parseInt(delay, 10);
+                                var expiration = parseInt(length, 10) + topHeader[1];
+                                var bal2 = amount - 1;
+
+                                var acc1 = account.publicKey;
+                                var acc2 = pubkey;
+
+                                userController.getBalance(account, topHeader, function (error, balance) {
+                                    if (amount > balance) {
+                                        showChannelError("You do not have enough VEO.")
+                                    } else {
+                                        variable_public_get(["new_channel_tx", acc1, pubkey, amount, bal2, delay, fee],
+                                            function (x) {
+                                                make_channel_func2(x, amount, bal2, acc1, acc2, delay, expiration, pubkey, topHeader, timeValue);
+                                            }
+                                        );
                                     }
-                                );
+                                });
                             }
-                        });
+                        })
                     }
                 })
             } else {
@@ -437,45 +444,78 @@ function make_bet(amount, price, type, oid, callback) {
         var server_pubkey = l[2];
         var period = l[3];
 
-        getStorage({topHeader: 0}, function(result) {
-            var topHeader = result.topHeader;
+        storage.getTopHeader(function(error, topHeader) {
             if (topHeader !== 0) {
-                getStorage({accounts: []}, function (result) {
-                    var account = result.accounts[0];
-                    var sc = market_contract(type_final, expires, price_final, server_pubkey, period, amount_final, oid_final, topHeader[1]);
-                    getStorage({channels: []}, function (result) {
-                        var channelFound = false;
-                        var channels = result.channels;
-                        var channel;
-                        for (var i = 0; i < channels.length; i++) {
-                            channel = channels[i];
-                            if (channel.me[1] === account.publicKey && channel.serverPubKey === server_pubkey) {
-                                channelFound = true;
-                                break;
-                            }
-                        }
+                passwordController.getPassword(function(password) {
+                    if (!password) {
+                        showBetError("Your wallet is locked.  Please unlock your wallet and try again.")
+                    } else {
+                        storage.getAccounts(password, function(error, accounts) {
+                            var account = accounts[0];
+                            var sc = market_contract(type_final, expires, price_final, server_pubkey, period, amount_final, oid_final, topHeader[1]);
+                            storage.getChannels(function (error, channels) {
+                                var channelFound = false;
+                                var channel;
+                                for (var i = 0; i < channels.length; i++) {
+                                    channel = channels[i];
+                                    if (channel.me[1] === account.publicKey && channel.serverPubKey === server_pubkey) {
+                                        channelFound = true;
+                                        break;
+                                    }
+                                }
 
-                        if (channelFound) {
-                            var spk = market_trade(channel, amount_final, price_final, sc, server_pubkey, oid_final);
-                            var keys = ec.keyFromPrivate(account.privateKey, "hex");
-                            var sspk = signTx(keys, spk);
+                                if (channelFound) {
+                                    var spk = market_trade(channel, amount_final, price_final, sc, server_pubkey, oid_final);
+                                    var keys = ec.keyFromPrivate(account.privateKey, "hex");
+                                    var sspk = signTx(keys, spk);
 
-                            try {
-                                return variable_public_get(["trade", account.publicKey, price_final, type_final, amount_final, oid_final, sspk, fee], function (x) {
-                                    make_bet3(x, sspk, server_pubkey, oid_final, callback);
-                                });
-                            } catch (e) {
-                                console.error(e);
-                                showBetError("An error occurred.  Please verify you have a channel open and the \"new channel\" transaction has been added to the blockchain.")
-                            }
-                        } else {
-                            showBetError("No channel found.  You must first open a channel in order to make bets.")
-                        }
-                    });
+                                    var trie_key = channel.me[6];
+
+                                    try {
+                                        merkle.requestProof(topHeader, "channels", trie_key, function(error, val) {
+                                            var spk = channel.them[1];
+                                            var expiration = channel.expiration;
+                                            var height = topHeader[1];
+                                            var amount = spk[7];
+                                            var betAmount = sum_bets(spk[3]);
+                                            var mybalance = ((val[4] - amount - betAmount));
+                                            var serverbalance = ((val[5] + amount) / 100000000);
+
+                                            if (amount_final > mybalance) {
+                                                showBetError("You do not have enough VEO.")
+                                            } else {
+                                                try {
+                                                    return variable_public_get(["trade", account.publicKey, price_final, type_final, amount_final, oid_final, sspk, fee], function (x) {
+                                                        make_bet3(x, sspk, server_pubkey, oid_final, callback);
+                                                    });
+                                                } catch (e) {
+                                                    console.error(e);
+                                                    showBetError("An error occurred.  Please verify you have a channel open and the \"new channel\" transaction has been added to the blockchain.")
+                                                }
+                                            }
+                                        });
+                                    } catch(e) {
+                                        console.error(e);
+                                        callback(row);
+                                    }
+                                } else {
+                                    showBetError("No channel found.  You must first open a channel in order to make bets.")
+                                }
+                            });
+                        });
+                    }
                 });
             }
         });
     });
+}
+
+function sum_bets(bets) {
+    var x = 0;
+    for (var i = 1; i < bets.length; i++) {
+        x += bets[i][2];
+    }
+    return x;
 }
 
 function market_contract(direction, expires, maxprice, server_pubkey, period, amount, oid, bet_height) {
@@ -587,8 +627,7 @@ function initCancel() {
 }
 
 function cancelTrade(n, server_pubkey) {
-    getStorage({channels: []}, function(result) {
-        var channels = result.channels;
+    storage.getChannels(function(error, channels) {
         var oldCD;
         for (var i = 0; i < channels.length; i++) {
             var channel = channels[i];
@@ -602,32 +641,40 @@ function cancelTrade(n, server_pubkey) {
             var spk = oldCD.me;
             var ss = oldCD.ssme[n - 2];
 
-            console.log("oldCD ssme, n");
-            console.log(JSON.stringify([oldCD.ssme, n]));
-            console.log("cancel trade ss is");
-            console.log(JSON.stringify(ss));
-            if (JSON.stringify(ss.code) == JSON.stringify([0,0,0,0,4])) {//this is what an unmatched trade looks like.
+            if (JSON.stringify(ss.code) === JSON.stringify([0,0,0,0,4])) {//this is what an unmatched trade looks like.
                 var spk2 = removeBet(n-1, spk);
                 spk2[8] += 1000000;
-                getStorage({accounts: []}, function(result) {
-                    var account = result.accounts[0];
-                    var keys = ec.keyFromPrivate(account.privateKey, "hex");
-                    var sspk2 = signTx(keys, spk2);
-                    var pubPoint = keys.getPublic("hex");
-                    var pubKey = btoa(formatUtility.fromHex(pubPoint));
-                    var msg = ["cancel_trade", pubKey, n, sspk2];
-                    variable_public_get(msg, function(x) {
-                        return cancelTradeResponse(x, sspk2, server_pubkey, n - 2);
-                    });
-                })
+                passwordController.getPassword(function(password) {
+                    if (!password) {
+                        showCancelError("Your wallet is locked.  Please unlock your wallet and try again.")
+                    } else {
+                        storage.getAccounts(password, function (error, accounts) {
+                            var account = accounts[0];
+                            var keys = ec.keyFromPrivate(account.privateKey, "hex");
+                            var sspk2 = signTx(keys, spk2);
+                            var pubPoint = keys.getPublic("hex");
+                            var pubKey = btoa(formatUtility.fromHex(pubPoint));
+                            var msg = ["cancel_trade", pubKey, n, sspk2];
+                            variable_public_get(msg, function (x) {
+                                return cancelTradeResponse(x, sspk2, server_pubkey, n - 2);
+                            });
+                        })
+                    }
+                });
             } else {
                 console.log(ss);
-                console.log("this trade has already been partially or fully matched. it cannot be canceled now.");
+                showCancelError("This trade has already been partially or fully matched. It cannot be canceled now.");
             }
         } else {
-            console.error("Channel not found");
+            showCancelError("Channel not found");
         }
     });
+}
+
+function showCancelError(message) {
+    var error = document.getElementById("cancel-error-text");
+    error.classList.remove("invisible");
+    error.innerHTML = message;
 }
 
 function removeBet(n, spk0) {
