@@ -19,7 +19,12 @@ function send(data, callback) {
                 callback(error, result);
             } else {
                 try {
-                    callback(error, JSON.parse(result)[1]);
+                    var response = JSON.parse(result)[1];
+                    if (response === "c3RvcCBzcGFtbWluZyB0aGUgc2VydmVy") {
+                        setTimeout(send(data, callback), 500);
+                    } else {
+                        callback(error, response);
+                    }
                 } catch(e) {
                     console.info(e);
                     callback(error, result);
