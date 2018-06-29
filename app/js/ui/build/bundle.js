@@ -15,6 +15,7 @@ module.exports = config;
 var network = require('../lib/network.js');
 var storage = require('../lib/storage.js');
 
+var retries = 0;
 
 function getUrl(callback) {
     storage.get({connectionInfo: {url: "168.62.52.179", port: 8080}}, function(result) {
@@ -30,12 +31,21 @@ function send(data, callback) {
     getUrl(function(error, url) {
         network.post(url, {}, JSON.stringify(data), function(error, result) {
             if (error) {
+                retries = 0;
                 callback(error, result);
             } else {
                 try {
-                    callback(error, JSON.parse(result)[1]);
+                    var response = JSON.parse(result)[1];
+                    if (response === "c3RvcCBzcGFtbWluZyB0aGUgc2VydmVy" && retries < 3) {
+                        retries++;
+                        setTimeout(send(data, callback), 500);
+                    } else {
+                        retries = 0;
+                        callback(error, response);
+                    }
                 } catch(e) {
                     console.info(e);
+                    retries = 0;
                     callback(error, result);
                 }
             }
@@ -1474,7 +1484,7 @@ var passwordController = require('../controller/password-controller.js');
 function initChannels(account) {
     storage.getChannels(function(error, channels) {
         if (channels.length > 0) {
-            showChannels(channels, account);
+            showChannels(channels, account, false);
         } else {
             views.show(views.ids.channels.blank);
         }
@@ -1483,7 +1493,7 @@ function initChannels(account) {
     initImportChannel(account);
 }
 
-function showChannels(channels, account) {
+function showChannels(channels, account, shouldReload) {
     if (channels.length > 0) {
         views.hide(views.ids.channels.blank);
     }
@@ -1498,11 +1508,13 @@ function showChannels(channels, account) {
                 })
             }
 
-            passwordController.setState({
-                selectedAddress: account.publicKey,
-                channels: channels,
-                isLocked: false
-            });
+            if (shouldReload) {
+                passwordController.setState({
+                    selectedAddress: account.publicKey,
+                    channels: channels,
+                    isLocked: false
+                });
+            }
         }
     });
 }
@@ -1618,7 +1630,7 @@ function initImportChannel(account) {
                             storage.setChannels(channels, function () {
                                 console.log("Channel imported");
 
-                                showChannels(channels, account);
+                                showChannels(channels, account, true);
                             });
                             console.log("Duplicate channel - Overwriting");
                             // showImportError("This channel has already been imported");
@@ -1627,14 +1639,14 @@ function initImportChannel(account) {
                             storage.setChannels(channels, function () {
                                 console.log("Channel imported");
 
-                                showChannels(channels, account);
+                                showChannels(channels, account, true);
                             });
                         }
                     } else {
                         storage.setChannels([channel], function () {
                             console.log("Channel imported");
 
-                            showChannels([channel], account);
+                            showChannels([channel], account, true);
                         });
                     }
                 });

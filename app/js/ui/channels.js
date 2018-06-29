@@ -7,7 +7,7 @@ var passwordController = require('../controller/password-controller.js');
 function initChannels(account) {
     storage.getChannels(function(error, channels) {
         if (channels.length > 0) {
-            showChannels(channels, account);
+            showChannels(channels, account, false);
         } else {
             views.show(views.ids.channels.blank);
         }
@@ -16,7 +16,7 @@ function initChannels(account) {
     initImportChannel(account);
 }
 
-function showChannels(channels, account) {
+function showChannels(channels, account, shouldReload) {
     if (channels.length > 0) {
         views.hide(views.ids.channels.blank);
     }
@@ -31,11 +31,13 @@ function showChannels(channels, account) {
                 })
             }
 
-            passwordController.setState({
-                selectedAddress: account.publicKey,
-                channels: channels,
-                isLocked: false
-            });
+            if (shouldReload) {
+                passwordController.setState({
+                    selectedAddress: account.publicKey,
+                    channels: channels,
+                    isLocked: false
+                });
+            }
         }
     });
 }
@@ -151,7 +153,7 @@ function initImportChannel(account) {
                             storage.setChannels(channels, function () {
                                 console.log("Channel imported");
 
-                                showChannels(channels, account);
+                                showChannels(channels, account, true);
                             });
                             console.log("Duplicate channel - Overwriting");
                             // showImportError("This channel has already been imported");
@@ -160,14 +162,14 @@ function initImportChannel(account) {
                             storage.setChannels(channels, function () {
                                 console.log("Channel imported");
 
-                                showChannels(channels, account);
+                                showChannels(channels, account, true);
                             });
                         }
                     } else {
                         storage.setChannels([channel], function () {
                             console.log("Channel imported");
 
-                            showChannels([channel], account);
+                            showChannels([channel], account, true);
                         });
                     }
                 });

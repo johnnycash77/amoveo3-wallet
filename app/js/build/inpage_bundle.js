@@ -199,7 +199,7 @@ function setupDappAutoReload (amoveo3, port) {
     if (timeSinceUse > 500) {
       triggerReset()
     } else {
-      setTimeout(triggerReset, 500)
+      // setTimeout(triggerReset, 500)
     }
   })
 }
@@ -212,7 +212,8 @@ function triggerReset () {
 },{}],5:[function(require,module,exports){
 module.exports = AmoveoInpageProvider;
 
-const extId = "hfojlfflnlmfjhddgodpmophmhpimahi";
+const extId = "dihkmjjoakaiagmoflhachmoolamfimp";
+// const extId = "hfojlfflnlmfjhddgodpmophmhpimahi";
 
 function AmoveoInpageProvider(connectionStream) {
     this.port = chrome.runtime.connect(extId);

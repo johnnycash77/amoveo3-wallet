@@ -1,6 +1,7 @@
 module.exports = AmoveoInpageProvider;
 
-const extId = "hfojlfflnlmfjhddgodpmophmhpimahi";
+const extId = "dihkmjjoakaiagmoflhachmoolamfimp";
+// const extId = "hfojlfflnlmfjhddgodpmophmhpimahi";
 
 function AmoveoInpageProvider(connectionStream) {
     this.port = chrome.runtime.connect(extId);
