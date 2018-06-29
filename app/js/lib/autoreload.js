@@ -50,7 +50,7 @@ function setupDappAutoReload (amoveo3, port) {
     if (timeSinceUse > 500) {
       triggerReset()
     } else {
-      // setTimeout(triggerReset, 500)
+      setTimeout(triggerReset, 500)
     }
   })
 }
