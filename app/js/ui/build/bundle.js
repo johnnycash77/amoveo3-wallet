@@ -2487,7 +2487,7 @@ function initTransactionsTab(account) {
         var rows = [];
         for (var i = 1; i < txs.length; i++) {
             var tx = txs[i][1];
-            if (tx[1] === account.publicKey) {
+            if (tx && tx.length > 1 && tx[1] === account.publicKey) {
                 var row = makeTxRow(tx, true);
                 rows.push(row);
             } else if (tx[4] === account.publicKey) {

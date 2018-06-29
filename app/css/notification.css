@@ -19,10 +19,12 @@ p {
 
 #channel-ip-container {
     padding: 16px;
+    padding-top: 4px;
 }
 
 #channel-button-container {
     padding: 16px;
+    padding-top: 4px;
 }
 
 #channel-button-container .btn {

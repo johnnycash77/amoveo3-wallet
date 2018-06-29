@@ -84,6 +84,8 @@ function initChannel() {
             }
         }
     });
+
+    getUserBalance();
 }
 
 function safeFloat(f) {
@@ -260,7 +262,7 @@ function makeChannel(amount, delay, length, timeValue) {
                                 var acc2 = pubkey;
 
                                 userController.getBalance(account, topHeader, function (error, balance) {
-                                    if (amount > balance) {
+                                    if ((amount / 100000000) > balance) {
                                         showChannelError("You do not have enough VEO.")
                                     } else {
                                         network.send(["new_channel_tx", acc1, pubkey, amount, bal2, delay, fee],
@@ -329,6 +331,12 @@ function make_channel_func2(tx, amount, bal2, acc1, acc2, delay, expiration, pub
 
 function channels3(x, expiration, pubkey, spk, tx_original) {
     var sstx = x[1];
+
+    if (!sstx || sstx.lenght < 1) {
+        showChannelError("An error occurred.");
+        return;
+    }
+
     var s2spk = x[2];
     var tx = sstx[1];
     if (JSON.stringify(tx) !== JSON.stringify(tx_original)) {
@@ -798,6 +806,33 @@ function showMaxBalance(amount) {
                     });
                 }
             });
+        }
+    });
+}
+
+function getUserBalance() {
+    storage.getTopHeader(function(error, topHeader) {
+        if (topHeader !== 0) {
+            passwordController.getPassword(function(password) {
+                if (!password) {
+                    showChannelError("Your wallet is locked.  Please unlock your wallet and try again.")
+                } else {
+                    storage.getAccounts(password, function(error, accounts) {
+                        if (accounts.length === 0) {
+                            showChannelError("Please open the wallet and create an account.")
+                        } else {
+                            var account = accounts[0];
+                            userController.getBalance(account, topHeader, function (error, balance) {
+                                var userBalance = document.getElementById("channel-user-balance");
+                                userBalance.classList.remove("invisible");
+                                userBalance.innerHTML = "Max: " + balance + " VEO";
+                            });
+                        }
+                    })
+                }
+            })
+        } else {
+            showChannelError("Wallet not synced. Please open the wallet and let it sync.")
         }
     });
 }
