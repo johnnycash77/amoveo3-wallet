@@ -1483,8 +1483,18 @@ var passwordController = require('../controller/password-controller.js');
 
 function initChannels(account) {
     storage.getChannels(function(error, channels) {
+        var parsedChannels = [];
         if (channels.length > 0) {
-            showChannels(channels, account, false);
+            for (var i = 0; i < channels.length; i++) {
+                var channel = channels[i];
+                if (channel && channel.me && channel.me.length > 1 && channel.me[1] === account.publicKey) {
+                    parsedChannels.push(channel);
+                }
+            }
+        }
+
+        if (parsedChannels.length > 0) {
+            showChannels(parsedChannels, account, false);
         } else {
             views.show(views.ids.channels.blank);
         }
