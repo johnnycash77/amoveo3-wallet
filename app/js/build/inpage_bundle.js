@@ -212,8 +212,7 @@ function triggerReset () {
 },{}],5:[function(require,module,exports){
 module.exports = AmoveoInpageProvider;
 
-const extId = "dihkmjjoakaiagmoflhachmoolamfimp";
-// const extId = "hfojlfflnlmfjhddgodpmophmhpimahi";
+const extId = "hfojlfflnlmfjhddgodpmophmhpimahi";
 
 function AmoveoInpageProvider(connectionStream) {
     this.port = chrome.runtime.connect(extId);

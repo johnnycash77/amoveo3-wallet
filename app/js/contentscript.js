@@ -3,7 +3,7 @@ const path = require('path')
 const extension = require('extensionizer')
 
 const inpageContent = fs.readFileSync(path.join(__dirname, 'build', 'inpage_bundle.js')).toString()
-const inpageSuffix = '//# sourceURL=' + extension.extension.getURL('inpage_bundle.js?v=1.2') + '\n'
+const inpageSuffix = '//# sourceURL=' + extension.extension.getURL('inpage_bundle.js?v=1.3') + '\n'
 const inpageBundle = inpageContent + inpageSuffix
 
 // Eventually this streaming injection could be replaced with:
