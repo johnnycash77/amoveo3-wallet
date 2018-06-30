@@ -293,7 +293,7 @@ function initImportAccount(password, accounts) {
 function showImportError(message) {
     var error = views.find(views.ids.settings.importError);
     error.innerHTML = message;
-    views.visible(views.ids.settings.importError);
+    views.show(views.ids.settings.importError);
 }
 
 init();

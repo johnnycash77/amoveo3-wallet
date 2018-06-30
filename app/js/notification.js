@@ -499,7 +499,7 @@ function makeBet(amount, price, type, oid, callback) {
                                             var serverbalance = ((val[5] + amount) / 100000000);
 
                                             if (amount_final > mybalance) {
-                                                showBetError("You do not have enough VEO.")
+                                                showBetError("You do not have enough VEO in this channel.")
                                             } else {
                                                 try {
                                                     return network.send(["trade", account.publicKey, price_final, type_final, amount_final, oid_final, sspk, fee], function (error, x) {
@@ -639,6 +639,10 @@ function initCancel() {
         network.send(["pubkey"], function(error, pubkey) {
             cancelTrade(index + 2, pubkey);
         });
+    }
+
+    document.getElementById('cancel-cancel-button').onclick = function() {
+        notificationManager.closePopup();
     }
 }
 
@@ -780,25 +784,20 @@ function showMaxBalance(amount) {
 
                                 var trie_key = channel.me[6];
 
-                                try {
-                                    merkle.requestProof(topHeader, "channels", trie_key, function(error, val) {
-                                        var spk = channel.them[1];
-                                        var amount = spk[7];
-                                        var betAmount = sumBets(spk[3]);
-                                        var mybalance = ((val[4] - amount - betAmount));
+                                merkle.requestProof(topHeader, "channels", trie_key, function(error, val) {
+                                    var spk = channel.them[1];
+                                    var amount = spk[7];
+                                    var betAmount = sumBets(spk[3]);
+                                    var mybalance = ((val[4] - amount - betAmount));
 
-                                        var userBalance = document.getElementById("bet-user-balance");
-                                        userBalance.classList.remove("invisible");
-                                        userBalance.innerHTML = "Max bet: " + mybalance + " VEO";
+                                    var userBalance = document.getElementById("bet-user-balance");
+                                    userBalance.classList.remove("invisible");
+                                    userBalance.innerHTML = "Max bet: " + mybalance + " VEO";
 
-                                        if (amount > userBalance) {
-                                            showBetError("Your maximum possible bet is " + mybalance + "VEO");
-                                        }
-                                    });
-                                } catch(e) {
-                                    console.error(e);
-                                    callback(row);
-                                }
+                                    if (amount > userBalance) {
+                                        showBetError("Your maximum possible bet is " + mybalance + "VEO");
+                                    }
+                                });
                             } else {
                                 showBetError("No channel found.  You must first open a channel in order to make bets.")
                             }

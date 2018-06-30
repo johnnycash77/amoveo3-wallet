@@ -1757,7 +1757,21 @@ const extension = require('extensionizer');
 
 function initMarketsTab() {
     document.getElementById('view-markets-link').onclick = function(e) {
-        extension.tabs.create({url: "http://amoveobook.com/"})
+        chrome.tabs.query({}, function (tabs) {
+            var tabExists = false;
+            for (var i = 0; i < tabs.length; i++) {
+                var tab = tabs[i];
+                if (tab.url.indexOf("amoveobook") !== -1) {
+                    tabExists = true;
+                    chrome.tabs.update(tab.id, { highlighted: true });
+                    break;
+                }
+            }
+
+            if (!tabExists) {
+                extension.tabs.create({url: "http://amoveobook.com/"})
+            }
+        });
     };
 }
 
@@ -2083,7 +2097,7 @@ function initImportAccount(password, accounts) {
 function showImportError(message) {
     var error = views.find(views.ids.settings.importError);
     error.innerHTML = message;
-    views.visible(views.ids.settings.importError);
+    views.show(views.ids.settings.importError);
 }
 
 init();
@@ -2324,6 +2338,7 @@ var storage = require('../lib/storage.js');
 const accountController = require('./account.js');
 const elliptic = require('../lib/elliptic.min.js');
 const fileUtility = require('../lib/file-utility.js');
+const network = require('../controller/network-controller.js');
 
 function initSettingsContainer(account) {
     views.hide(views.ids.accountContainer);
@@ -2407,7 +2422,7 @@ function showConnectError(text) {
 }
 
 exports.init = initSettingsContainer;
-},{"../lib/elliptic.min.js":6,"../lib/file-utility.js":7,"../lib/format-utility.js":8,"../lib/storage.js":11,"../lib/views.js":13,"./account.js":14}],24:[function(require,module,exports){
+},{"../controller/network-controller.js":2,"../lib/elliptic.min.js":6,"../lib/file-utility.js":7,"../lib/format-utility.js":8,"../lib/storage.js":11,"../lib/views.js":13,"./account.js":14}],24:[function(require,module,exports){
 "use strict";var sjcl={cipher:{},hash:{},keyexchange:{},mode:{},misc:{},codec:{},exception:{corrupt:function(a){this.toString=function(){return"CORRUPT: "+this.message};this.message=a},invalid:function(a){this.toString=function(){return"INVALID: "+this.message};this.message=a},bug:function(a){this.toString=function(){return"BUG: "+this.message};this.message=a},notReady:function(a){this.toString=function(){return"NOT READY: "+this.message};this.message=a}}};
 sjcl.cipher.aes=function(a){this.s[0][0][0]||this.O();var b,c,d,e,f=this.s[0][4],g=this.s[1];b=a.length;var h=1;if(4!==b&&6!==b&&8!==b)throw new sjcl.exception.invalid("invalid aes key size");this.b=[d=a.slice(0),e=[]];for(a=b;a<4*b+28;a++){c=d[a-1];if(0===a%b||8===b&&4===a%b)c=f[c>>>24]<<24^f[c>>16&255]<<16^f[c>>8&255]<<8^f[c&255],0===a%b&&(c=c<<8^c>>>24^h<<24,h=h<<1^283*(h>>7));d[a]=d[a-b]^c}for(b=0;a;b++,a--)c=d[b&3?a:a-4],e[b]=4>=a||4>b?c:g[0][f[c>>>24]]^g[1][f[c>>16&255]]^g[2][f[c>>8&255]]^g[3][f[c&
 255]]};

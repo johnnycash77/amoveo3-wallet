@@ -4,6 +4,7 @@ var storage = require('../lib/storage.js');
 const accountController = require('./account.js');
 const elliptic = require('../lib/elliptic.min.js');
 const fileUtility = require('../lib/file-utility.js');
+const network = require('../controller/network-controller.js');
 
 function initSettingsContainer(account) {
     views.hide(views.ids.accountContainer);

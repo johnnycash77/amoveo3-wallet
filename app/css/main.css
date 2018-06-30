@@ -282,7 +282,7 @@
 
 .settings-row {
     margin: 32px;
-    height: 64px;
+    min-height: 64px;
 }
 
 .section-heading {
