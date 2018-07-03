@@ -302,6 +302,11 @@ class BlocksController {
             var RF = config.retargetFrequency;
             var height = header[1];
             var x = height % RF;
+            if (height > 26900) {
+                x = height % Math.floor(RF / 2);
+            } else {
+                x = height % RF;
+            }
             if ((x === 0) && (!(height < 10))) {
                 return this.calculateDifficultyRecursive(header);
             } else {
@@ -322,9 +327,11 @@ class BlocksController {
         var m10 = median((times1).reverse().slice(0));
         var m2 = median((times2).reverse());//628500
         var tbig = m1 - m2;
-        var t = Math.floor(tbig / f);
+        var t0 = Math.floor(tbig / f);//limit to 700 seconds
+        var t = Math.min(t0, Math.floor(period * 7 / 6));//upper limit of 16.66% decrease in difficulty.
+        var old_diff = header2000[6];
         var nt = recalculatePow(
-            header2000[6],//old difficulty
+            old_diff,
             period,
             Math.max(1, t));//current estimated block time
         return Math.max(nt, config.initialDifficulty);//initial difficulty
@@ -750,10 +757,14 @@ exports.encrypt = encrypt;
 exports.decrypt = decrypt;
 
 },{"../ui/sjcl.js":10,"./format-utility.js":6}],6:[function(require,module,exports){
-function s2c(x) { return x / 100000000; }
+function s2c(x) {
+    return x / 100000000;
+}
+
 function c2s(x) {
     return Math.floor(parseFloat(x.value, 10) * 100000000);
 }
+
 function array_to_int(l) {
     var x = 0;
     for (var i = 0; i < l.length; i++) {
@@ -761,6 +772,7 @@ function array_to_int(l) {
     }
     return x;
 }
+
 function toHex(str) {
     var hex = '';
     for(var i=0;i<str.length;i++) {

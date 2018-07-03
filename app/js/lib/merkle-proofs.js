@@ -182,20 +182,8 @@ function serialize(v, trie_key) {
     }
 }
 
-function test() {
-    requestProof("governance", 14, function(fun_limit) {
-        console.log("merkle proof test result is: ");
-        console.log(fun_limit);
-    });
-    requestProof("oracles", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=", function(fun_limit) {
-        console.log("merkle proof test result is: ");
-        console.log(fun_limit);
-    });
-}
-
 
 exports.requestProof = requestProof;
 exports.verify = verify;
 exports.serialize = serialize;
 exports.serializeKey = serializeKey;
-exports.test = test;

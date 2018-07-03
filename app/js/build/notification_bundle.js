@@ -438,10 +438,14 @@ exports.encrypt = encrypt;
 exports.decrypt = decrypt;
 
 },{"../ui/sjcl.js":11,"./format-utility.js":5}],5:[function(require,module,exports){
-function s2c(x) { return x / 100000000; }
+function s2c(x) {
+    return x / 100000000;
+}
+
 function c2s(x) {
     return Math.floor(parseFloat(x.value, 10) * 100000000);
 }
+
 function array_to_int(l) {
     var x = 0;
     for (var i = 0; i < l.length; i++) {
@@ -449,6 +453,7 @@ function array_to_int(l) {
     }
     return x;
 }
+
 function toHex(str) {
     var hex = '';
     for(var i=0;i<str.length;i++) {
@@ -855,23 +860,12 @@ function serialize(v, trie_key) {
     }
 }
 
-function test() {
-    requestProof("governance", 14, function(fun_limit) {
-        console.log("merkle proof test result is: ");
-        console.log(fun_limit);
-    });
-    requestProof("oracles", "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=", function(fun_limit) {
-        console.log("merkle proof test result is: ");
-        console.log(fun_limit);
-    });
-}
-
 
 exports.requestProof = requestProof;
 exports.verify = verify;
 exports.serialize = serialize;
 exports.serializeKey = serializeKey;
-exports.test = test;
+
 },{"../controller/network-controller.js":1,"./crypto-utility.js":4,"./format-utility.js":5}],7:[function(require,module,exports){
 var request = require('request');
 
