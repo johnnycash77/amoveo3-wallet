@@ -7,6 +7,18 @@ var cryptoUtility = require('../lib/crypto-utility.js');
 class BlocksController {
 
     constructor() {
+        this.init();
+
+        var instance = this;
+        storage.getTopHeader(function(error, header) {
+            instance.topHeader = header;
+        });
+        storage.getHeaders(function(error, headers) {
+            instance.headersDb = headers;
+        })
+    }
+
+    init() {
         this.topHeader = 0;
         this.lastHeader = -1;
         this.lastSavedHeader = -1;
@@ -36,6 +48,10 @@ class BlocksController {
         } else {
             callback(this.topHeader[1]);
         }
+    }
+
+    reset() {
+        this.init();
     }
 
     startSyncing(callback) {

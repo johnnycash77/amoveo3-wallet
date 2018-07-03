@@ -72,6 +72,7 @@ var ids = {
         importButton: "import-account-button",
         importError: "import-error-text",
         exportButton: "export-button",
+        resyncButton: "resync-button",
         exportError: "export-error-text",
         connect: {
             url: "node-url",

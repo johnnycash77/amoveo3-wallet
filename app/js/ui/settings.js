@@ -23,6 +23,8 @@ function initSettingsContainer(account) {
     initExportAccount(account);
 
     initConnection();
+
+    initResync();
 }
 
 function resetTitle() {
@@ -80,6 +82,18 @@ function initConnection() {
             }
         }
     });
+}
+
+function initResync() {
+    var resyncButton = views.find(views.ids.settings.resyncButton);
+    resyncButton.onclick = function (e) {
+        storage.setTopHeader(0, function () {
+            storage.setHeaders({}, function () {
+                views.setText(views.ids.latestBlock, "Latest Block: 0");
+                chrome.extension.sendMessage({ msg: "resync"});
+            });
+        });
+    };
 }
 
 function showConnectError(text) {

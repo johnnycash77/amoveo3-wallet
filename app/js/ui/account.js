@@ -59,12 +59,12 @@ function refresh(account, callback) {
 }
 
 function updateBlockNumber(height) {
-    var blockNumber = views.find(views.ids.account.blockNumber);
+    var blockNumber = views.find(views.ids.latestBlock);
     views.show(views.ids.latestBlock);
     if (height) {
-        blockNumber.innerHTML = height;
+        blockNumber.innerHTML = "Latest Block: " + height;
     } else {
-        blockNumber.innerHTML = 0;
+        blockNumber.innerHTML = "Latest Block: " + 0;
     }
 }
 

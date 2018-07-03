@@ -42,6 +42,8 @@ chrome.extension.onMessage.addListener(
                 chrome.extension.sendMessage({ msg: "stopSync" });
                 // chrome.extension.onMessage.removeListener(onSync);
             });
+        } if (request.msg === "resync") {
+            blocksController.reset();
         } else if (request.msg === "password") {
             password = request.data;
             resetPasswordTimer();

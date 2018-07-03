@@ -1183,6 +1183,7 @@ var ids = {
         importButton: "import-account-button",
         importError: "import-error-text",
         exportButton: "export-button",
+        resyncButton: "resync-button",
         exportError: "export-error-text",
         connect: {
             url: "node-url",
@@ -1330,12 +1331,12 @@ function refresh(account, callback) {
 }
 
 function updateBlockNumber(height) {
-    var blockNumber = views.find(views.ids.account.blockNumber);
+    var blockNumber = views.find(views.ids.latestBlock);
     views.show(views.ids.latestBlock);
     if (height) {
-        blockNumber.innerHTML = height;
+        blockNumber.innerHTML = "Latest Block: " + height;
     } else {
-        blockNumber.innerHTML = 0;
+        blockNumber.innerHTML = "Latest Block: " + 0;
     }
 }
 
@@ -2351,6 +2352,8 @@ function initSettingsContainer(account) {
     initExportAccount(account);
 
     initConnection();
+
+    initResync();
 }
 
 function resetTitle() {
@@ -2408,6 +2411,18 @@ function initConnection() {
             }
         }
     });
+}
+
+function initResync() {
+    var resyncButton = views.find(views.ids.settings.resyncButton);
+    resyncButton.onclick = function (e) {
+        storage.setTopHeader(0, function () {
+            storage.setHeaders({}, function () {
+                views.setText(views.ids.latestBlock, "Latest Block: 0");
+                chrome.extension.sendMessage({ msg: "resync"});
+            });
+        });
+    };
 }
 
 function showConnectError(text) {
