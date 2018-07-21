@@ -240,8 +240,6 @@ function capitalize(text) {
 
 function makeChannel(amount, delay, length, timeValue) {
     network.send(["pubkey"], function(error, pubkey) {
-        // return refresh_channels_interfaces(pubkey);
-
         storage.getTopHeader(function(error, topHeader) {
             if (topHeader !== 0) {
                 passwordController.getPassword(function(password) {
@@ -758,55 +756,57 @@ function remove_nth(n, a) {
 }
 
 function showMaxBalance(amount) {
-    storage.getTopHeader(function(error, topHeader) {
-        if (topHeader !== 0) {
-            passwordController.getPassword(function(password) {
-                if (!password) {
-                    showBetError("Your wallet is locked.  Please unlock your wallet and try again.")
-                } else {
-                    storage.getAccounts(password, function(error, accounts) {
-                        var account = accounts[0];
-                        storage.getChannels(function (error, channels) {
-                            var channelFound = false;
-                            var channel;
-                            for (var i = 0; i < channels.length; i++) {
-                                channel = channels[i];
-                                if (channel.me[1] === account.publicKey && channel.serverPubKey === server_pubkey) {
-                                    channelFound = true;
-                                    break;
-                                }
-                            }
+	network.send(["pubkey"], function(error, serverPubkey) {
+		storage.getTopHeader(function (error, topHeader) {
+			if (topHeader !== 0) {
+				passwordController.getPassword(function (password) {
+					if (!password) {
+						showBetError("Your wallet is locked.  Please unlock your wallet and try again.")
+					} else {
+						storage.getAccounts(password, function (error, accounts) {
+							var account = accounts[0];
+							storage.getChannels(function (error, channels) {
+								var channelFound = false;
+								var channel;
+								for (var i = 0; i < channels.length; i++) {
+									channel = channels[i];
+									if (channel.me[1] === account.publicKey && channel.serverPubKey === serverPubkey) {
+										channelFound = true;
+										break;
+									}
+								}
 
-                            if (channelFound) {
-                                var spk = marketTrade(channel, amount_final, price_final, sc, server_pubkey, oid_final);
-                                var keys = ec.keyFromPrivate(account.privateKey, "hex");
-                                var sspk = signTx(keys, spk);
+								if (channelFound) {
+									var spk = marketTrade(channel, amount_final, price_final, sc, serverPubkey, oid_final);
+									var keys = ec.keyFromPrivate(account.privateKey, "hex");
+									var sspk = signTx(keys, spk);
 
-                                var trie_key = channel.me[6];
+									var trie_key = channel.me[6];
 
-                                merkle.requestProof(topHeader, "channels", trie_key, function(error, val) {
-                                    var spk = channel.them[1];
-                                    var amount = spk[7];
-                                    var betAmount = sumBets(spk[3]);
-                                    var mybalance = ((val[4] - amount - betAmount));
+									merkle.requestProof(topHeader, "channels", trie_key, function (error, val) {
+										var spk = channel.them[1];
+										var amount = spk[7];
+										var betAmount = sumBets(spk[3]);
+										var mybalance = ((val[4] - amount - betAmount));
 
-                                    var userBalance = document.getElementById("bet-user-balance");
-                                    userBalance.classList.remove("invisible");
-                                    userBalance.innerHTML = "Max bet: " + mybalance + " VEO";
+										var userBalance = document.getElementById("bet-user-balance");
+										userBalance.classList.remove("invisible");
+										userBalance.innerHTML = "Max bet: " + mybalance + " VEO";
 
-                                    if (amount > userBalance) {
-                                        showBetError("Your maximum possible bet is " + mybalance + "VEO");
-                                    }
-                                });
-                            } else {
-                                showBetError("No channel found.  You must first open a channel in order to make bets.")
-                            }
-                        });
-                    });
-                }
-            });
-        }
-    });
+										if (amount > userBalance) {
+											showBetError("Your maximum possible bet is " + mybalance + "VEO");
+										}
+									});
+								} else {
+									showBetError("No channel found.  You must first open a channel in order to make bets.")
+								}
+							});
+						});
+					}
+				});
+			}
+		});
+	});
 }
 
 function getUserBalance() {

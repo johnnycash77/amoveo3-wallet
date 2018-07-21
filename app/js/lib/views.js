@@ -22,6 +22,10 @@ function setText(id, text) {
     document.getElementById(id).innerHTML = text;
 }
 
+function setValue(id, value) {
+    document.getElementById(id).value = value;
+}
+
 function removeAllChildren(id) {
     var view = find(id);
     while (view.firstChild) {
@@ -86,6 +90,10 @@ var ids = {
         max: "send-max-amount",
         amount: "send-amount",
         fee: "tx-fee",
+        txFeeEdit: "tx-fee-edit",
+        txFeeButton: "tx-fee-edit-button",
+        defaultFeeContainer: "tx-fee-default",
+        txFeeDefault: "default-fee",
         address: "send-address",
         button: "send-button",
         error: "send-message",
@@ -156,5 +164,6 @@ exports.show = show;
 exports.invisible = invisible;
 exports.visible = visible;
 exports.setText = setText;
+exports.setValue = setValue;
 exports.removeAllChildren = removeAllChildren;
 exports.hideNavbarButtons = hideNavbarButtons;

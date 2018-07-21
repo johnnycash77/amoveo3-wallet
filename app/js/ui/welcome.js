@@ -40,6 +40,9 @@ function initWelcomeImportAccount(password) {
         importFile.click();
     };
     importFile.onchange = function() {
+        storage.getAccounts(password, function(error, accounts) {
+            var i = 0;
+        })
         var file = (importFile.files)[0];
         var reader = new FileReader();
         reader.onload = function(e) {
@@ -76,7 +79,7 @@ function initWelcomeImportAccount(password) {
 function showWelcomeError(message) {
     var error = views.find(views.ids.welcome.importAccountError);
     error.innerHTML = message;
-    views.visible(error);
+    views.visible(views.ids.welcome.importAccountError);
 }
 
 exports.init = initWelcomePage;

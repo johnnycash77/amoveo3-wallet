@@ -11,10 +11,16 @@
         <input id="send-amount" type="number" min="0" />
         <a id="send-max-amount" href="#">Max</a>
     </div>
-    <div>
+    <div id="tx-fee-default" class="clearfix">
+        <label class="left">Tx Fee</label>
+        <p class="left" id="default-fee"></p>
+        <a class="left" id="tx-fee-edit-button" href="#">(Edit)</a>
+        <div class="clear"></div>
+    </div>
+    <div id="tx-fee-edit" class="hidden">
         <div>
             <label>Max Tx Fee</label>
-            <input id="tx-fee" type="number" min="0" step="0.001" value="0.00151168" />
+            <input id="tx-fee" type="number" min="0" step="0.001" value="" />
         </div>
     </div>
     <div>

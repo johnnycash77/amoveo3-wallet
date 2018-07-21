@@ -5,6 +5,7 @@ const userController = require('../controller/user-controller.js');
 const elliptic = require('../lib/elliptic.min.js');
 const merkle = require('../lib/merkle-proofs.js');
 const cryptoUtility = require('../lib/crypto-utility.js');
+const config = require('../config.js');
 
 function initSpend(account) {
     var max = views.find(views.ids.send.max);
@@ -49,6 +50,19 @@ function initSpend(account) {
                 }
             })
         });
+    }
+
+    initFee();
+}
+
+function initFee() {
+	views.setText(views.ids.send.txFeeDefault, config.defaultFee);
+	views.setValue(views.ids.send.fee, config.defaultFee);
+
+	var txFeeButton = views.find(views.ids.send.txFeeButton);
+	txFeeButton.onclick = function(e) {
+		views.hide(views.ids.send.defaultFeeContainer);
+		views.show(views.ids.send.txFeeEdit);
     }
 }
 

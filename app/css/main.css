@@ -100,6 +100,17 @@
 
 }
 
+#tx-fee-default {
+    width: 170px;
+    margin: auto;
+}
+
+#default-fee {
+    margin-left: 8px;
+    margin-right: 8px;
+    font-weight: bold;
+}
+
 #channels-row {
     padding: 8px 16px;
     margin: -16px;
