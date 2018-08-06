@@ -1179,6 +1179,8 @@ const network = require('./controller/network-controller');
 
 const fee = 152050;
 
+const DECIMALS = 100000
+
 var ec = new elliptic.ec('secp256k1');
 
 function getParameterByName(name, url) {
@@ -1420,7 +1422,7 @@ function makeChannel(amount, delay, length, timeValue) {
                                 showChannelError("Please open the wallet and create an account.")
                             } else {
                                 var account = accounts[0];
-                                amount = Math.floor(parseFloat(amount, 10) * 100000000) - fee;
+                                amount = Math.floor(parseFloat(amount, 10) * DECIMALS) - fee;
                                 delay = parseInt(delay, 10);
                                 var expiration = parseInt(length, 10) + topHeader[1];
                                 var bal2 = amount - 1;
@@ -1429,7 +1431,7 @@ function makeChannel(amount, delay, length, timeValue) {
                                 var acc2 = pubkey;
 
                                 userController.getBalance(account, topHeader, function (error, balance) {
-                                    if ((amount / 100000000) > balance) {
+                                    if ((amount / DECIMALS) > balance) {
                                         showChannelError("You do not have enough VEO.")
                                     } else {
                                         network.send(["new_channel_tx", acc1, pubkey, amount, bal2, delay, fee],
@@ -1464,7 +1466,7 @@ function make_channel_func2(tx, amount, bal2, acc1, acc2, delay, expiration, pub
         console.log("server edited the tx. aborting");
     } else {
         var lifespan = expiration - topHeader[1];
-        var spk_amount = Math.floor((timeValue * (delay + lifespan) * (amount + bal2) ) / 100000000);
+        var spk_amount = Math.floor((timeValue * (delay + lifespan) * (amount + bal2) ) / DECIMALS);
         var spk = ["spk", acc1, acc2, [-6], 0, 0, cid, spk_amount, 0, delay];
         passwordController.getPassword(function(password) {
             if (!password) {
@@ -1622,7 +1624,7 @@ function makeBet(amount, price, type, oid, callback) {
             (ttv == "假")) {
             type_final = 2;
         }
-        var amount_final = Math.floor(parseFloat(amount, 10) * 100000000);
+        var amount_final = Math.floor(parseFloat(amount, 10) * DECIMALS);
         var oid_final = oid;
         var expires = l[1];
         var server_pubkey = l[2];
@@ -1663,7 +1665,7 @@ function makeBet(amount, price, type, oid, callback) {
                                             var amount = spk[7];
                                             var betAmount = sumBets(spk[3]);
                                             var mybalance = ((val[4] - amount - betAmount));
-                                            var serverbalance = ((val[5] + amount) / 100000000);
+                                            var serverbalance = ((val[5] + amount) / DECIMALS);
 
                                             if (amount_final > mybalance) {
                                                 showBetError("You do not have enough VEO in this channel.")
