@@ -54,7 +54,7 @@ class BlocksController {
         var instance = this;
 
 	    storage.getTopHeader(function(error, header) {
-		    if (header === 0 || header[1] < 28101) {
+		    if (header === 0 || header[1] < 28101 || header[1] === 28136) {
 			    instance.writeHeader(instance.checkPointHeader, instance.checkPointEwah);
 			    instance.doSync(callback);
 		    } else {

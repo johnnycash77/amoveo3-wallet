@@ -7,9 +7,9 @@ const userController = require('./controller/user-controller');
 const passwordController = require('./controller/password-controller');
 const merkle = require('./lib/merkle-proofs');
 const network = require('./controller/network-controller');
+const elliptic = require('./lib/elliptic.min.js');
 
 const fee = 152050;
-
 const DECIMALS = 100000
 
 var ec = new elliptic.ec('secp256k1');
@@ -154,49 +154,6 @@ function initFee(timeValue) {
     updateFee();
 }
 
-function refresh_channels_interfaces(pubkey, callback) {
-    console.log("refresh channels interfaces");
-    network.send(["time_value"], function(error, x) {
-        tv = x;
-        refresh_channels_interfaces2(pubkey, callback);
-    });
-}
-
-function refresh_channels_interfaces2(pubkey, callback) {
-    console.log("server pubkey is ");
-    console.log(pubkey);
-    load_button.onchange = function() {return load_channels(pubkey) };
-    //refresh_channels_button.onclick = function() {return refresh_channels_interfaces2(pubkey)};
-    var tv_display = document.createElement("div");
-    tv_display.innerHTML = translate.words("time_value").concat(": ").concat((tv).toString());
-
-    if (read(pubkey) == undefined) {
-        console.log("give interface for making channels.");
-        height_button.onclick = function() { return make_channel_func(pubkey) };
-        append_children(div, [height_button, amount_info, spend_amount, br(), delay_info, spend_delay, br(), lifespan_info, lifespan]);
-    } else {
-        console.log("give interface for making bets in channels.");
-        append_children(div, [close_channel_button, br(), balance_div, channel_balance_button, br(), lightning_button, lightning_amount_info, lightning_amount, lightning_to_info, lightning_to, br(), market_title, market_link, br(), price_info, price, trade_type_info, trade_type, trade_amount_info, trade_amount, oid_info, oid, button, br(), bet_update_button, br(), br(), combine_cancel_button, br(), br(), list_bets_button, br(), bets_div]);
-        lightning_button.onclick = function() { lightning_spend(pubkey); };
-        channel_balance_button.onclick = function() {refresh_balance(pubkey);};
-        bet_update_button.onclick = function() {
-            spk_object.pull_channel_state(function() {
-                refresh_channels_interfaces(pubkey);
-            });
-        };
-        combine_cancel_button.onclick = function() {
-            combine_cancel_object.main(pubkey);
-        };
-        close_channel_button.onclick = function() {
-            close_channel_func(pubkey);
-        };
-        bets_object.draw();
-    }
-    if (callback != undefined) {
-        callback();
-    }
-}
-
 function initBet() {
     setTitle("Confirm Bet");
 
@@ -267,7 +224,7 @@ function makeChannel(amount, delay, length, timeValue) {
                                     } else {
                                         network.send(["new_channel_tx", acc1, pubkey, amount, bal2, delay, fee],
                                             function (error, x) {
-                                                make_channel_func2(x, amount, bal2, acc1, acc2, delay, expiration, pubkey, topHeader, timeValue);
+                                                makeChannelCallback2(x, amount, bal2, acc1, acc2, delay, expiration, pubkey, topHeader, timeValue);
                                             }
                                         );
                                     }
@@ -283,7 +240,7 @@ function makeChannel(amount, delay, length, timeValue) {
     });
 }
 
-function make_channel_func2(tx, amount, bal2, acc1, acc2, delay, expiration, pubkey, topHeader, timeValue) {
+function makeChannelCallback2(tx, amount, bal2, acc1, acc2, delay, expiration, pubkey, topHeader, timeValue) {
     var amount0 = tx[5];
     var bal20 = tx[6];
     var fee0 = tx[3];
@@ -344,7 +301,7 @@ function channels3(x, expiration, pubkey, spk, tx_original) {
         console.log(JSON.stringify(tx_original));
         throw("the server illegally manipulated the tx");
     }
-    var a = verify_both(sstx);
+    var a = verifyBoth(sstx);
     if (!(a)) {
         throw("bad signature on tx in channels 3");
     }
@@ -369,9 +326,6 @@ function channels3(x, expiration, pubkey, spk, tx_original) {
 
         notificationManager.closePopup();
     });
-
-    // write(acc2, channel);
-    // refresh_channels_interfaces(pubkey);
 }
 
 function saveChannel(channel, callback) {
@@ -401,7 +355,7 @@ function bin2rs(x) {
       (vr) is the signed big-endian encoding of the value "r", of minimal length;
       (vs) is the signed big-endian encoding of the value "s", of minimal length.
     */
-    var h = toHex(x);
+    var h = formatUtility.toHex(x);
     var a2 = x.charCodeAt(3);
     var r = h.slice(8, 8+(a2*2));
     var s = h.slice(12+(a2*2));
@@ -409,14 +363,14 @@ function bin2rs(x) {
 }
 
 function verify1(tx) {
-    return verify(tx[1], tx[2], ec.keyFromPublic(toHex(atob(tx[1][1])), "hex"));
+    return verify(tx[1], tx[2], ec.keyFromPublic(formatUtility.toHex(atob(tx[1][1])), "hex"));
 }
 
 function verify2(tx) {
-    return verify(tx[1], tx[3], ec.keyFromPublic(toHex(atob(tx[1][2])), "hex"));
+    return verify(tx[1], tx[3], ec.keyFromPublic(formatUtility.toHex(atob(tx[1][2])), "hex"));
 }
 
-function verify_both(tx) {
+function verifyBoth(tx) {
     return (verify1(tx) && verify2(tx));
 }
 
@@ -424,7 +378,7 @@ function newChannel(me, them, ssme, ssthem, expiration, cid) {
     return {"me": me, "them": them, "ssme": ssme, "ssthem": ssthem, "cid":cid, "expiration": expiration};
 }
 
-function new_ss(code, prove, meta) {
+function newSs(code, prove, meta) {
     if (meta == undefined) {
         meta = 0;
     }
@@ -537,18 +491,18 @@ function sumBets(bets) {
 
 function marketContract(direction, expires, maxprice, server_pubkey, period, amount, oid, bet_height) {
     var a;
-    var a2 = string_to_array(atob("AAAAAAJ4AA=="));
-    var b = string_to_array(atob("AAAAAAN4AA=="));
-    var c = string_to_array(atob("AAAAAAR4AgAAACA="));
-    var d = string_to_array(atob("AAAAAAV4AA=="));
-    var e = string_to_array(atob("AAAAAAZ4AgAAAEE="));
+    var a2 = formatUtility.stringToArray(atob("AAAAAAJ4AA=="));
+    var b = formatUtility.stringToArray(atob("AAAAAAN4AA=="));
+    var c = formatUtility.stringToArray(atob("AAAAAAR4AgAAACA="));
+    var d = formatUtility.stringToArray(atob("AAAAAAV4AA=="));
+    var e = formatUtility.stringToArray(atob("AAAAAAZ4AgAAAEE="));
     var f;
 	if (direction == 1) {
-		a = string_to_array(atob("AAAAJxAAAAAAAXgA"));
-		f = string_to_array(atob("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"));
+		a = formatUtility.stringToArray(atob("AAAAJxAAAAAAAXgA"));
+		f = formatUtility.stringToArray(atob("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"));
 	} else if (direction == 2) {
-		a = string_to_array(atob("AAAAAAAAAAAAAXgA"));
-		f = string_to_array(atob("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"));
+		a = formatUtility.stringToArray(atob("AAAAAAAAAAAAAXgA"));
+		f = formatUtility.stringToArray(atob("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"));
 	} else {
         console.log("that is an invalid direction");
         console.log(direction);
@@ -557,13 +511,13 @@ function marketContract(direction, expires, maxprice, server_pubkey, period, amo
 
     console.log("market oid is ");
     console.log(oid);
-    var g = a.concat(integer_to_array(bet_height, 4)).concat(a2).concat(integer_to_array(expires, 4))
-        .concat(b).concat(integer_to_array(maxprice, 4)).concat(c).concat(string_to_array(atob(oid)))
-        .concat(d).concat(integer_to_array(period, 4)).concat(e).concat(string_to_array(atob(server_pubkey)))
+    var g = a.concat(formatUtility.intToArray(bet_height, 4)).concat(a2).concat(formatUtility.intToArray(expires, 4))
+        .concat(b).concat(formatUtility.intToArray(maxprice, 4)).concat(c).concat(formatUtility.intToArray(atob(oid)))
+        .concat(d).concat(formatUtility.intToArray(period, 4)).concat(e).concat(formatUtility.intToArray(atob(server_pubkey)))
         .concat(f);
     console.log("compiled contract");
     console.log(JSON.stringify(g));
-    var contract =  btoa(array_to_string(g));
+    var contract =  btoa(formatUtility.arrayToString(g));
     var codekey = ["market", 1, oid, expires, server_pubkey, period, oid]
     return ["bet", contract, amount, codekey, [-7, direction, maxprice]]; //codekey is insttructions on how to re-create the contract, so we can do pattern matching when updating channels.
 }
@@ -589,13 +543,12 @@ function marketTrade(channel, amount, price, bet, oid) { //oid unused
 }
 
 function make_bet3(sspk2, sspk, server_pubkey, oid_final, callback) {
-    var bool = verify_both(sspk2);
-    if (!(bool)) {
+    if (!verifyBoth(sspk2)) {
         throw("make bet3, badly signed sspk2");
     }
     var hspk2 = JSON.stringify(sspk2[1]);
     var hspk = JSON.stringify(sspk[1]);
-    if (!(hspk == hspk2)) {
+    if (hspk !== hspk2) {
         console.log("error, we calculated the spk differently from the server. you calculated this: ");
         console.log(JSON.stringify(sspk[1]));
         console.log("the server calculated this: ");
@@ -608,7 +561,7 @@ function make_bet3(sspk2, sspk, server_pubkey, oid_final, callback) {
             if (channel.serverPubKey === server_pubkey) {
                 channel.me = sspk[1];
                 channel.them = sspk2;
-                var newss = new_ss([0,0,0,0,4], [-6, ["oracles", oid_final]]);
+                var newss = newSs([0,0,0,0,4], [-6, ["oracles", oid_final]]);
                 channel.ssme = ([newss]).concat(channel.ssme);
                 channel.ssthem = ([newss]).concat(channel.ssthem);
                 break;
@@ -701,7 +654,7 @@ function removeBet(n, spk0) {
     var spk = JSON.parse(JSON.stringify(spk0));
     var bets = spk[3];
     var bet = bets[n];
-    var bets2 = remove_nth(n, bets);
+    var bets2 = removeNth(n, bets);
     var bet_meta = bet[4];
     var a;
     if (bet_meta == 0) {
@@ -724,7 +677,7 @@ function cancelTradeResponse(sspk2, sspk, server_pubkey, n) {
             if (channel.serverPubKey === server_pubkey) {
                 console.log("cancel trade2, fail to verify this: ");
                 console.log(JSON.stringify(sspk2));
-                var bool = verify_both(sspk2);
+                var bool = verifyBoth(sspk2);
                 if (!(bool)) {
                     throw("cancel trade badly signed");
                 }
@@ -738,8 +691,8 @@ function cancelTradeResponse(sspk2, sspk, server_pubkey, n) {
                 }
                 channel.them = sspk2;
                 channel.me = spk;
-                channel.ssme = remove_nth(n, channel.ssme);
-                channel.ssthem = remove_nth(n, channel.ssthem);
+                channel.ssme = removeNth(n, channel.ssme);
+                channel.ssthem = removeNth(n, channel.ssthem);
             }
         }
 
@@ -751,7 +704,7 @@ function cancelTradeResponse(sspk2, sspk, server_pubkey, n) {
     })
 }
 
-function remove_nth(n, a) {
+function removeNth(n, a) {
     var b = a.slice(0, n);
     var c = a.slice(n+1, a.length);
     return b.concat(c);
