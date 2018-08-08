@@ -6,6 +6,7 @@ var config = {
     configStreamName: 'publicConfigStore',
     channelStreamName: 'ChannelStore',
     retargetFrequency: 2000,
+    forks: {two: 9000, four: 26900, seven:28135},
     initialDifficulty: 8844,
     appTitle: "Amoveo3 Wallet",
 }

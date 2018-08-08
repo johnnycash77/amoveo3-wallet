@@ -1,3 +1,5 @@
+var BigInt = require('./BigInt.js');
+
 function s2c(x) {
     return x / 100000000;
 }
@@ -149,8 +151,8 @@ function sciToInt(x) {
     function pair2int(l) {
         var b = l.pop();
         var a = l.pop();
-        var c = exponent(2, a);
-        return Math.floor((c * (256 + b)) / 256);
+	    var c = exponent(BigInt(2), a);
+	    return c.times((256 + b)).divide(256);
     }
 
     function sci2pair(i) {
@@ -170,8 +172,8 @@ function intToSci(x) {
 
     function int2pair(x) {
         var a = log2(x) - 1;
-        var c = exponent(2, a);
-        var b = Math.floor((x * 256) / c) - 256;
+	    var c = exponent(BigInt(2), a);
+	    var b = x.times(256).divide(c).minus(256).toJSNumber();
         return [a, b];
     }
     return pair2sci(int2pair(x));
@@ -182,23 +184,24 @@ function pairTosci(x, b) {
 }
 
 function log2(x) {
-    if (x === 1) {
-        return 1;
-    } else {
-        return 1 + log2(Math.floor(x / 2))
-    }
+	if (x.eq(0)) {
+	    return 1;
+	} else if (x.eq(1)) {
+	    return 1;
+	} else {
+	    return 1 + log2(x.divide(2))
+	}
 }
-
 function exponent(a, b) {
-    if (b === 0) {
-        return 1;
-    } else if (b === 1) {
-        return a;
-    } else if ((b % 2) === 0) {
-        return exponent(a * a, Math.floor(b / 2));
-    } else {
-        return a * exponent(a, b - 1);
-    }
+	if (b === 0) {
+		return BigInt(1);
+	} else if (b === 1) {
+		return a;
+	} else if (b % 2 === 0) {
+		return exponent(a.times(a), Math.floor(b / 2));
+	} else {
+		return a.times(exponent(a, b-1));
+	}
 }
 
 function serializeHeader(x) {
