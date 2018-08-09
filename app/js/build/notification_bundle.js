@@ -47,7 +47,7 @@ function retry(data, callback, attempts) {
 }
 
 exports.send = send;
-},{"../config":1,"../lib/network.js":9}],3:[function(require,module,exports){
+},{"../config":1,"../lib/network.js":10}],3:[function(require,module,exports){
 function getPassword(callback) {
     chrome.extension.onMessage.addListener(
         function listener(request, sender, sendResponse) {
@@ -101,7 +101,7 @@ function getBalance(account, header, callback) {
 }
 
 exports.getBalance = getBalance;
-},{"../lib/merkle-proofs.js":8}],5:[function(require,module,exports){
+},{"../lib/merkle-proofs.js":9}],5:[function(require,module,exports){
 var bigInt = (function (undefined) {
 	"use strict";
 
@@ -1753,7 +1753,15 @@ exports.signTx = signTx;
 exports.encrypt = encrypt;
 exports.decrypt = decrypt;
 
-},{"../ui/sjcl.js":13,"./format-utility.js":7}],7:[function(require,module,exports){
+},{"../ui/sjcl.js":14,"./format-utility.js":8}],7:[function(require,module,exports){
+(function (global){
+!function(a){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=a();else if("function"==typeof define&&define.amd)define([],a);else{var b;b="undefined"!=typeof window?window:"undefined"!=typeof global?global:"undefined"!=typeof self?self:this,b.elliptic=a()}}(function(){return function a(b,c,d){function e(g,h){if(!c[g]){if(!b[g]){var i="function"==typeof require&&require;if(!h&&i)return i(g,!0);if(f)return f(g,!0);var j=new Error("Cannot find module '"+g+"'");throw j.code="MODULE_NOT_FOUND",j}var k=c[g]={exports:{}};b[g][0].call(k.exports,function(a){var c=b[g][1][a];return e(c?c:a)},k,k.exports,a,b,c,d)}return c[g].exports}for(var f="function"==typeof require&&require,g=0;g<d.length;g++)e(d[g]);return e}({1:[function(a,b,c){"use strict";var d=c;d.version=a("../package.json").version,d.utils=a("./elliptic/utils"),d.rand=a("brorand"),d.curve=a("./elliptic/curve"),d.curves=a("./elliptic/curves"),d.ec=a("./elliptic/ec"),d.eddsa=a("./elliptic/eddsa")},{"../package.json":30,"./elliptic/curve":4,"./elliptic/curves":7,"./elliptic/ec":8,"./elliptic/eddsa":11,"./elliptic/utils":15,brorand:17}],2:[function(a,b,c){"use strict";function d(a,b){this.type=a,this.p=new f(b.p,16),this.red=b.prime?f.red(b.prime):f.mont(this.p),this.zero=new f(0).toRed(this.red),this.one=new f(1).toRed(this.red),this.two=new f(2).toRed(this.red),this.n=b.n&&new f(b.n,16),this.g=b.g&&this.pointFromJSON(b.g,b.gRed),this._wnafT1=new Array(4),this._wnafT2=new Array(4),this._wnafT3=new Array(4),this._wnafT4=new Array(4);var c=this.n&&this.p.div(this.n);!c||c.cmpn(100)>0?this.redN=null:(this._maxwellTrick=!0,this.redN=this.n.toRed(this.red))}function e(a,b){this.curve=a,this.type=b,this.precomputed=null}var f=a("bn.js"),g=a("../../elliptic"),h=g.utils,i=h.getNAF,j=h.getJSF,k=h.assert;b.exports=d,d.prototype.point=function(){throw new Error("Not implemented")},d.prototype.validate=function(){throw new Error("Not implemented")},d.prototype._fixedNafMul=function(a,b){k(a.precomputed);var c=a._getDoubles(),d=i(b,1),e=(1<<c.step+1)-(c.step%2===0?2:1);e/=3;for(var f=[],g=0;g<d.length;g+=c.step){for(var h=0,b=g+c.step-1;b>=g;b--)h=(h<<1)+d[b];f.push(h)}for(var j=this.jpoint(null,null,null),l=this.jpoint(null,null,null),m=e;m>0;m--){for(var g=0;g<f.length;g++){var h=f[g];h===m?l=l.mixedAdd(c.points[g]):h===-m&&(l=l.mixedAdd(c.points[g].neg()))}j=j.add(l)}return j.toP()},d.prototype._wnafMul=function(a,b){var c=4,d=a._getNAFPoints(c);c=d.wnd;for(var e=d.points,f=i(b,c),g=this.jpoint(null,null,null),h=f.length-1;h>=0;h--){for(var b=0;h>=0&&0===f[h];h--)b++;if(h>=0&&b++,g=g.dblp(b),h<0)break;var j=f[h];k(0!==j),g="affine"===a.type?j>0?g.mixedAdd(e[j-1>>1]):g.mixedAdd(e[-j-1>>1].neg()):j>0?g.add(e[j-1>>1]):g.add(e[-j-1>>1].neg())}return"affine"===a.type?g.toP():g},d.prototype._wnafMulAdd=function(a,b,c,d,e){for(var f=this._wnafT1,g=this._wnafT2,h=this._wnafT3,k=0,l=0;l<d;l++){var m=b[l],n=m._getNAFPoints(a);f[l]=n.wnd,g[l]=n.points}for(var l=d-1;l>=1;l-=2){var o=l-1,p=l;if(1===f[o]&&1===f[p]){var q=[b[o],null,null,b[p]];0===b[o].y.cmp(b[p].y)?(q[1]=b[o].add(b[p]),q[2]=b[o].toJ().mixedAdd(b[p].neg())):0===b[o].y.cmp(b[p].y.redNeg())?(q[1]=b[o].toJ().mixedAdd(b[p]),q[2]=b[o].add(b[p].neg())):(q[1]=b[o].toJ().mixedAdd(b[p]),q[2]=b[o].toJ().mixedAdd(b[p].neg()));var r=[-3,-1,-5,-7,0,7,5,1,3],s=j(c[o],c[p]);k=Math.max(s[0].length,k),h[o]=new Array(k),h[p]=new Array(k);for(var t=0;t<k;t++){var u=0|s[0][t],v=0|s[1][t];h[o][t]=r[3*(u+1)+(v+1)],h[p][t]=0,g[o]=q}}else h[o]=i(c[o],f[o]),h[p]=i(c[p],f[p]),k=Math.max(h[o].length,k),k=Math.max(h[p].length,k)}for(var w=this.jpoint(null,null,null),x=this._wnafT4,l=k;l>=0;l--){for(var y=0;l>=0;){for(var z=!0,t=0;t<d;t++)x[t]=0|h[t][l],0!==x[t]&&(z=!1);if(!z)break;y++,l--}if(l>=0&&y++,w=w.dblp(y),l<0)break;for(var t=0;t<d;t++){var m,A=x[t];0!==A&&(A>0?m=g[t][A-1>>1]:A<0&&(m=g[t][-A-1>>1].neg()),w="affine"===m.type?w.mixedAdd(m):w.add(m))}}for(var l=0;l<d;l++)g[l]=null;return e?w:w.toP()},d.BasePoint=e,e.prototype.eq=function(){throw new Error("Not implemented")},e.prototype.validate=function(){return this.curve.validate(this)},d.prototype.decodePoint=function(a,b){a=h.toArray(a,b);var c=this.p.byteLength();if((4===a[0]||6===a[0]||7===a[0])&&a.length-1===2*c){6===a[0]?k(a[a.length-1]%2===0):7===a[0]&&k(a[a.length-1]%2===1);var d=this.point(a.slice(1,1+c),a.slice(1+c,1+2*c));return d}if((2===a[0]||3===a[0])&&a.length-1===c)return this.pointFromX(a.slice(1,1+c),3===a[0]);throw new Error("Unknown point format")},e.prototype.encodeCompressed=function(a){return this.encode(a,!0)},e.prototype._encode=function(a){var b=this.curve.p.byteLength(),c=this.getX().toArray("be",b);return a?[this.getY().isEven()?2:3].concat(c):[4].concat(c,this.getY().toArray("be",b))},e.prototype.encode=function(a,b){return h.encode(this._encode(b),a)},e.prototype.precompute=function(a){if(this.precomputed)return this;var b={doubles:null,naf:null,beta:null};return b.naf=this._getNAFPoints(8),b.doubles=this._getDoubles(4,a),b.beta=this._getBeta(),this.precomputed=b,this},e.prototype._hasDoubles=function(a){if(!this.precomputed)return!1;var b=this.precomputed.doubles;return!!b&&b.points.length>=Math.ceil((a.bitLength()+1)/b.step)},e.prototype._getDoubles=function(a,b){if(this.precomputed&&this.precomputed.doubles)return this.precomputed.doubles;for(var c=[this],d=this,e=0;e<b;e+=a){for(var f=0;f<a;f++)d=d.dbl();c.push(d)}return{step:a,points:c}},e.prototype._getNAFPoints=function(a){if(this.precomputed&&this.precomputed.naf)return this.precomputed.naf;for(var b=[this],c=(1<<a)-1,d=1===c?null:this.dbl(),e=1;e<c;e++)b[e]=b[e-1].add(d);return{wnd:a,points:b}},e.prototype._getBeta=function(){return null},e.prototype.dblp=function(a){for(var b=this,c=0;c<a;c++)b=b.dbl();return b}},{"../../elliptic":1,"bn.js":16}],3:[function(a,b,c){"use strict";function d(a){this.twisted=1!==(0|a.a),this.mOneA=this.twisted&&(0|a.a)===-1,this.extended=this.mOneA,j.call(this,"edwards",a),this.a=new h(a.a,16).umod(this.red.m),this.a=this.a.toRed(this.red),this.c=new h(a.c,16).toRed(this.red),this.c2=this.c.redSqr(),this.d=new h(a.d,16).toRed(this.red),this.dd=this.d.redAdd(this.d),k(!this.twisted||0===this.c.fromRed().cmpn(1)),this.oneC=1===(0|a.c)}function e(a,b,c,d,e){j.BasePoint.call(this,a,"projective"),null===b&&null===c&&null===d?(this.x=this.curve.zero,this.y=this.curve.one,this.z=this.curve.one,this.t=this.curve.zero,this.zOne=!0):(this.x=new h(b,16),this.y=new h(c,16),this.z=d?new h(d,16):this.curve.one,this.t=e&&new h(e,16),this.x.red||(this.x=this.x.toRed(this.curve.red)),this.y.red||(this.y=this.y.toRed(this.curve.red)),this.z.red||(this.z=this.z.toRed(this.curve.red)),this.t&&!this.t.red&&(this.t=this.t.toRed(this.curve.red)),this.zOne=this.z===this.curve.one,this.curve.extended&&!this.t&&(this.t=this.x.redMul(this.y),this.zOne||(this.t=this.t.redMul(this.z.redInvm()))))}var f=a("../curve"),g=a("../../elliptic"),h=a("bn.js"),i=a("inherits"),j=f.base,k=g.utils.assert;i(d,j),b.exports=d,d.prototype._mulA=function(a){return this.mOneA?a.redNeg():this.a.redMul(a)},d.prototype._mulC=function(a){return this.oneC?a:this.c.redMul(a)},d.prototype.jpoint=function(a,b,c,d){return this.point(a,b,c,d)},d.prototype.pointFromX=function(a,b){a=new h(a,16),a.red||(a=a.toRed(this.red));var c=a.redSqr(),d=this.c2.redSub(this.a.redMul(c)),e=this.one.redSub(this.c2.redMul(this.d).redMul(c)),f=d.redMul(e.redInvm()),g=f.redSqrt();if(0!==g.redSqr().redSub(f).cmp(this.zero))throw new Error("invalid point");var i=g.fromRed().isOdd();return(b&&!i||!b&&i)&&(g=g.redNeg()),this.point(a,g)},d.prototype.pointFromY=function(a,b){a=new h(a,16),a.red||(a=a.toRed(this.red));var c=a.redSqr(),d=c.redSub(this.one),e=c.redMul(this.d).redAdd(this.one),f=d.redMul(e.redInvm());if(0===f.cmp(this.zero)){if(b)throw new Error("invalid point");return this.point(this.zero,a)}var g=f.redSqrt();if(0!==g.redSqr().redSub(f).cmp(this.zero))throw new Error("invalid point");return g.isOdd()!==b&&(g=g.redNeg()),this.point(g,a)},d.prototype.validate=function(a){if(a.isInfinity())return!0;a.normalize();var b=a.x.redSqr(),c=a.y.redSqr(),d=b.redMul(this.a).redAdd(c),e=this.c2.redMul(this.one.redAdd(this.d.redMul(b).redMul(c)));return 0===d.cmp(e)},i(e,j.BasePoint),d.prototype.pointFromJSON=function(a){return e.fromJSON(this,a)},d.prototype.point=function(a,b,c,d){return new e(this,a,b,c,d)},e.fromJSON=function(a,b){return new e(a,b[0],b[1],b[2])},e.prototype.inspect=function(){return this.isInfinity()?"<EC Point Infinity>":"<EC Point x: "+this.x.fromRed().toString(16,2)+" y: "+this.y.fromRed().toString(16,2)+" z: "+this.z.fromRed().toString(16,2)+">"},e.prototype.isInfinity=function(){return 0===this.x.cmpn(0)&&0===this.y.cmp(this.z)},e.prototype._extDbl=function(){var a=this.x.redSqr(),b=this.y.redSqr(),c=this.z.redSqr();c=c.redIAdd(c);var d=this.curve._mulA(a),e=this.x.redAdd(this.y).redSqr().redISub(a).redISub(b),f=d.redAdd(b),g=f.redSub(c),h=d.redSub(b),i=e.redMul(g),j=f.redMul(h),k=e.redMul(h),l=g.redMul(f);return this.curve.point(i,j,l,k)},e.prototype._projDbl=function(){var a,b,c,d=this.x.redAdd(this.y).redSqr(),e=this.x.redSqr(),f=this.y.redSqr();if(this.curve.twisted){var g=this.curve._mulA(e),h=g.redAdd(f);if(this.zOne)a=d.redSub(e).redSub(f).redMul(h.redSub(this.curve.two)),b=h.redMul(g.redSub(f)),c=h.redSqr().redSub(h).redSub(h);else{var i=this.z.redSqr(),j=h.redSub(i).redISub(i);a=d.redSub(e).redISub(f).redMul(j),b=h.redMul(g.redSub(f)),c=h.redMul(j)}}else{var g=e.redAdd(f),i=this.curve._mulC(this.c.redMul(this.z)).redSqr(),j=g.redSub(i).redSub(i);a=this.curve._mulC(d.redISub(g)).redMul(j),b=this.curve._mulC(g).redMul(e.redISub(f)),c=g.redMul(j)}return this.curve.point(a,b,c)},e.prototype.dbl=function(){return this.isInfinity()?this:this.curve.extended?this._extDbl():this._projDbl()},e.prototype._extAdd=function(a){var b=this.y.redSub(this.x).redMul(a.y.redSub(a.x)),c=this.y.redAdd(this.x).redMul(a.y.redAdd(a.x)),d=this.t.redMul(this.curve.dd).redMul(a.t),e=this.z.redMul(a.z.redAdd(a.z)),f=c.redSub(b),g=e.redSub(d),h=e.redAdd(d),i=c.redAdd(b),j=f.redMul(g),k=h.redMul(i),l=f.redMul(i),m=g.redMul(h);return this.curve.point(j,k,m,l)},e.prototype._projAdd=function(a){var b,c,d=this.z.redMul(a.z),e=d.redSqr(),f=this.x.redMul(a.x),g=this.y.redMul(a.y),h=this.curve.d.redMul(f).redMul(g),i=e.redSub(h),j=e.redAdd(h),k=this.x.redAdd(this.y).redMul(a.x.redAdd(a.y)).redISub(f).redISub(g),l=d.redMul(i).redMul(k);return this.curve.twisted?(b=d.redMul(j).redMul(g.redSub(this.curve._mulA(f))),c=i.redMul(j)):(b=d.redMul(j).redMul(g.redSub(f)),c=this.curve._mulC(i).redMul(j)),this.curve.point(l,b,c)},e.prototype.add=function(a){return this.isInfinity()?a:a.isInfinity()?this:this.curve.extended?this._extAdd(a):this._projAdd(a)},e.prototype.mul=function(a){return this._hasDoubles(a)?this.curve._fixedNafMul(this,a):this.curve._wnafMul(this,a)},e.prototype.mulAdd=function(a,b,c){return this.curve._wnafMulAdd(1,[this,b],[a,c],2,!1)},e.prototype.jmulAdd=function(a,b,c){return this.curve._wnafMulAdd(1,[this,b],[a,c],2,!0)},e.prototype.normalize=function(){if(this.zOne)return this;var a=this.z.redInvm();return this.x=this.x.redMul(a),this.y=this.y.redMul(a),this.t&&(this.t=this.t.redMul(a)),this.z=this.curve.one,this.zOne=!0,this},e.prototype.neg=function(){return this.curve.point(this.x.redNeg(),this.y,this.z,this.t&&this.t.redNeg())},e.prototype.getX=function(){return this.normalize(),this.x.fromRed()},e.prototype.getY=function(){return this.normalize(),this.y.fromRed()},e.prototype.eq=function(a){return this===a||0===this.getX().cmp(a.getX())&&0===this.getY().cmp(a.getY())},e.prototype.eqXToP=function(a){var b=a.toRed(this.curve.red).redMul(this.z);if(0===this.x.cmp(b))return!0;for(var c=a.clone(),d=this.curve.redN.redMul(this.z);;){if(c.iadd(this.curve.n),c.cmp(this.curve.p)>=0)return!1;if(b.redIAdd(d),0===this.x.cmp(b))return!0}return!1},e.prototype.toP=e.prototype.normalize,e.prototype.mixedAdd=e.prototype.add},{"../../elliptic":1,"../curve":4,"bn.js":16,inherits:27}],4:[function(a,b,c){"use strict";var d=c;d.base=a("./base"),d["short"]=a("./short"),d.mont=a("./mont"),d.edwards=a("./edwards")},{"./base":2,"./edwards":3,"./mont":5,"./short":6}],5:[function(a,b,c){"use strict";function d(a){i.call(this,"mont",a),this.a=new g(a.a,16).toRed(this.red),this.b=new g(a.b,16).toRed(this.red),this.i4=new g(4).toRed(this.red).redInvm(),this.two=new g(2).toRed(this.red),this.a24=this.i4.redMul(this.a.redAdd(this.two))}function e(a,b,c){i.BasePoint.call(this,a,"projective"),null===b&&null===c?(this.x=this.curve.one,this.z=this.curve.zero):(this.x=new g(b,16),this.z=new g(c,16),this.x.red||(this.x=this.x.toRed(this.curve.red)),this.z.red||(this.z=this.z.toRed(this.curve.red)))}var f=a("../curve"),g=a("bn.js"),h=a("inherits"),i=f.base,j=a("../../elliptic"),k=j.utils;h(d,i),b.exports=d,d.prototype.validate=function(a){var b=a.normalize().x,c=b.redSqr(),d=c.redMul(b).redAdd(c.redMul(this.a)).redAdd(b),e=d.redSqrt();return 0===e.redSqr().cmp(d)},h(e,i.BasePoint),d.prototype.decodePoint=function(a,b){return this.point(k.toArray(a,b),1)},d.prototype.point=function(a,b){return new e(this,a,b)},d.prototype.pointFromJSON=function(a){return e.fromJSON(this,a)},e.prototype.precompute=function(){},e.prototype._encode=function(){return this.getX().toArray("be",this.curve.p.byteLength())},e.fromJSON=function(a,b){return new e(a,b[0],b[1]||a.one)},e.prototype.inspect=function(){return this.isInfinity()?"<EC Point Infinity>":"<EC Point x: "+this.x.fromRed().toString(16,2)+" z: "+this.z.fromRed().toString(16,2)+">"},e.prototype.isInfinity=function(){return 0===this.z.cmpn(0)},e.prototype.dbl=function(){var a=this.x.redAdd(this.z),b=a.redSqr(),c=this.x.redSub(this.z),d=c.redSqr(),e=b.redSub(d),f=b.redMul(d),g=e.redMul(d.redAdd(this.curve.a24.redMul(e)));return this.curve.point(f,g)},e.prototype.add=function(){throw new Error("Not supported on Montgomery curve")},e.prototype.diffAdd=function(a,b){var c=this.x.redAdd(this.z),d=this.x.redSub(this.z),e=a.x.redAdd(a.z),f=a.x.redSub(a.z),g=f.redMul(c),h=e.redMul(d),i=b.z.redMul(g.redAdd(h).redSqr()),j=b.x.redMul(g.redISub(h).redSqr());return this.curve.point(i,j)},e.prototype.mul=function(a){for(var b=a.clone(),c=this,d=this.curve.point(null,null),e=this,f=[];0!==b.cmpn(0);b.iushrn(1))f.push(b.andln(1));for(var g=f.length-1;g>=0;g--)0===f[g]?(c=c.diffAdd(d,e),d=d.dbl()):(d=c.diffAdd(d,e),c=c.dbl());return d},e.prototype.mulAdd=function(){throw new Error("Not supported on Montgomery curve")},e.prototype.jumlAdd=function(){throw new Error("Not supported on Montgomery curve")},e.prototype.eq=function(a){return 0===this.getX().cmp(a.getX())},e.prototype.normalize=function(){return this.x=this.x.redMul(this.z.redInvm()),this.z=this.curve.one,this},e.prototype.getX=function(){return this.normalize(),this.x.fromRed()}},{"../../elliptic":1,"../curve":4,"bn.js":16,inherits:27}],6:[function(a,b,c){"use strict";function d(a){k.call(this,"short",a),this.a=new i(a.a,16).toRed(this.red),this.b=new i(a.b,16).toRed(this.red),this.tinv=this.two.redInvm(),this.zeroA=0===this.a.fromRed().cmpn(0),this.threeA=0===this.a.fromRed().sub(this.p).cmpn(-3),this.endo=this._getEndomorphism(a),this._endoWnafT1=new Array(4),this._endoWnafT2=new Array(4)}function e(a,b,c,d){k.BasePoint.call(this,a,"affine"),null===b&&null===c?(this.x=null,this.y=null,this.inf=!0):(this.x=new i(b,16),this.y=new i(c,16),d&&(this.x.forceRed(this.curve.red),this.y.forceRed(this.curve.red)),this.x.red||(this.x=this.x.toRed(this.curve.red)),this.y.red||(this.y=this.y.toRed(this.curve.red)),this.inf=!1)}function f(a,b,c,d){k.BasePoint.call(this,a,"jacobian"),null===b&&null===c&&null===d?(this.x=this.curve.one,this.y=this.curve.one,this.z=new i(0)):(this.x=new i(b,16),this.y=new i(c,16),this.z=new i(d,16)),this.x.red||(this.x=this.x.toRed(this.curve.red)),this.y.red||(this.y=this.y.toRed(this.curve.red)),this.z.red||(this.z=this.z.toRed(this.curve.red)),this.zOne=this.z===this.curve.one}var g=a("../curve"),h=a("../../elliptic"),i=a("bn.js"),j=a("inherits"),k=g.base,l=h.utils.assert;j(d,k),b.exports=d,d.prototype._getEndomorphism=function(a){if(this.zeroA&&this.g&&this.n&&1===this.p.modn(3)){var b,c;if(a.beta)b=new i(a.beta,16).toRed(this.red);else{var d=this._getEndoRoots(this.p);b=d[0].cmp(d[1])<0?d[0]:d[1],b=b.toRed(this.red)}if(a.lambda)c=new i(a.lambda,16);else{var e=this._getEndoRoots(this.n);0===this.g.mul(e[0]).x.cmp(this.g.x.redMul(b))?c=e[0]:(c=e[1],l(0===this.g.mul(c).x.cmp(this.g.x.redMul(b))))}var f;return f=a.basis?a.basis.map(function(a){return{a:new i(a.a,16),b:new i(a.b,16)}}):this._getEndoBasis(c),{beta:b,lambda:c,basis:f}}},d.prototype._getEndoRoots=function(a){var b=a===this.p?this.red:i.mont(a),c=new i(2).toRed(b).redInvm(),d=c.redNeg(),e=new i(3).toRed(b).redNeg().redSqrt().redMul(c),f=d.redAdd(e).fromRed(),g=d.redSub(e).fromRed();return[f,g]},d.prototype._getEndoBasis=function(a){for(var b,c,d,e,f,g,h,j,k,l=this.n.ushrn(Math.floor(this.n.bitLength()/2)),m=a,n=this.n.clone(),o=new i(1),p=new i(0),q=new i(0),r=new i(1),s=0;0!==m.cmpn(0);){var t=n.div(m);j=n.sub(t.mul(m)),k=q.sub(t.mul(o));var u=r.sub(t.mul(p));if(!d&&j.cmp(l)<0)b=h.neg(),c=o,d=j.neg(),e=k;else if(d&&2===++s)break;h=j,n=m,m=j,q=o,o=k,r=p,p=u}f=j.neg(),g=k;var v=d.sqr().add(e.sqr()),w=f.sqr().add(g.sqr());return w.cmp(v)>=0&&(f=b,g=c),d.negative&&(d=d.neg(),e=e.neg()),f.negative&&(f=f.neg(),g=g.neg()),[{a:d,b:e},{a:f,b:g}]},d.prototype._endoSplit=function(a){var b=this.endo.basis,c=b[0],d=b[1],e=d.b.mul(a).divRound(this.n),f=c.b.neg().mul(a).divRound(this.n),g=e.mul(c.a),h=f.mul(d.a),i=e.mul(c.b),j=f.mul(d.b),k=a.sub(g).sub(h),l=i.add(j).neg();return{k1:k,k2:l}},d.prototype.pointFromX=function(a,b){a=new i(a,16),a.red||(a=a.toRed(this.red));var c=a.redSqr().redMul(a).redIAdd(a.redMul(this.a)).redIAdd(this.b),d=c.redSqrt();if(0!==d.redSqr().redSub(c).cmp(this.zero))throw new Error("invalid point");var e=d.fromRed().isOdd();return(b&&!e||!b&&e)&&(d=d.redNeg()),this.point(a,d)},d.prototype.validate=function(a){if(a.inf)return!0;var b=a.x,c=a.y,d=this.a.redMul(b),e=b.redSqr().redMul(b).redIAdd(d).redIAdd(this.b);return 0===c.redSqr().redISub(e).cmpn(0)},d.prototype._endoWnafMulAdd=function(a,b,c){for(var d=this._endoWnafT1,e=this._endoWnafT2,f=0;f<a.length;f++){var g=this._endoSplit(b[f]),h=a[f],i=h._getBeta();g.k1.negative&&(g.k1.ineg(),h=h.neg(!0)),g.k2.negative&&(g.k2.ineg(),i=i.neg(!0)),d[2*f]=h,d[2*f+1]=i,e[2*f]=g.k1,e[2*f+1]=g.k2}for(var j=this._wnafMulAdd(1,d,e,2*f,c),k=0;k<2*f;k++)d[k]=null,e[k]=null;return j},j(e,k.BasePoint),d.prototype.point=function(a,b,c){return new e(this,a,b,c)},d.prototype.pointFromJSON=function(a,b){return e.fromJSON(this,a,b)},e.prototype._getBeta=function(){if(this.curve.endo){var a=this.precomputed;if(a&&a.beta)return a.beta;var b=this.curve.point(this.x.redMul(this.curve.endo.beta),this.y);if(a){var c=this.curve,d=function(a){return c.point(a.x.redMul(c.endo.beta),a.y)};a.beta=b,b.precomputed={beta:null,naf:a.naf&&{wnd:a.naf.wnd,points:a.naf.points.map(d)},doubles:a.doubles&&{step:a.doubles.step,points:a.doubles.points.map(d)}}}return b}},e.prototype.toJSON=function(){return this.precomputed?[this.x,this.y,this.precomputed&&{doubles:this.precomputed.doubles&&{step:this.precomputed.doubles.step,points:this.precomputed.doubles.points.slice(1)},naf:this.precomputed.naf&&{wnd:this.precomputed.naf.wnd,points:this.precomputed.naf.points.slice(1)}}]:[this.x,this.y]},e.fromJSON=function(a,b,c){function d(b){return a.point(b[0],b[1],c)}"string"==typeof b&&(b=JSON.parse(b));var e=a.point(b[0],b[1],c);if(!b[2])return e;var f=b[2];return e.precomputed={beta:null,doubles:f.doubles&&{step:f.doubles.step,points:[e].concat(f.doubles.points.map(d))},naf:f.naf&&{wnd:f.naf.wnd,points:[e].concat(f.naf.points.map(d))}},e},e.prototype.inspect=function(){return this.isInfinity()?"<EC Point Infinity>":"<EC Point x: "+this.x.fromRed().toString(16,2)+" y: "+this.y.fromRed().toString(16,2)+">"},e.prototype.isInfinity=function(){return this.inf},e.prototype.add=function(a){if(this.inf)return a;if(a.inf)return this;if(this.eq(a))return this.dbl();if(this.neg().eq(a))return this.curve.point(null,null);if(0===this.x.cmp(a.x))return this.curve.point(null,null);var b=this.y.redSub(a.y);0!==b.cmpn(0)&&(b=b.redMul(this.x.redSub(a.x).redInvm()));var c=b.redSqr().redISub(this.x).redISub(a.x),d=b.redMul(this.x.redSub(c)).redISub(this.y);return this.curve.point(c,d)},e.prototype.dbl=function(){if(this.inf)return this;var a=this.y.redAdd(this.y);if(0===a.cmpn(0))return this.curve.point(null,null);var b=this.curve.a,c=this.x.redSqr(),d=a.redInvm(),e=c.redAdd(c).redIAdd(c).redIAdd(b).redMul(d),f=e.redSqr().redISub(this.x.redAdd(this.x)),g=e.redMul(this.x.redSub(f)).redISub(this.y);return this.curve.point(f,g)},e.prototype.getX=function(){return this.x.fromRed()},e.prototype.getY=function(){return this.y.fromRed()},e.prototype.mul=function(a){return a=new i(a,16),this._hasDoubles(a)?this.curve._fixedNafMul(this,a):this.curve.endo?this.curve._endoWnafMulAdd([this],[a]):this.curve._wnafMul(this,a)},e.prototype.mulAdd=function(a,b,c){var d=[this,b],e=[a,c];return this.curve.endo?this.curve._endoWnafMulAdd(d,e):this.curve._wnafMulAdd(1,d,e,2)},e.prototype.jmulAdd=function(a,b,c){var d=[this,b],e=[a,c];return this.curve.endo?this.curve._endoWnafMulAdd(d,e,!0):this.curve._wnafMulAdd(1,d,e,2,!0)},e.prototype.eq=function(a){return this===a||this.inf===a.inf&&(this.inf||0===this.x.cmp(a.x)&&0===this.y.cmp(a.y))},e.prototype.neg=function(a){if(this.inf)return this;var b=this.curve.point(this.x,this.y.redNeg());if(a&&this.precomputed){var c=this.precomputed,d=function(a){return a.neg()};b.precomputed={naf:c.naf&&{wnd:c.naf.wnd,points:c.naf.points.map(d)},doubles:c.doubles&&{step:c.doubles.step,points:c.doubles.points.map(d)}}}return b},e.prototype.toJ=function(){if(this.inf)return this.curve.jpoint(null,null,null);var a=this.curve.jpoint(this.x,this.y,this.curve.one);return a},j(f,k.BasePoint),d.prototype.jpoint=function(a,b,c){return new f(this,a,b,c)},f.prototype.toP=function(){if(this.isInfinity())return this.curve.point(null,null);var a=this.z.redInvm(),b=a.redSqr(),c=this.x.redMul(b),d=this.y.redMul(b).redMul(a);return this.curve.point(c,d)},f.prototype.neg=function(){return this.curve.jpoint(this.x,this.y.redNeg(),this.z)},f.prototype.add=function(a){if(this.isInfinity())return a;if(a.isInfinity())return this;var b=a.z.redSqr(),c=this.z.redSqr(),d=this.x.redMul(b),e=a.x.redMul(c),f=this.y.redMul(b.redMul(a.z)),g=a.y.redMul(c.redMul(this.z)),h=d.redSub(e),i=f.redSub(g);if(0===h.cmpn(0))return 0!==i.cmpn(0)?this.curve.jpoint(null,null,null):this.dbl();var j=h.redSqr(),k=j.redMul(h),l=d.redMul(j),m=i.redSqr().redIAdd(k).redISub(l).redISub(l),n=i.redMul(l.redISub(m)).redISub(f.redMul(k)),o=this.z.redMul(a.z).redMul(h);return this.curve.jpoint(m,n,o)},f.prototype.mixedAdd=function(a){if(this.isInfinity())return a.toJ();if(a.isInfinity())return this;var b=this.z.redSqr(),c=this.x,d=a.x.redMul(b),e=this.y,f=a.y.redMul(b).redMul(this.z),g=c.redSub(d),h=e.redSub(f);if(0===g.cmpn(0))return 0!==h.cmpn(0)?this.curve.jpoint(null,null,null):this.dbl();var i=g.redSqr(),j=i.redMul(g),k=c.redMul(i),l=h.redSqr().redIAdd(j).redISub(k).redISub(k),m=h.redMul(k.redISub(l)).redISub(e.redMul(j)),n=this.z.redMul(g);return this.curve.jpoint(l,m,n)},f.prototype.dblp=function(a){if(0===a)return this;if(this.isInfinity())return this;if(!a)return this.dbl();if(this.curve.zeroA||this.curve.threeA){for(var b=this,c=0;c<a;c++)b=b.dbl();return b}for(var d=this.curve.a,e=this.curve.tinv,f=this.x,g=this.y,h=this.z,i=h.redSqr().redSqr(),j=g.redAdd(g),c=0;c<a;c++){var k=f.redSqr(),l=j.redSqr(),m=l.redSqr(),n=k.redAdd(k).redIAdd(k).redIAdd(d.redMul(i)),o=f.redMul(l),p=n.redSqr().redISub(o.redAdd(o)),q=o.redISub(p),r=n.redMul(q);r=r.redIAdd(r).redISub(m);var s=j.redMul(h);c+1<a&&(i=i.redMul(m)),f=p,h=s,j=r}return this.curve.jpoint(f,j.redMul(e),h)},f.prototype.dbl=function(){return this.isInfinity()?this:this.curve.zeroA?this._zeroDbl():this.curve.threeA?this._threeDbl():this._dbl()},f.prototype._zeroDbl=function(){var a,b,c;if(this.zOne){var d=this.x.redSqr(),e=this.y.redSqr(),f=e.redSqr(),g=this.x.redAdd(e).redSqr().redISub(d).redISub(f);g=g.redIAdd(g);var h=d.redAdd(d).redIAdd(d),i=h.redSqr().redISub(g).redISub(g),j=f.redIAdd(f);j=j.redIAdd(j),j=j.redIAdd(j),a=i,b=h.redMul(g.redISub(i)).redISub(j),c=this.y.redAdd(this.y)}else{var k=this.x.redSqr(),l=this.y.redSqr(),m=l.redSqr(),n=this.x.redAdd(l).redSqr().redISub(k).redISub(m);n=n.redIAdd(n);var o=k.redAdd(k).redIAdd(k),p=o.redSqr(),q=m.redIAdd(m);q=q.redIAdd(q),q=q.redIAdd(q),a=p.redISub(n).redISub(n),b=o.redMul(n.redISub(a)).redISub(q),c=this.y.redMul(this.z),c=c.redIAdd(c)}return this.curve.jpoint(a,b,c)},f.prototype._threeDbl=function(){var a,b,c;if(this.zOne){var d=this.x.redSqr(),e=this.y.redSqr(),f=e.redSqr(),g=this.x.redAdd(e).redSqr().redISub(d).redISub(f);g=g.redIAdd(g);var h=d.redAdd(d).redIAdd(d).redIAdd(this.curve.a),i=h.redSqr().redISub(g).redISub(g);a=i;var j=f.redIAdd(f);j=j.redIAdd(j),j=j.redIAdd(j),b=h.redMul(g.redISub(i)).redISub(j),c=this.y.redAdd(this.y)}else{var k=this.z.redSqr(),l=this.y.redSqr(),m=this.x.redMul(l),n=this.x.redSub(k).redMul(this.x.redAdd(k));n=n.redAdd(n).redIAdd(n);var o=m.redIAdd(m);o=o.redIAdd(o);var p=o.redAdd(o);a=n.redSqr().redISub(p),c=this.y.redAdd(this.z).redSqr().redISub(l).redISub(k);var q=l.redSqr();q=q.redIAdd(q),q=q.redIAdd(q),q=q.redIAdd(q),b=n.redMul(o.redISub(a)).redISub(q)}return this.curve.jpoint(a,b,c)},f.prototype._dbl=function(){var a=this.curve.a,b=this.x,c=this.y,d=this.z,e=d.redSqr().redSqr(),f=b.redSqr(),g=c.redSqr(),h=f.redAdd(f).redIAdd(f).redIAdd(a.redMul(e)),i=b.redAdd(b);i=i.redIAdd(i);var j=i.redMul(g),k=h.redSqr().redISub(j.redAdd(j)),l=j.redISub(k),m=g.redSqr();m=m.redIAdd(m),m=m.redIAdd(m),m=m.redIAdd(m);var n=h.redMul(l).redISub(m),o=c.redAdd(c).redMul(d);return this.curve.jpoint(k,n,o)},f.prototype.trpl=function(){if(!this.curve.zeroA)return this.dbl().add(this);var a=this.x.redSqr(),b=this.y.redSqr(),c=this.z.redSqr(),d=b.redSqr(),e=a.redAdd(a).redIAdd(a),f=e.redSqr(),g=this.x.redAdd(b).redSqr().redISub(a).redISub(d);g=g.redIAdd(g),g=g.redAdd(g).redIAdd(g),g=g.redISub(f);var h=g.redSqr(),i=d.redIAdd(d);i=i.redIAdd(i),i=i.redIAdd(i),i=i.redIAdd(i);var j=e.redIAdd(g).redSqr().redISub(f).redISub(h).redISub(i),k=b.redMul(j);k=k.redIAdd(k),k=k.redIAdd(k);var l=this.x.redMul(h).redISub(k);l=l.redIAdd(l),l=l.redIAdd(l);var m=this.y.redMul(j.redMul(i.redISub(j)).redISub(g.redMul(h)));m=m.redIAdd(m),m=m.redIAdd(m),m=m.redIAdd(m);var n=this.z.redAdd(g).redSqr().redISub(c).redISub(h);return this.curve.jpoint(l,m,n)},f.prototype.mul=function(a,b){return a=new i(a,b),this.curve._wnafMul(this,a)},f.prototype.eq=function(a){if("affine"===a.type)return this.eq(a.toJ());if(this===a)return!0;var b=this.z.redSqr(),c=a.z.redSqr();if(0!==this.x.redMul(c).redISub(a.x.redMul(b)).cmpn(0))return!1;var d=b.redMul(this.z),e=c.redMul(a.z);return 0===this.y.redMul(e).redISub(a.y.redMul(d)).cmpn(0)},f.prototype.eqXToP=function(a){var b=this.z.redSqr(),c=a.toRed(this.curve.red).redMul(b);if(0===this.x.cmp(c))return!0;for(var d=a.clone(),e=this.curve.redN.redMul(b);;){if(d.iadd(this.curve.n),d.cmp(this.curve.p)>=0)return!1;if(c.redIAdd(e),0===this.x.cmp(c))return!0}return!1},f.prototype.inspect=function(){return this.isInfinity()?"<EC JPoint Infinity>":"<EC JPoint x: "+this.x.toString(16,2)+" y: "+this.y.toString(16,2)+" z: "+this.z.toString(16,2)+">"},f.prototype.isInfinity=function(){return 0===this.z.cmpn(0)}},{"../../elliptic":1,"../curve":4,"bn.js":16,inherits:27}],7:[function(a,b,c){"use strict";function d(a){"short"===a.type?this.curve=new h.curve["short"](a):"edwards"===a.type?this.curve=new h.curve.edwards(a):this.curve=new h.curve.mont(a),this.g=this.curve.g,this.n=this.curve.n,this.hash=a.hash,i(this.g.validate(),"Invalid curve"),i(this.g.mul(this.n).isInfinity(),"Invalid curve, G*N != O")}function e(a,b){Object.defineProperty(f,a,{configurable:!0,enumerable:!0,get:function(){var c=new d(b);return Object.defineProperty(f,a,{configurable:!0,enumerable:!0,value:c}),c}})}var f=c,g=a("hash.js"),h=a("../elliptic"),i=h.utils.assert;f.PresetCurve=d,e("p192",{type:"short",prime:"p192",p:"ffffffff ffffffff ffffffff fffffffe ffffffff ffffffff",a:"ffffffff ffffffff ffffffff fffffffe ffffffff fffffffc",b:"64210519 e59c80e7 0fa7e9ab 72243049 feb8deec c146b9b1",n:"ffffffff ffffffff ffffffff 99def836 146bc9b1 b4d22831",hash:g.sha256,gRed:!1,g:["188da80e b03090f6 7cbf20eb 43a18800 f4ff0afd 82ff1012","07192b95 ffc8da78 631011ed 6b24cdd5 73f977a1 1e794811"]}),e("p224",{type:"short",prime:"p224",p:"ffffffff ffffffff ffffffff ffffffff 00000000 00000000 00000001",a:"ffffffff ffffffff ffffffff fffffffe ffffffff ffffffff fffffffe",b:"b4050a85 0c04b3ab f5413256 5044b0b7 d7bfd8ba 270b3943 2355ffb4",n:"ffffffff ffffffff ffffffff ffff16a2 e0b8f03e 13dd2945 5c5c2a3d",hash:g.sha256,gRed:!1,g:["b70e0cbd 6bb4bf7f 321390b9 4a03c1d3 56c21122 343280d6 115c1d21","bd376388 b5f723fb 4c22dfe6 cd4375a0 5a074764 44d58199 85007e34"]}),e("p256",{type:"short",prime:null,p:"ffffffff 00000001 00000000 00000000 00000000 ffffffff ffffffff ffffffff",a:"ffffffff 00000001 00000000 00000000 00000000 ffffffff ffffffff fffffffc",b:"5ac635d8 aa3a93e7 b3ebbd55 769886bc 651d06b0 cc53b0f6 3bce3c3e 27d2604b",n:"ffffffff 00000000 ffffffff ffffffff bce6faad a7179e84 f3b9cac2 fc632551",hash:g.sha256,gRed:!1,g:["6b17d1f2 e12c4247 f8bce6e5 63a440f2 77037d81 2deb33a0 f4a13945 d898c296","4fe342e2 fe1a7f9b 8ee7eb4a 7c0f9e16 2bce3357 6b315ece cbb64068 37bf51f5"]}),e("p384",{type:"short",prime:null,p:"ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff fffffffe ffffffff 00000000 00000000 ffffffff",a:"ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff fffffffe ffffffff 00000000 00000000 fffffffc",b:"b3312fa7 e23ee7e4 988e056b e3f82d19 181d9c6e fe814112 0314088f 5013875a c656398d 8a2ed19d 2a85c8ed d3ec2aef",n:"ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff c7634d81 f4372ddf 581a0db2 48b0a77a ecec196a ccc52973",hash:g.sha384,gRed:!1,g:["aa87ca22 be8b0537 8eb1c71e f320ad74 6e1d3b62 8ba79b98 59f741e0 82542a38 5502f25d bf55296c 3a545e38 72760ab7","3617de4a 96262c6f 5d9e98bf 9292dc29 f8f41dbd 289a147c e9da3113 b5f0b8c0 0a60b1ce 1d7e819d 7a431d7c 90ea0e5f"]}),e("p521",{type:"short",prime:null,p:"000001ff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff",a:"000001ff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff fffffffc",b:"00000051 953eb961 8e1c9a1f 929a21a0 b68540ee a2da725b 99b315f3 b8b48991 8ef109e1 56193951 ec7e937b 1652c0bd 3bb1bf07 3573df88 3d2c34f1 ef451fd4 6b503f00",n:"000001ff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff fffffffa 51868783 bf2f966b 7fcc0148 f709a5d0 3bb5c9b8 899c47ae bb6fb71e 91386409",hash:g.sha512,gRed:!1,g:["000000c6 858e06b7 0404e9cd 9e3ecb66 2395b442 9c648139 053fb521 f828af60 6b4d3dba a14b5e77 efe75928 fe1dc127 a2ffa8de 3348b3c1 856a429b f97e7e31 c2e5bd66","00000118 39296a78 9a3bc004 5c8a5fb4 2c7d1bd9 98f54449 579b4468 17afbd17 273e662c 97ee7299 5ef42640 c550b901 3fad0761 353c7086 a272c240 88be9476 9fd16650"]}),e("curve25519",{type:"mont",prime:"p25519",p:"7fffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffed",a:"76d06",b:"1",n:"1000000000000000 0000000000000000 14def9dea2f79cd6 5812631a5cf5d3ed",hash:g.sha256,gRed:!1,g:["9"]}),e("ed25519",{type:"edwards",prime:"p25519",p:"7fffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffed",a:"-1",c:"1",d:"52036cee2b6ffe73 8cc740797779e898 00700a4d4141d8ab 75eb4dca135978a3",n:"1000000000000000 0000000000000000 14def9dea2f79cd6 5812631a5cf5d3ed",hash:g.sha256,gRed:!1,g:["216936d3cd6e53fec0a4e231fdd6dc5c692cc7609525a7b2c9562d608f25d51a","6666666666666666666666666666666666666666666666666666666666666658"]});var j;try{j=a("./precomputed/secp256k1")}catch(k){
+j=void 0}e("secp256k1",{type:"short",prime:"k256",p:"ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff fffffffe fffffc2f",a:"0",b:"7",n:"ffffffff ffffffff ffffffff fffffffe baaedce6 af48a03b bfd25e8c d0364141",h:"1",hash:g.sha256,beta:"7ae96a2b657c07106e64479eac3434e99cf0497512f58995c1396c28719501ee",lambda:"5363ad4cc05c30e0a5261c028812645a122e22ea20816678df02967c1b23bd72",basis:[{a:"3086d221a7d46bcde86c90e49284eb15",b:"-e4437ed6010e88286f547fa90abfe4c3"},{a:"114ca50f7a8e2f3f657c1108d9d44cfd8",b:"3086d221a7d46bcde86c90e49284eb15"}],gRed:!1,g:["79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798","483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8",j]})},{"../elliptic":1,"./precomputed/secp256k1":14,"hash.js":19}],8:[function(a,b,c){"use strict";function d(a){return this instanceof d?("string"==typeof a&&(i(g.curves.hasOwnProperty(a),"Unknown curve "+a),a=g.curves[a]),a instanceof g.curves.PresetCurve&&(a={curve:a}),this.curve=a.curve.curve,this.n=this.curve.n,this.nh=this.n.ushrn(1),this.g=this.curve.g,this.g=a.curve.g,this.g.precompute(a.curve.n.bitLength()+1),void(this.hash=a.hash||a.curve.hash)):new d(a)}var e=a("bn.js"),f=a("hmac-drbg"),g=a("../../elliptic"),h=g.utils,i=h.assert,j=a("./key"),k=a("./signature");b.exports=d,d.prototype.keyPair=function(a){return new j(this,a)},d.prototype.keyFromPrivate=function(a,b){return j.fromPrivate(this,a,b)},d.prototype.keyFromPublic=function(a,b){return j.fromPublic(this,a,b)},d.prototype.genKeyPair=function(a){a||(a={});for(var b=new f({hash:this.hash,pers:a.pers,persEnc:a.persEnc||"utf8",entropy:a.entropy||g.rand(this.hash.hmacStrength),entropyEnc:a.entropy&&a.entropyEnc||"utf8",nonce:this.n.toArray()}),c=this.n.byteLength(),d=this.n.sub(new e(2));;){var h=new e(b.generate(c));if(!(h.cmp(d)>0))return h.iaddn(1),this.keyFromPrivate(h)}},d.prototype._truncateToN=function(a,b){var c=8*a.byteLength()-this.n.bitLength();return c>0&&(a=a.ushrn(c)),!b&&a.cmp(this.n)>=0?a.sub(this.n):a},d.prototype.sign=function(a,b,c,d){"object"==typeof c&&(d=c,c=null),d||(d={}),b=this.keyFromPrivate(b,c),a=this._truncateToN(new e(a,16));for(var g=this.n.byteLength(),h=b.getPrivate().toArray("be",g),i=a.toArray("be",g),j=new f({hash:this.hash,entropy:h,nonce:i,pers:d.pers,persEnc:d.persEnc||"utf8"}),l=this.n.sub(new e(1)),m=0;!0;m++){var n=d.k?d.k(m):new e(j.generate(this.n.byteLength()));if(n=this._truncateToN(n,!0),!(n.cmpn(1)<=0||n.cmp(l)>=0)){var o=this.g.mul(n);if(!o.isInfinity()){var p=o.getX(),q=p.umod(this.n);if(0!==q.cmpn(0)){var r=n.invm(this.n).mul(q.mul(b.getPrivate()).iadd(a));if(r=r.umod(this.n),0!==r.cmpn(0)){var s=(o.getY().isOdd()?1:0)|(0!==p.cmp(q)?2:0);return d.canonical&&r.cmp(this.nh)>0&&(r=this.n.sub(r),s^=1),new k({r:q,s:r,recoveryParam:s})}}}}}},d.prototype.verify=function(a,b,c,d){a=this._truncateToN(new e(a,16)),c=this.keyFromPublic(c,d),b=new k(b,"hex");var f=b.r,g=b.s;if(f.cmpn(1)<0||f.cmp(this.n)>=0)return!1;if(g.cmpn(1)<0||g.cmp(this.n)>=0)return!1;var h=g.invm(this.n),i=h.mul(a).umod(this.n),j=h.mul(f).umod(this.n);if(!this.curve._maxwellTrick){var l=this.g.mulAdd(i,c.getPublic(),j);return!l.isInfinity()&&0===l.getX().umod(this.n).cmp(f)}var l=this.g.jmulAdd(i,c.getPublic(),j);return!l.isInfinity()&&l.eqXToP(f)},d.prototype.recoverPubKey=function(a,b,c,d){i((3&c)===c,"The recovery param is more than two bits"),b=new k(b,d);var f=this.n,g=new e(a),h=b.r,j=b.s,l=1&c,m=c>>1;if(h.cmp(this.curve.p.umod(this.curve.n))>=0&&m)throw new Error("Unable to find sencond key candinate");h=m?this.curve.pointFromX(h.add(this.curve.n),l):this.curve.pointFromX(h,l);var n=b.r.invm(f),o=f.sub(g).mul(n).umod(f),p=j.mul(n).umod(f);return this.g.mulAdd(o,h,p)},d.prototype.getKeyRecoveryParam=function(a,b,c,d){if(b=new k(b,d),null!==b.recoveryParam)return b.recoveryParam;for(var e=0;e<4;e++){var f;try{f=this.recoverPubKey(a,b,e)}catch(a){continue}if(f.eq(c))return e}throw new Error("Unable to find valid recovery factor")}},{"../../elliptic":1,"./key":9,"./signature":10,"bn.js":16,"hmac-drbg":25}],9:[function(a,b,c){"use strict";function d(a,b){this.ec=a,this.priv=null,this.pub=null,b.priv&&this._importPrivate(b.priv,b.privEnc),b.pub&&this._importPublic(b.pub,b.pubEnc)}var e=a("bn.js"),f=a("../../elliptic"),g=f.utils,h=g.assert;b.exports=d,d.fromPublic=function(a,b,c){return b instanceof d?b:new d(a,{pub:b,pubEnc:c})},d.fromPrivate=function(a,b,c){return b instanceof d?b:new d(a,{priv:b,privEnc:c})},d.prototype.validate=function(){var a=this.getPublic();return a.isInfinity()?{result:!1,reason:"Invalid public key"}:a.validate()?a.mul(this.ec.curve.n).isInfinity()?{result:!0,reason:null}:{result:!1,reason:"Public key * N != O"}:{result:!1,reason:"Public key is not a point"}},d.prototype.getPublic=function(a,b){return"string"==typeof a&&(b=a,a=null),this.pub||(this.pub=this.ec.g.mul(this.priv)),b?this.pub.encode(b,a):this.pub},d.prototype.getPrivate=function(a){return"hex"===a?this.priv.toString(16,2):this.priv},d.prototype._importPrivate=function(a,b){this.priv=new e(a,b||16),this.priv=this.priv.umod(this.ec.curve.n)},d.prototype._importPublic=function(a,b){return a.x||a.y?("mont"===this.ec.curve.type?h(a.x,"Need x coordinate"):"short"!==this.ec.curve.type&&"edwards"!==this.ec.curve.type||h(a.x&&a.y,"Need both x and y coordinate"),void(this.pub=this.ec.curve.point(a.x,a.y))):void(this.pub=this.ec.curve.decodePoint(a,b))},d.prototype.derive=function(a){return a.mul(this.priv).getX()},d.prototype.sign=function(a,b,c){return this.ec.sign(a,this,b,c)},d.prototype.verify=function(a,b){return this.ec.verify(a,b,this)},d.prototype.inspect=function(){return"<Key priv: "+(this.priv&&this.priv.toString(16,2))+" pub: "+(this.pub&&this.pub.inspect())+" >"}},{"../../elliptic":1,"bn.js":16}],10:[function(a,b,c){"use strict";function d(a,b){return a instanceof d?a:void(this._importDER(a,b)||(l(a.r&&a.s,"Signature without r or s"),this.r=new i(a.r,16),this.s=new i(a.s,16),void 0===a.recoveryParam?this.recoveryParam=null:this.recoveryParam=a.recoveryParam))}function e(){this.place=0}function f(a,b){var c=a[b.place++];if(!(128&c))return c;for(var d=15&c,e=0,f=0,g=b.place;f<d;f++,g++)e<<=8,e|=a[g];return b.place=g,e}function g(a){for(var b=0,c=a.length-1;!a[b]&&!(128&a[b+1])&&b<c;)b++;return 0===b?a:a.slice(b)}function h(a,b){if(b<128)return void a.push(b);var c=1+(Math.log(b)/Math.LN2>>>3);for(a.push(128|c);--c;)a.push(b>>>(c<<3)&255);a.push(b)}var i=a("bn.js"),j=a("../../elliptic"),k=j.utils,l=k.assert;b.exports=d,d.prototype._importDER=function(a,b){a=k.toArray(a,b);var c=new e;if(48!==a[c.place++])return!1;var d=f(a,c);if(d+c.place!==a.length)return!1;if(2!==a[c.place++])return!1;var g=f(a,c),h=a.slice(c.place,g+c.place);if(c.place+=g,2!==a[c.place++])return!1;var j=f(a,c);if(a.length!==j+c.place)return!1;var l=a.slice(c.place,j+c.place);return 0===h[0]&&128&h[1]&&(h=h.slice(1)),0===l[0]&&128&l[1]&&(l=l.slice(1)),this.r=new i(h),this.s=new i(l),this.recoveryParam=null,!0},d.prototype.toDER=function(a){var b=this.r.toArray(),c=this.s.toArray();for(128&b[0]&&(b=[0].concat(b)),128&c[0]&&(c=[0].concat(c)),b=g(b),c=g(c);!(c[0]||128&c[1]);)c=c.slice(1);var d=[2];h(d,b.length),d=d.concat(b),d.push(2),h(d,c.length);var e=d.concat(c),f=[48];return h(f,e.length),f=f.concat(e),k.encode(f,a)}},{"../../elliptic":1,"bn.js":16}],11:[function(a,b,c){"use strict";function d(a){if(h("ed25519"===a,"only tested with ed25519 so far"),!(this instanceof d))return new d(a);var a=f.curves[a].curve;this.curve=a,this.g=a.g,this.g.precompute(a.n.bitLength()+1),this.pointClass=a.point().constructor,this.encodingLength=Math.ceil(a.n.bitLength()/8),this.hash=e.sha512}var e=a("hash.js"),f=a("../../elliptic"),g=f.utils,h=g.assert,i=g.parseBytes,j=a("./key"),k=a("./signature");b.exports=d,d.prototype.sign=function(a,b){a=i(a);var c=this.keyFromSecret(b),d=this.hashInt(c.messagePrefix(),a),e=this.g.mul(d),f=this.encodePoint(e),g=this.hashInt(f,c.pubBytes(),a).mul(c.priv()),h=d.add(g).umod(this.curve.n);return this.makeSignature({R:e,S:h,Rencoded:f})},d.prototype.verify=function(a,b,c){a=i(a),b=this.makeSignature(b);var d=this.keyFromPublic(c),e=this.hashInt(b.Rencoded(),d.pubBytes(),a),f=this.g.mul(b.S()),g=b.R().add(d.pub().mul(e));return g.eq(f)},d.prototype.hashInt=function(){for(var a=this.hash(),b=0;b<arguments.length;b++)a.update(arguments[b]);return g.intFromLE(a.digest()).umod(this.curve.n)},d.prototype.keyFromPublic=function(a){return j.fromPublic(this,a)},d.prototype.keyFromSecret=function(a){return j.fromSecret(this,a)},d.prototype.makeSignature=function(a){return a instanceof k?a:new k(this,a)},d.prototype.encodePoint=function(a){var b=a.getY().toArray("le",this.encodingLength);return b[this.encodingLength-1]|=a.getX().isOdd()?128:0,b},d.prototype.decodePoint=function(a){a=g.parseBytes(a);var b=a.length-1,c=a.slice(0,b).concat(a[b]&-129),d=0!==(128&a[b]),e=g.intFromLE(c);return this.curve.pointFromY(e,d)},d.prototype.encodeInt=function(a){return a.toArray("le",this.encodingLength)},d.prototype.decodeInt=function(a){return g.intFromLE(a)},d.prototype.isPoint=function(a){return a instanceof this.pointClass}},{"../../elliptic":1,"./key":12,"./signature":13,"hash.js":19}],12:[function(a,b,c){"use strict";function d(a,b){this.eddsa=a,this._secret=h(b.secret),a.isPoint(b.pub)?this._pub=b.pub:this._pubBytes=h(b.pub)}var e=a("../../elliptic"),f=e.utils,g=f.assert,h=f.parseBytes,i=f.cachedProperty;d.fromPublic=function(a,b){return b instanceof d?b:new d(a,{pub:b})},d.fromSecret=function(a,b){return b instanceof d?b:new d(a,{secret:b})},d.prototype.secret=function(){return this._secret},i(d,"pubBytes",function(){return this.eddsa.encodePoint(this.pub())}),i(d,"pub",function(){return this._pubBytes?this.eddsa.decodePoint(this._pubBytes):this.eddsa.g.mul(this.priv())}),i(d,"privBytes",function(){var a=this.eddsa,b=this.hash(),c=a.encodingLength-1,d=b.slice(0,a.encodingLength);return d[0]&=248,d[c]&=127,d[c]|=64,d}),i(d,"priv",function(){return this.eddsa.decodeInt(this.privBytes())}),i(d,"hash",function(){return this.eddsa.hash().update(this.secret()).digest()}),i(d,"messagePrefix",function(){return this.hash().slice(this.eddsa.encodingLength)}),d.prototype.sign=function(a){return g(this._secret,"KeyPair can only verify"),this.eddsa.sign(a,this)},d.prototype.verify=function(a,b){return this.eddsa.verify(a,b,this)},d.prototype.getSecret=function(a){return g(this._secret,"KeyPair is public only"),f.encode(this.secret(),a)},d.prototype.getPublic=function(a){return f.encode(this.pubBytes(),a)},b.exports=d},{"../../elliptic":1}],13:[function(a,b,c){"use strict";function d(a,b){this.eddsa=a,"object"!=typeof b&&(b=j(b)),Array.isArray(b)&&(b={R:b.slice(0,a.encodingLength),S:b.slice(a.encodingLength)}),h(b.R&&b.S,"Signature without R or S"),a.isPoint(b.R)&&(this._R=b.R),b.S instanceof e&&(this._S=b.S),this._Rencoded=Array.isArray(b.R)?b.R:b.Rencoded,this._Sencoded=Array.isArray(b.S)?b.S:b.Sencoded}var e=a("bn.js"),f=a("../../elliptic"),g=f.utils,h=g.assert,i=g.cachedProperty,j=g.parseBytes;i(d,"S",function(){return this.eddsa.decodeInt(this.Sencoded())}),i(d,"R",function(){return this.eddsa.decodePoint(this.Rencoded())}),i(d,"Rencoded",function(){return this.eddsa.encodePoint(this.R())}),i(d,"Sencoded",function(){return this.eddsa.encodeInt(this.S())}),d.prototype.toBytes=function(){return this.Rencoded().concat(this.Sencoded())},d.prototype.toHex=function(){return g.encode(this.toBytes(),"hex").toUpperCase()},b.exports=d},{"../../elliptic":1,"bn.js":16}],14:[function(a,b,c){b.exports={doubles:{step:4,points:[["e60fce93b59e9ec53011aabc21c23e97b2a31369b87a5ae9c44ee89e2a6dec0a","f7e3507399e595929db99f34f57937101296891e44d23f0be1f32cce69616821"],["8282263212c609d9ea2a6e3e172de238d8c39cabd5ac1ca10646e23fd5f51508","11f8a8098557dfe45e8256e830b60ace62d613ac2f7b17bed31b6eaff6e26caf"],["175e159f728b865a72f99cc6c6fc846de0b93833fd2222ed73fce5b551e5b739","d3506e0d9e3c79eba4ef97a51ff71f5eacb5955add24345c6efa6ffee9fed695"],["363d90d447b00c9c99ceac05b6262ee053441c7e55552ffe526bad8f83ff4640","4e273adfc732221953b445397f3363145b9a89008199ecb62003c7f3bee9de9"],["8b4b5f165df3c2be8c6244b5b745638843e4a781a15bcd1b69f79a55dffdf80c","4aad0a6f68d308b4b3fbd7813ab0da04f9e336546162ee56b3eff0c65fd4fd36"],["723cbaa6e5db996d6bf771c00bd548c7b700dbffa6c0e77bcb6115925232fcda","96e867b5595cc498a921137488824d6e2660a0653779494801dc069d9eb39f5f"],["eebfa4d493bebf98ba5feec812c2d3b50947961237a919839a533eca0e7dd7fa","5d9a8ca3970ef0f269ee7edaf178089d9ae4cdc3a711f712ddfd4fdae1de8999"],["100f44da696e71672791d0a09b7bde459f1215a29b3c03bfefd7835b39a48db0","cdd9e13192a00b772ec8f3300c090666b7ff4a18ff5195ac0fbd5cd62bc65a09"],["e1031be262c7ed1b1dc9227a4a04c017a77f8d4464f3b3852c8acde6e534fd2d","9d7061928940405e6bb6a4176597535af292dd419e1ced79a44f18f29456a00d"],["feea6cae46d55b530ac2839f143bd7ec5cf8b266a41d6af52d5e688d9094696d","e57c6b6c97dce1bab06e4e12bf3ecd5c981c8957cc41442d3155debf18090088"],["da67a91d91049cdcb367be4be6ffca3cfeed657d808583de33fa978bc1ec6cb1","9bacaa35481642bc41f463f7ec9780e5dec7adc508f740a17e9ea8e27a68be1d"],["53904faa0b334cdda6e000935ef22151ec08d0f7bb11069f57545ccc1a37b7c0","5bc087d0bc80106d88c9eccac20d3c1c13999981e14434699dcb096b022771c8"],["8e7bcd0bd35983a7719cca7764ca906779b53a043a9b8bcaeff959f43ad86047","10b7770b2a3da4b3940310420ca9514579e88e2e47fd68b3ea10047e8460372a"],["385eed34c1cdff21e6d0818689b81bde71a7f4f18397e6690a841e1599c43862","283bebc3e8ea23f56701de19e9ebf4576b304eec2086dc8cc0458fe5542e5453"],["6f9d9b803ecf191637c73a4413dfa180fddf84a5947fbc9c606ed86c3fac3a7","7c80c68e603059ba69b8e2a30e45c4d47ea4dd2f5c281002d86890603a842160"],["3322d401243c4e2582a2147c104d6ecbf774d163db0f5e5313b7e0e742d0e6bd","56e70797e9664ef5bfb019bc4ddaf9b72805f63ea2873af624f3a2e96c28b2a0"],["85672c7d2de0b7da2bd1770d89665868741b3f9af7643397721d74d28134ab83","7c481b9b5b43b2eb6374049bfa62c2e5e77f17fcc5298f44c8e3094f790313a6"],["948bf809b1988a46b06c9f1919413b10f9226c60f668832ffd959af60c82a0a","53a562856dcb6646dc6b74c5d1c3418c6d4dff08c97cd2bed4cb7f88d8c8e589"],["6260ce7f461801c34f067ce0f02873a8f1b0e44dfc69752accecd819f38fd8e8","bc2da82b6fa5b571a7f09049776a1ef7ecd292238051c198c1a84e95b2b4ae17"],["e5037de0afc1d8d43d8348414bbf4103043ec8f575bfdc432953cc8d2037fa2d","4571534baa94d3b5f9f98d09fb990bddbd5f5b03ec481f10e0e5dc841d755bda"],["e06372b0f4a207adf5ea905e8f1771b4e7e8dbd1c6a6c5b725866a0ae4fce725","7a908974bce18cfe12a27bb2ad5a488cd7484a7787104870b27034f94eee31dd"],["213c7a715cd5d45358d0bbf9dc0ce02204b10bdde2a3f58540ad6908d0559754","4b6dad0b5ae462507013ad06245ba190bb4850f5f36a7eeddff2c27534b458f2"],["4e7c272a7af4b34e8dbb9352a5419a87e2838c70adc62cddf0cc3a3b08fbd53c","17749c766c9d0b18e16fd09f6def681b530b9614bff7dd33e0b3941817dcaae6"],["fea74e3dbe778b1b10f238ad61686aa5c76e3db2be43057632427e2840fb27b6","6e0568db9b0b13297cf674deccb6af93126b596b973f7b77701d3db7f23cb96f"],["76e64113f677cf0e10a2570d599968d31544e179b760432952c02a4417bdde39","c90ddf8dee4e95cf577066d70681f0d35e2a33d2b56d2032b4b1752d1901ac01"],["c738c56b03b2abe1e8281baa743f8f9a8f7cc643df26cbee3ab150242bcbb891","893fb578951ad2537f718f2eacbfbbbb82314eef7880cfe917e735d9699a84c3"],["d895626548b65b81e264c7637c972877d1d72e5f3a925014372e9f6588f6c14b","febfaa38f2bc7eae728ec60818c340eb03428d632bb067e179363ed75d7d991f"],["b8da94032a957518eb0f6433571e8761ceffc73693e84edd49150a564f676e03","2804dfa44805a1e4d7c99cc9762808b092cc584d95ff3b511488e4e74efdf6e7"],["e80fea14441fb33a7d8adab9475d7fab2019effb5156a792f1a11778e3c0df5d","eed1de7f638e00771e89768ca3ca94472d155e80af322ea9fcb4291b6ac9ec78"],["a301697bdfcd704313ba48e51d567543f2a182031efd6915ddc07bbcc4e16070","7370f91cfb67e4f5081809fa25d40f9b1735dbf7c0a11a130c0d1a041e177ea1"],["90ad85b389d6b936463f9d0512678de208cc330b11307fffab7ac63e3fb04ed4","e507a3620a38261affdcbd9427222b839aefabe1582894d991d4d48cb6ef150"],["8f68b9d2f63b5f339239c1ad981f162ee88c5678723ea3351b7b444c9ec4c0da","662a9f2dba063986de1d90c2b6be215dbbea2cfe95510bfdf23cbf79501fff82"],["e4f3fb0176af85d65ff99ff9198c36091f48e86503681e3e6686fd5053231e11","1e63633ad0ef4f1c1661a6d0ea02b7286cc7e74ec951d1c9822c38576feb73bc"],["8c00fa9b18ebf331eb961537a45a4266c7034f2f0d4e1d0716fb6eae20eae29e","efa47267fea521a1a9dc343a3736c974c2fadafa81e36c54e7d2a4c66702414b"],["e7a26ce69dd4829f3e10cec0a9e98ed3143d084f308b92c0997fddfc60cb3e41","2a758e300fa7984b471b006a1aafbb18d0a6b2c0420e83e20e8a9421cf2cfd51"],["b6459e0ee3662ec8d23540c223bcbdc571cbcb967d79424f3cf29eb3de6b80ef","67c876d06f3e06de1dadf16e5661db3c4b3ae6d48e35b2ff30bf0b61a71ba45"],["d68a80c8280bb840793234aa118f06231d6f1fc67e73c5a5deda0f5b496943e8","db8ba9fff4b586d00c4b1f9177b0e28b5b0e7b8f7845295a294c84266b133120"],["324aed7df65c804252dc0270907a30b09612aeb973449cea4095980fc28d3d5d","648a365774b61f2ff130c0c35aec1f4f19213b0c7e332843967224af96ab7c84"],["4df9c14919cde61f6d51dfdbe5fee5dceec4143ba8d1ca888e8bd373fd054c96","35ec51092d8728050974c23a1d85d4b5d506cdc288490192ebac06cad10d5d"],["9c3919a84a474870faed8a9c1cc66021523489054d7f0308cbfc99c8ac1f98cd","ddb84f0f4a4ddd57584f044bf260e641905326f76c64c8e6be7e5e03d4fc599d"],["6057170b1dd12fdf8de05f281d8e06bb91e1493a8b91d4cc5a21382120a959e5","9a1af0b26a6a4807add9a2daf71df262465152bc3ee24c65e899be932385a2a8"],["a576df8e23a08411421439a4518da31880cef0fba7d4df12b1a6973eecb94266","40a6bf20e76640b2c92b97afe58cd82c432e10a7f514d9f3ee8be11ae1b28ec8"],["7778a78c28dec3e30a05fe9629de8c38bb30d1f5cf9a3a208f763889be58ad71","34626d9ab5a5b22ff7098e12f2ff580087b38411ff24ac563b513fc1fd9f43ac"],["928955ee637a84463729fd30e7afd2ed5f96274e5ad7e5cb09eda9c06d903ac","c25621003d3f42a827b78a13093a95eeac3d26efa8a8d83fc5180e935bcd091f"],["85d0fef3ec6db109399064f3a0e3b2855645b4a907ad354527aae75163d82751","1f03648413a38c0be29d496e582cf5663e8751e96877331582c237a24eb1f962"],["ff2b0dce97eece97c1c9b6041798b85dfdfb6d8882da20308f5404824526087e","493d13fef524ba188af4c4dc54d07936c7b7ed6fb90e2ceb2c951e01f0c29907"],["827fbbe4b1e880ea9ed2b2e6301b212b57f1ee148cd6dd28780e5e2cf856e241","c60f9c923c727b0b71bef2c67d1d12687ff7a63186903166d605b68baec293ec"],["eaa649f21f51bdbae7be4ae34ce6e5217a58fdce7f47f9aa7f3b58fa2120e2b3","be3279ed5bbbb03ac69a80f89879aa5a01a6b965f13f7e59d47a5305ba5ad93d"],["e4a42d43c5cf169d9391df6decf42ee541b6d8f0c9a137401e23632dda34d24f","4d9f92e716d1c73526fc99ccfb8ad34ce886eedfa8d8e4f13a7f7131deba9414"],["1ec80fef360cbdd954160fadab352b6b92b53576a88fea4947173b9d4300bf19","aeefe93756b5340d2f3a4958a7abbf5e0146e77f6295a07b671cdc1cc107cefd"],["146a778c04670c2f91b00af4680dfa8bce3490717d58ba889ddb5928366642be","b318e0ec3354028add669827f9d4b2870aaa971d2f7e5ed1d0b297483d83efd0"],["fa50c0f61d22e5f07e3acebb1aa07b128d0012209a28b9776d76a8793180eef9","6b84c6922397eba9b72cd2872281a68a5e683293a57a213b38cd8d7d3f4f2811"],["da1d61d0ca721a11b1a5bf6b7d88e8421a288ab5d5bba5220e53d32b5f067ec2","8157f55a7c99306c79c0766161c91e2966a73899d279b48a655fba0f1ad836f1"],["a8e282ff0c9706907215ff98e8fd416615311de0446f1e062a73b0610d064e13","7f97355b8db81c09abfb7f3c5b2515888b679a3e50dd6bd6cef7c73111f4cc0c"],["174a53b9c9a285872d39e56e6913cab15d59b1fa512508c022f382de8319497c","ccc9dc37abfc9c1657b4155f2c47f9e6646b3a1d8cb9854383da13ac079afa73"],["959396981943785c3d3e57edf5018cdbe039e730e4918b3d884fdff09475b7ba","2e7e552888c331dd8ba0386a4b9cd6849c653f64c8709385e9b8abf87524f2fd"],["d2a63a50ae401e56d645a1153b109a8fcca0a43d561fba2dbb51340c9d82b151","e82d86fb6443fcb7565aee58b2948220a70f750af484ca52d4142174dcf89405"],["64587e2335471eb890ee7896d7cfdc866bacbdbd3839317b3436f9b45617e073","d99fcdd5bf6902e2ae96dd6447c299a185b90a39133aeab358299e5e9faf6589"],["8481bde0e4e4d885b3a546d3e549de042f0aa6cea250e7fd358d6c86dd45e458","38ee7b8cba5404dd84a25bf39cecb2ca900a79c42b262e556d64b1b59779057e"],["13464a57a78102aa62b6979ae817f4637ffcfed3c4b1ce30bcd6303f6caf666b","69be159004614580ef7e433453ccb0ca48f300a81d0942e13f495a907f6ecc27"],["bc4a9df5b713fe2e9aef430bcc1dc97a0cd9ccede2f28588cada3a0d2d83f366","d3a81ca6e785c06383937adf4b798caa6e8a9fbfa547b16d758d666581f33c1"],["8c28a97bf8298bc0d23d8c749452a32e694b65e30a9472a3954ab30fe5324caa","40a30463a3305193378fedf31f7cc0eb7ae784f0451cb9459e71dc73cbef9482"],["8ea9666139527a8c1dd94ce4f071fd23c8b350c5a4bb33748c4ba111faccae0","620efabbc8ee2782e24e7c0cfb95c5d735b783be9cf0f8e955af34a30e62b945"],["dd3625faef5ba06074669716bbd3788d89bdde815959968092f76cc4eb9a9787","7a188fa3520e30d461da2501045731ca941461982883395937f68d00c644a573"],["f710d79d9eb962297e4f6232b40e8f7feb2bc63814614d692c12de752408221e","ea98e67232d3b3295d3b535532115ccac8612c721851617526ae47a9c77bfc82"]]},naf:{wnd:7,points:[["f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9","388f7b0f632de8140fe337e62a37f3566500a99934c2231b6cb9fd7584b8e672"],["2f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4","d8ac222636e5e3d6d4dba9dda6c9c426f788271bab0d6840dca87d3aa6ac62d6"],["5cbdf0646e5db4eaa398f365f2ea7a0e3d419b7e0330e39ce92bddedcac4f9bc","6aebca40ba255960a3178d6d861a54dba813d0b813fde7b5a5082628087264da"],["acd484e2f0c7f65309ad178a9f559abde09796974c57e714c35f110dfc27ccbe","cc338921b0a7d9fd64380971763b61e9add888a4375f8e0f05cc262ac64f9c37"],["774ae7f858a9411e5ef4246b70c65aac5649980be5c17891bbec17895da008cb","d984a032eb6b5e190243dd56d7b7b365372db1e2dff9d6a8301d74c9c953c61b"],["f28773c2d975288bc7d1d205c3748651b075fbc6610e58cddeeddf8f19405aa8","ab0902e8d880a89758212eb65cdaf473a1a06da521fa91f29b5cb52db03ed81"],["d7924d4f7d43ea965a465ae3095ff41131e5946f3c85f79e44adbcf8e27e080e","581e2872a86c72a683842ec228cc6defea40af2bd896d3a5c504dc9ff6a26b58"],["defdea4cdb677750a420fee807eacf21eb9898ae79b9768766e4faa04a2d4a34","4211ab0694635168e997b0ead2a93daeced1f4a04a95c0f6cfb199f69e56eb77"],["2b4ea0a797a443d293ef5cff444f4979f06acfebd7e86d277475656138385b6c","85e89bc037945d93b343083b5a1c86131a01f60c50269763b570c854e5c09b7a"],["352bbf4a4cdd12564f93fa332ce333301d9ad40271f8107181340aef25be59d5","321eb4075348f534d59c18259dda3e1f4a1b3b2e71b1039c67bd3d8bcf81998c"],["2fa2104d6b38d11b0230010559879124e42ab8dfeff5ff29dc9cdadd4ecacc3f","2de1068295dd865b64569335bd5dd80181d70ecfc882648423ba76b532b7d67"],["9248279b09b4d68dab21a9b066edda83263c3d84e09572e269ca0cd7f5453714","73016f7bf234aade5d1aa71bdea2b1ff3fc0de2a887912ffe54a32ce97cb3402"],["daed4f2be3a8bf278e70132fb0beb7522f570e144bf615c07e996d443dee8729","a69dce4a7d6c98e8d4a1aca87ef8d7003f83c230f3afa726ab40e52290be1c55"],["c44d12c7065d812e8acf28d7cbb19f9011ecd9e9fdf281b0e6a3b5e87d22e7db","2119a460ce326cdc76c45926c982fdac0e106e861edf61c5a039063f0e0e6482"],["6a245bf6dc698504c89a20cfded60853152b695336c28063b61c65cbd269e6b4","e022cf42c2bd4a708b3f5126f16a24ad8b33ba48d0423b6efd5e6348100d8a82"],["1697ffa6fd9de627c077e3d2fe541084ce13300b0bec1146f95ae57f0d0bd6a5","b9c398f186806f5d27561506e4557433a2cf15009e498ae7adee9d63d01b2396"],["605bdb019981718b986d0f07e834cb0d9deb8360ffb7f61df982345ef27a7479","2972d2de4f8d20681a78d93ec96fe23c26bfae84fb14db43b01e1e9056b8c49"],["62d14dab4150bf497402fdc45a215e10dcb01c354959b10cfe31c7e9d87ff33d","80fc06bd8cc5b01098088a1950eed0db01aa132967ab472235f5642483b25eaf"],["80c60ad0040f27dade5b4b06c408e56b2c50e9f56b9b8b425e555c2f86308b6f","1c38303f1cc5c30f26e66bad7fe72f70a65eed4cbe7024eb1aa01f56430bd57a"],["7a9375ad6167ad54aa74c6348cc54d344cc5dc9487d847049d5eabb0fa03c8fb","d0e3fa9eca8726909559e0d79269046bdc59ea10c70ce2b02d499ec224dc7f7"],["d528ecd9b696b54c907a9ed045447a79bb408ec39b68df504bb51f459bc3ffc9","eecf41253136e5f99966f21881fd656ebc4345405c520dbc063465b521409933"],["49370a4b5f43412ea25f514e8ecdad05266115e4a7ecb1387231808f8b45963","758f3f41afd6ed428b3081b0512fd62a54c3f3afbb5b6764b653052a12949c9a"],["77f230936ee88cbbd73df930d64702ef881d811e0e1498e2f1c13eb1fc345d74","958ef42a7886b6400a08266e9ba1b37896c95330d97077cbbe8eb3c7671c60d6"],["f2dac991cc4ce4b9ea44887e5c7c0bce58c80074ab9d4dbaeb28531b7739f530","e0dedc9b3b2f8dad4da1f32dec2531df9eb5fbeb0598e4fd1a117dba703a3c37"],["463b3d9f662621fb1b4be8fbbe2520125a216cdfc9dae3debcba4850c690d45b","5ed430d78c296c3543114306dd8622d7c622e27c970a1de31cb377b01af7307e"],["f16f804244e46e2a09232d4aff3b59976b98fac14328a2d1a32496b49998f247","cedabd9b82203f7e13d206fcdf4e33d92a6c53c26e5cce26d6579962c4e31df6"],["caf754272dc84563b0352b7a14311af55d245315ace27c65369e15f7151d41d1","cb474660ef35f5f2a41b643fa5e460575f4fa9b7962232a5c32f908318a04476"],["2600ca4b282cb986f85d0f1709979d8b44a09c07cb86d7c124497bc86f082120","4119b88753c15bd6a693b03fcddbb45d5ac6be74ab5f0ef44b0be9475a7e4b40"],["7635ca72d7e8432c338ec53cd12220bc01c48685e24f7dc8c602a7746998e435","91b649609489d613d1d5e590f78e6d74ecfc061d57048bad9e76f302c5b9c61"],["754e3239f325570cdbbf4a87deee8a66b7f2b33479d468fbc1a50743bf56cc18","673fb86e5bda30fb3cd0ed304ea49a023ee33d0197a695d0c5d98093c536683"],["e3e6bd1071a1e96aff57859c82d570f0330800661d1c952f9fe2694691d9b9e8","59c9e0bba394e76f40c0aa58379a3cb6a5a2283993e90c4167002af4920e37f5"],["186b483d056a033826ae73d88f732985c4ccb1f32ba35f4b4cc47fdcf04aa6eb","3b952d32c67cf77e2e17446e204180ab21fb8090895138b4a4a797f86e80888b"],["df9d70a6b9876ce544c98561f4be4f725442e6d2b737d9c91a8321724ce0963f","55eb2dafd84d6ccd5f862b785dc39d4ab157222720ef9da217b8c45cf2ba2417"],["5edd5cc23c51e87a497ca815d5dce0f8ab52554f849ed8995de64c5f34ce7143","efae9c8dbc14130661e8cec030c89ad0c13c66c0d17a2905cdc706ab7399a868"],["290798c2b6476830da12fe02287e9e777aa3fba1c355b17a722d362f84614fba","e38da76dcd440621988d00bcf79af25d5b29c094db2a23146d003afd41943e7a"],["af3c423a95d9f5b3054754efa150ac39cd29552fe360257362dfdecef4053b45","f98a3fd831eb2b749a93b0e6f35cfb40c8cd5aa667a15581bc2feded498fd9c6"],["766dbb24d134e745cccaa28c99bf274906bb66b26dcf98df8d2fed50d884249a","744b1152eacbe5e38dcc887980da38b897584a65fa06cedd2c924f97cbac5996"],["59dbf46f8c94759ba21277c33784f41645f7b44f6c596a58ce92e666191abe3e","c534ad44175fbc300f4ea6ce648309a042ce739a7919798cd85e216c4a307f6e"],["f13ada95103c4537305e691e74e9a4a8dd647e711a95e73cb62dc6018cfd87b8","e13817b44ee14de663bf4bc808341f326949e21a6a75c2570778419bdaf5733d"],["7754b4fa0e8aced06d4167a2c59cca4cda1869c06ebadfb6488550015a88522c","30e93e864e669d82224b967c3020b8fa8d1e4e350b6cbcc537a48b57841163a2"],["948dcadf5990e048aa3874d46abef9d701858f95de8041d2a6828c99e2262519","e491a42537f6e597d5d28a3224b1bc25df9154efbd2ef1d2cbba2cae5347d57e"],["7962414450c76c1689c7b48f8202ec37fb224cf5ac0bfa1570328a8a3d7c77ab","100b610ec4ffb4760d5c1fc133ef6f6b12507a051f04ac5760afa5b29db83437"],["3514087834964b54b15b160644d915485a16977225b8847bb0dd085137ec47ca","ef0afbb2056205448e1652c48e8127fc6039e77c15c2378b7e7d15a0de293311"],["d3cc30ad6b483e4bc79ce2c9dd8bc54993e947eb8df787b442943d3f7b527eaf","8b378a22d827278d89c5e9be8f9508ae3c2ad46290358630afb34db04eede0a4"],["1624d84780732860ce1c78fcbfefe08b2b29823db913f6493975ba0ff4847610","68651cf9b6da903e0914448c6cd9d4ca896878f5282be4c8cc06e2a404078575"],["733ce80da955a8a26902c95633e62a985192474b5af207da6df7b4fd5fc61cd4","f5435a2bd2badf7d485a4d8b8db9fcce3e1ef8e0201e4578c54673bc1dc5ea1d"],["15d9441254945064cf1a1c33bbd3b49f8966c5092171e699ef258dfab81c045c","d56eb30b69463e7234f5137b73b84177434800bacebfc685fc37bbe9efe4070d"],["a1d0fcf2ec9de675b612136e5ce70d271c21417c9d2b8aaaac138599d0717940","edd77f50bcb5a3cab2e90737309667f2641462a54070f3d519212d39c197a629"],["e22fbe15c0af8ccc5780c0735f84dbe9a790badee8245c06c7ca37331cb36980","a855babad5cd60c88b430a69f53a1a7a38289154964799be43d06d77d31da06"],["311091dd9860e8e20ee13473c1155f5f69635e394704eaa74009452246cfa9b3","66db656f87d1f04fffd1f04788c06830871ec5a64feee685bd80f0b1286d8374"],["34c1fd04d301be89b31c0442d3e6ac24883928b45a9340781867d4232ec2dbdf","9414685e97b1b5954bd46f730174136d57f1ceeb487443dc5321857ba73abee"],["f219ea5d6b54701c1c14de5b557eb42a8d13f3abbcd08affcc2a5e6b049b8d63","4cb95957e83d40b0f73af4544cccf6b1f4b08d3c07b27fb8d8c2962a400766d1"],["d7b8740f74a8fbaab1f683db8f45de26543a5490bca627087236912469a0b448","fa77968128d9c92ee1010f337ad4717eff15db5ed3c049b3411e0315eaa4593b"],["32d31c222f8f6f0ef86f7c98d3a3335ead5bcd32abdd94289fe4d3091aa824bf","5f3032f5892156e39ccd3d7915b9e1da2e6dac9e6f26e961118d14b8462e1661"],["7461f371914ab32671045a155d9831ea8793d77cd59592c4340f86cbc18347b5","8ec0ba238b96bec0cbdddcae0aa442542eee1ff50c986ea6b39847b3cc092ff6"],["ee079adb1df1860074356a25aa38206a6d716b2c3e67453d287698bad7b2b2d6","8dc2412aafe3be5c4c5f37e0ecc5f9f6a446989af04c4e25ebaac479ec1c8c1e"],["16ec93e447ec83f0467b18302ee620f7e65de331874c9dc72bfd8616ba9da6b5","5e4631150e62fb40d0e8c2a7ca5804a39d58186a50e497139626778e25b0674d"],["eaa5f980c245f6f038978290afa70b6bd8855897f98b6aa485b96065d537bd99","f65f5d3e292c2e0819a528391c994624d784869d7e6ea67fb18041024edc07dc"],["78c9407544ac132692ee1910a02439958ae04877151342ea96c4b6b35a49f51","f3e0319169eb9b85d5404795539a5e68fa1fbd583c064d2462b675f194a3ddb4"],["494f4be219a1a77016dcd838431aea0001cdc8ae7a6fc688726578d9702857a5","42242a969283a5f339ba7f075e36ba2af925ce30d767ed6e55f4b031880d562c"],["a598a8030da6d86c6bc7f2f5144ea549d28211ea58faa70ebf4c1e665c1fe9b5","204b5d6f84822c307e4b4a7140737aec23fc63b65b35f86a10026dbd2d864e6b"],["c41916365abb2b5d09192f5f2dbeafec208f020f12570a184dbadc3e58595997","4f14351d0087efa49d245b328984989d5caf9450f34bfc0ed16e96b58fa9913"],["841d6063a586fa475a724604da03bc5b92a2e0d2e0a36acfe4c73a5514742881","73867f59c0659e81904f9a1c7543698e62562d6744c169ce7a36de01a8d6154"],["5e95bb399a6971d376026947f89bde2f282b33810928be4ded112ac4d70e20d5","39f23f366809085beebfc71181313775a99c9aed7d8ba38b161384c746012865"],["36e4641a53948fd476c39f8a99fd974e5ec07564b5315d8bf99471bca0ef2f66","d2424b1b1abe4eb8164227b085c9aa9456ea13493fd563e06fd51cf5694c78fc"],["336581ea7bfbbb290c191a2f507a41cf5643842170e914faeab27c2c579f726","ead12168595fe1be99252129b6e56b3391f7ab1410cd1e0ef3dcdcabd2fda224"],["8ab89816dadfd6b6a1f2634fcf00ec8403781025ed6890c4849742706bd43ede","6fdcef09f2f6d0a044e654aef624136f503d459c3e89845858a47a9129cdd24e"],["1e33f1a746c9c5778133344d9299fcaa20b0938e8acff2544bb40284b8c5fb94","60660257dd11b3aa9c8ed618d24edff2306d320f1d03010e33a7d2057f3b3b6"],["85b7c1dcb3cec1b7ee7f30ded79dd20a0ed1f4cc18cbcfcfa410361fd8f08f31","3d98a9cdd026dd43f39048f25a8847f4fcafad1895d7a633c6fed3c35e999511"],["29df9fbd8d9e46509275f4b125d6d45d7fbe9a3b878a7af872a2800661ac5f51","b4c4fe99c775a606e2d8862179139ffda61dc861c019e55cd2876eb2a27d84b"],["a0b1cae06b0a847a3fea6e671aaf8adfdfe58ca2f768105c8082b2e449fce252","ae434102edde0958ec4b19d917a6a28e6b72da1834aff0e650f049503a296cf2"],["4e8ceafb9b3e9a136dc7ff67e840295b499dfb3b2133e4ba113f2e4c0e121e5","cf2174118c8b6d7a4b48f6d534ce5c79422c086a63460502b827ce62a326683c"],["d24a44e047e19b6f5afb81c7ca2f69080a5076689a010919f42725c2b789a33b","6fb8d5591b466f8fc63db50f1c0f1c69013f996887b8244d2cdec417afea8fa3"],["ea01606a7a6c9cdd249fdfcfacb99584001edd28abbab77b5104e98e8e3b35d4","322af4908c7312b0cfbfe369f7a7b3cdb7d4494bc2823700cfd652188a3ea98d"],["af8addbf2b661c8a6c6328655eb96651252007d8c5ea31be4ad196de8ce2131f","6749e67c029b85f52a034eafd096836b2520818680e26ac8f3dfbcdb71749700"],["e3ae1974566ca06cc516d47e0fb165a674a3dabcfca15e722f0e3450f45889","2aeabe7e4531510116217f07bf4d07300de97e4874f81f533420a72eeb0bd6a4"],["591ee355313d99721cf6993ffed1e3e301993ff3ed258802075ea8ced397e246","b0ea558a113c30bea60fc4775460c7901ff0b053d25ca2bdeee98f1a4be5d196"],["11396d55fda54c49f19aa97318d8da61fa8584e47b084945077cf03255b52984","998c74a8cd45ac01289d5833a7beb4744ff536b01b257be4c5767bea93ea57a4"],["3c5d2a1ba39c5a1790000738c9e0c40b8dcdfd5468754b6405540157e017aa7a","b2284279995a34e2f9d4de7396fc18b80f9b8b9fdd270f6661f79ca4c81bd257"],["cc8704b8a60a0defa3a99a7299f2e9c3fbc395afb04ac078425ef8a1793cc030","bdd46039feed17881d1e0862db347f8cf395b74fc4bcdc4e940b74e3ac1f1b13"],["c533e4f7ea8555aacd9777ac5cad29b97dd4defccc53ee7ea204119b2889b197","6f0a256bc5efdf429a2fb6242f1a43a2d9b925bb4a4b3a26bb8e0f45eb596096"],["c14f8f2ccb27d6f109f6d08d03cc96a69ba8c34eec07bbcf566d48e33da6593","c359d6923bb398f7fd4473e16fe1c28475b740dd098075e6c0e8649113dc3a38"],["a6cbc3046bc6a450bac24789fa17115a4c9739ed75f8f21ce441f72e0b90e6ef","21ae7f4680e889bb130619e2c0f95a360ceb573c70603139862afd617fa9b9f"],["347d6d9a02c48927ebfb86c1359b1caf130a3c0267d11ce6344b39f99d43cc38","60ea7f61a353524d1c987f6ecec92f086d565ab687870cb12689ff1e31c74448"],["da6545d2181db8d983f7dcb375ef5866d47c67b1bf31c8cf855ef7437b72656a","49b96715ab6878a79e78f07ce5680c5d6673051b4935bd897fea824b77dc208a"],["c40747cc9d012cb1a13b8148309c6de7ec25d6945d657146b9d5994b8feb1111","5ca560753be2a12fc6de6caf2cb489565db936156b9514e1bb5e83037e0fa2d4"],["4e42c8ec82c99798ccf3a610be870e78338c7f713348bd34c8203ef4037f3502","7571d74ee5e0fb92a7a8b33a07783341a5492144cc54bcc40a94473693606437"],["3775ab7089bc6af823aba2e1af70b236d251cadb0c86743287522a1b3b0dedea","be52d107bcfa09d8bcb9736a828cfa7fac8db17bf7a76a2c42ad961409018cf7"],["cee31cbf7e34ec379d94fb814d3d775ad954595d1314ba8846959e3e82f74e26","8fd64a14c06b589c26b947ae2bcf6bfa0149ef0be14ed4d80f448a01c43b1c6d"],["b4f9eaea09b6917619f6ea6a4eb5464efddb58fd45b1ebefcdc1a01d08b47986","39e5c9925b5a54b07433a4f18c61726f8bb131c012ca542eb24a8ac07200682a"],["d4263dfc3d2df923a0179a48966d30ce84e2515afc3dccc1b77907792ebcc60e","62dfaf07a0f78feb30e30d6295853ce189e127760ad6cf7fae164e122a208d54"],["48457524820fa65a4f8d35eb6930857c0032acc0a4a2de422233eeda897612c4","25a748ab367979d98733c38a1fa1c2e7dc6cc07db2d60a9ae7a76aaa49bd0f77"],["dfeeef1881101f2cb11644f3a2afdfc2045e19919152923f367a1767c11cceda","ecfb7056cf1de042f9420bab396793c0c390bde74b4bbdff16a83ae09a9a7517"],["6d7ef6b17543f8373c573f44e1f389835d89bcbc6062ced36c82df83b8fae859","cd450ec335438986dfefa10c57fea9bcc521a0959b2d80bbf74b190dca712d10"],["e75605d59102a5a2684500d3b991f2e3f3c88b93225547035af25af66e04541f","f5c54754a8f71ee540b9b48728473e314f729ac5308b06938360990e2bfad125"],["eb98660f4c4dfaa06a2be453d5020bc99a0c2e60abe388457dd43fefb1ed620c","6cb9a8876d9cb8520609af3add26cd20a0a7cd8a9411131ce85f44100099223e"],["13e87b027d8514d35939f2e6892b19922154596941888336dc3563e3b8dba942","fef5a3c68059a6dec5d624114bf1e91aac2b9da568d6abeb2570d55646b8adf1"],["ee163026e9fd6fe017c38f06a5be6fc125424b371ce2708e7bf4491691e5764a","1acb250f255dd61c43d94ccc670d0f58f49ae3fa15b96623e5430da0ad6c62b2"],["b268f5ef9ad51e4d78de3a750c2dc89b1e626d43505867999932e5db33af3d80","5f310d4b3c99b9ebb19f77d41c1dee018cf0d34fd4191614003e945a1216e423"],["ff07f3118a9df035e9fad85eb6c7bfe42b02f01ca99ceea3bf7ffdba93c4750d","438136d603e858a3a5c440c38eccbaddc1d2942114e2eddd4740d098ced1f0d8"],["8d8b9855c7c052a34146fd20ffb658bea4b9f69e0d825ebec16e8c3ce2b526a1","cdb559eedc2d79f926baf44fb84ea4d44bcf50fee51d7ceb30e2e7f463036758"],["52db0b5384dfbf05bfa9d472d7ae26dfe4b851ceca91b1eba54263180da32b63","c3b997d050ee5d423ebaf66a6db9f57b3180c902875679de924b69d84a7b375"],["e62f9490d3d51da6395efd24e80919cc7d0f29c3f3fa48c6fff543becbd43352","6d89ad7ba4876b0b22c2ca280c682862f342c8591f1daf5170e07bfd9ccafa7d"],["7f30ea2476b399b4957509c88f77d0191afa2ff5cb7b14fd6d8e7d65aaab1193","ca5ef7d4b231c94c3b15389a5f6311e9daff7bb67b103e9880ef4bff637acaec"],["5098ff1e1d9f14fb46a210fada6c903fef0fb7b4a1dd1d9ac60a0361800b7a00","9731141d81fc8f8084d37c6e7542006b3ee1b40d60dfe5362a5b132fd17ddc0"],["32b78c7de9ee512a72895be6b9cbefa6e2f3c4ccce445c96b9f2c81e2778ad58","ee1849f513df71e32efc3896ee28260c73bb80547ae2275ba497237794c8753c"],["e2cb74fddc8e9fbcd076eef2a7c72b0ce37d50f08269dfc074b581550547a4f7","d3aa2ed71c9dd2247a62df062736eb0baddea9e36122d2be8641abcb005cc4a4"],["8438447566d4d7bedadc299496ab357426009a35f235cb141be0d99cd10ae3a8","c4e1020916980a4da5d01ac5e6ad330734ef0d7906631c4f2390426b2edd791f"],["4162d488b89402039b584c6fc6c308870587d9c46f660b878ab65c82c711d67e","67163e903236289f776f22c25fb8a3afc1732f2b84b4e95dbda47ae5a0852649"],["3fad3fa84caf0f34f0f89bfd2dcf54fc175d767aec3e50684f3ba4a4bf5f683d","cd1bc7cb6cc407bb2f0ca647c718a730cf71872e7d0d2a53fa20efcdfe61826"],["674f2600a3007a00568c1a7ce05d0816c1fb84bf1370798f1c69532faeb1a86b","299d21f9413f33b3edf43b257004580b70db57da0b182259e09eecc69e0d38a5"],["d32f4da54ade74abb81b815ad1fb3b263d82d6c692714bcff87d29bd5ee9f08f","f9429e738b8e53b968e99016c059707782e14f4535359d582fc416910b3eea87"],["30e4e670435385556e593657135845d36fbb6931f72b08cb1ed954f1e3ce3ff6","462f9bce619898638499350113bbc9b10a878d35da70740dc695a559eb88db7b"],["be2062003c51cc3004682904330e4dee7f3dcd10b01e580bf1971b04d4cad297","62188bc49d61e5428573d48a74e1c655b1c61090905682a0d5558ed72dccb9bc"],["93144423ace3451ed29e0fb9ac2af211cb6e84a601df5993c419859fff5df04a","7c10dfb164c3425f5c71a3f9d7992038f1065224f72bb9d1d902a6d13037b47c"],["b015f8044f5fcbdcf21ca26d6c34fb8197829205c7b7d2a7cb66418c157b112c","ab8c1e086d04e813744a655b2df8d5f83b3cdc6faa3088c1d3aea1454e3a1d5f"],["d5e9e1da649d97d89e4868117a465a3a4f8a18de57a140d36b3f2af341a21b52","4cb04437f391ed73111a13cc1d4dd0db1693465c2240480d8955e8592f27447a"],["d3ae41047dd7ca065dbf8ed77b992439983005cd72e16d6f996a5316d36966bb","bd1aeb21ad22ebb22a10f0303417c6d964f8cdd7df0aca614b10dc14d125ac46"],["463e2763d885f958fc66cdd22800f0a487197d0a82e377b49f80af87c897b065","bfefacdb0e5d0fd7df3a311a94de062b26b80c61fbc97508b79992671ef7ca7f"],["7985fdfd127c0567c6f53ec1bb63ec3158e597c40bfe747c83cddfc910641917","603c12daf3d9862ef2b25fe1de289aed24ed291e0ec6708703a5bd567f32ed03"],["74a1ad6b5f76e39db2dd249410eac7f99e74c59cb83d2d0ed5ff1543da7703e9","cc6157ef18c9c63cd6193d83631bbea0093e0968942e8c33d5737fd790e0db08"],["30682a50703375f602d416664ba19b7fc9bab42c72747463a71d0896b22f6da3","553e04f6b018b4fa6c8f39e7f311d3176290d0e0f19ca73f17714d9977a22ff8"],["9e2158f0d7c0d5f26c3791efefa79597654e7a2b2464f52b1ee6c1347769ef57","712fcdd1b9053f09003a3481fa7762e9ffd7c8ef35a38509e2fbf2629008373"],["176e26989a43c9cfeba4029c202538c28172e566e3c4fce7322857f3be327d66","ed8cc9d04b29eb877d270b4878dc43c19aefd31f4eee09ee7b47834c1fa4b1c3"],["75d46efea3771e6e68abb89a13ad747ecf1892393dfc4f1b7004788c50374da8","9852390a99507679fd0b86fd2b39a868d7efc22151346e1a3ca4726586a6bed8"],["809a20c67d64900ffb698c4c825f6d5f2310fb0451c869345b7319f645605721","9e994980d9917e22b76b061927fa04143d096ccc54963e6a5ebfa5f3f8e286c1"],["1b38903a43f7f114ed4500b4eac7083fdefece1cf29c63528d563446f972c180","4036edc931a60ae889353f77fd53de4a2708b26b6f5da72ad3394119daf408f9"]]
+}}},{}],15:[function(a,b,c){"use strict";function d(a,b){for(var c=[],d=1<<b+1,e=a.clone();e.cmpn(1)>=0;){var f;if(e.isOdd()){var g=e.andln(d-1);f=g>(d>>1)-1?(d>>1)-g:g,e.isubn(f)}else f=0;c.push(f);for(var h=0!==e.cmpn(0)&&0===e.andln(d-1)?b+1:1,i=1;i<h;i++)c.push(0);e.iushrn(h)}return c}function e(a,b){var c=[[],[]];a=a.clone(),b=b.clone();for(var d=0,e=0;a.cmpn(-d)>0||b.cmpn(-e)>0;){var f=a.andln(3)+d&3,g=b.andln(3)+e&3;3===f&&(f=-1),3===g&&(g=-1);var h;if(0===(1&f))h=0;else{var i=a.andln(7)+d&7;h=3!==i&&5!==i||2!==g?f:-f}c[0].push(h);var j;if(0===(1&g))j=0;else{var i=b.andln(7)+e&7;j=3!==i&&5!==i||2!==f?g:-g}c[1].push(j),2*d===h+1&&(d=1-d),2*e===j+1&&(e=1-e),a.iushrn(1),b.iushrn(1)}return c}function f(a,b,c){var d="_"+b;a.prototype[b]=function(){return void 0!==this[d]?this[d]:this[d]=c.call(this)}}function g(a){return"string"==typeof a?i.toArray(a,"hex"):a}function h(a){return new j(a,"hex","le")}var i=c,j=a("bn.js"),k=a("minimalistic-assert"),l=a("minimalistic-crypto-utils");i.assert=k,i.toArray=l.toArray,i.zero2=l.zero2,i.toHex=l.toHex,i.encode=l.encode,i.getNAF=d,i.getJSF=e,i.cachedProperty=f,i.parseBytes=g,i.intFromLE=h},{"bn.js":16,"minimalistic-assert":28,"minimalistic-crypto-utils":29}],16:[function(a,b,c){!function(b,c){"use strict";function d(a,b){if(!a)throw new Error(b||"Assertion failed")}function e(a,b){a.super_=b;var c=function(){};c.prototype=b.prototype,a.prototype=new c,a.prototype.constructor=a}function f(a,b,c){return f.isBN(a)?a:(this.negative=0,this.words=null,this.length=0,this.red=null,void(null!==a&&("le"!==b&&"be"!==b||(c=b,b=10),this._init(a||0,b||10,c||"be"))))}function g(a,b,c){for(var d=0,e=Math.min(a.length,c),f=b;f<e;f++){var g=a.charCodeAt(f)-48;d<<=4,d|=g>=49&&g<=54?g-49+10:g>=17&&g<=22?g-17+10:15&g}return d}function h(a,b,c,d){for(var e=0,f=Math.min(a.length,c),g=b;g<f;g++){var h=a.charCodeAt(g)-48;e*=d,e+=h>=49?h-49+10:h>=17?h-17+10:h}return e}function i(a){for(var b=new Array(a.bitLength()),c=0;c<b.length;c++){var d=c/26|0,e=c%26;b[c]=(a.words[d]&1<<e)>>>e}return b}function j(a,b,c){c.negative=b.negative^a.negative;var d=a.length+b.length|0;c.length=d,d=d-1|0;var e=0|a.words[0],f=0|b.words[0],g=e*f,h=67108863&g,i=g/67108864|0;c.words[0]=h;for(var j=1;j<d;j++){for(var k=i>>>26,l=67108863&i,m=Math.min(j,b.length-1),n=Math.max(0,j-a.length+1);n<=m;n++){var o=j-n|0;e=0|a.words[o],f=0|b.words[n],g=e*f+l,k+=g/67108864|0,l=67108863&g}c.words[j]=0|l,i=0|k}return 0!==i?c.words[j]=0|i:c.length--,c.strip()}function k(a,b,c){c.negative=b.negative^a.negative,c.length=a.length+b.length;for(var d=0,e=0,f=0;f<c.length-1;f++){var g=e;e=0;for(var h=67108863&d,i=Math.min(f,b.length-1),j=Math.max(0,f-a.length+1);j<=i;j++){var k=f-j,l=0|a.words[k],m=0|b.words[j],n=l*m,o=67108863&n;g=g+(n/67108864|0)|0,o=o+h|0,h=67108863&o,g=g+(o>>>26)|0,e+=g>>>26,g&=67108863}c.words[f]=h,d=g,g=e}return 0!==d?c.words[f]=d:c.length--,c.strip()}function l(a,b,c){var d=new m;return d.mulp(a,b,c)}function m(a,b){this.x=a,this.y=b}function n(a,b){this.name=a,this.p=new f(b,16),this.n=this.p.bitLength(),this.k=new f(1).iushln(this.n).isub(this.p),this.tmp=this._tmp()}function o(){n.call(this,"k256","ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff fffffffe fffffc2f")}function p(){n.call(this,"p224","ffffffff ffffffff ffffffff ffffffff 00000000 00000000 00000001")}function q(){n.call(this,"p192","ffffffff ffffffff ffffffff fffffffe ffffffff ffffffff")}function r(){n.call(this,"25519","7fffffffffffffff ffffffffffffffff ffffffffffffffff ffffffffffffffed")}function s(a){if("string"==typeof a){var b=f._prime(a);this.m=b.p,this.prime=b}else d(a.gtn(1),"modulus must be greater than 1"),this.m=a,this.prime=null}function t(a){s.call(this,a),this.shift=this.m.bitLength(),this.shift%26!==0&&(this.shift+=26-this.shift%26),this.r=new f(1).iushln(this.shift),this.r2=this.imod(this.r.sqr()),this.rinv=this.r._invmp(this.m),this.minv=this.rinv.mul(this.r).isubn(1).div(this.m),this.minv=this.minv.umod(this.r),this.minv=this.r.sub(this.minv)}"object"==typeof b?b.exports=f:c.BN=f,f.BN=f,f.wordSize=26;var u;try{u=a("buffer").Buffer}catch(v){}f.isBN=function(a){return a instanceof f||null!==a&&"object"==typeof a&&a.constructor.wordSize===f.wordSize&&Array.isArray(a.words)},f.max=function(a,b){return a.cmp(b)>0?a:b},f.min=function(a,b){return a.cmp(b)<0?a:b},f.prototype._init=function(a,b,c){if("number"==typeof a)return this._initNumber(a,b,c);if("object"==typeof a)return this._initArray(a,b,c);"hex"===b&&(b=16),d(b===(0|b)&&b>=2&&b<=36),a=a.toString().replace(/\s+/g,"");var e=0;"-"===a[0]&&e++,16===b?this._parseHex(a,e):this._parseBase(a,b,e),"-"===a[0]&&(this.negative=1),this.strip(),"le"===c&&this._initArray(this.toArray(),b,c)},f.prototype._initNumber=function(a,b,c){a<0&&(this.negative=1,a=-a),a<67108864?(this.words=[67108863&a],this.length=1):a<4503599627370496?(this.words=[67108863&a,a/67108864&67108863],this.length=2):(d(a<9007199254740992),this.words=[67108863&a,a/67108864&67108863,1],this.length=3),"le"===c&&this._initArray(this.toArray(),b,c)},f.prototype._initArray=function(a,b,c){if(d("number"==typeof a.length),a.length<=0)return this.words=[0],this.length=1,this;this.length=Math.ceil(a.length/3),this.words=new Array(this.length);for(var e=0;e<this.length;e++)this.words[e]=0;var f,g,h=0;if("be"===c)for(e=a.length-1,f=0;e>=0;e-=3)g=a[e]|a[e-1]<<8|a[e-2]<<16,this.words[f]|=g<<h&67108863,this.words[f+1]=g>>>26-h&67108863,h+=24,h>=26&&(h-=26,f++);else if("le"===c)for(e=0,f=0;e<a.length;e+=3)g=a[e]|a[e+1]<<8|a[e+2]<<16,this.words[f]|=g<<h&67108863,this.words[f+1]=g>>>26-h&67108863,h+=24,h>=26&&(h-=26,f++);return this.strip()},f.prototype._parseHex=function(a,b){this.length=Math.ceil((a.length-b)/6),this.words=new Array(this.length);for(var c=0;c<this.length;c++)this.words[c]=0;var d,e,f=0;for(c=a.length-6,d=0;c>=b;c-=6)e=g(a,c,c+6),this.words[d]|=e<<f&67108863,this.words[d+1]|=e>>>26-f&4194303,f+=24,f>=26&&(f-=26,d++);c+6!==b&&(e=g(a,b,c+6),this.words[d]|=e<<f&67108863,this.words[d+1]|=e>>>26-f&4194303),this.strip()},f.prototype._parseBase=function(a,b,c){this.words=[0],this.length=1;for(var d=0,e=1;e<=67108863;e*=b)d++;d--,e=e/b|0;for(var f=a.length-c,g=f%d,i=Math.min(f,f-g)+c,j=0,k=c;k<i;k+=d)j=h(a,k,k+d,b),this.imuln(e),this.words[0]+j<67108864?this.words[0]+=j:this._iaddn(j);if(0!==g){var l=1;for(j=h(a,k,a.length,b),k=0;k<g;k++)l*=b;this.imuln(l),this.words[0]+j<67108864?this.words[0]+=j:this._iaddn(j)}},f.prototype.copy=function(a){a.words=new Array(this.length);for(var b=0;b<this.length;b++)a.words[b]=this.words[b];a.length=this.length,a.negative=this.negative,a.red=this.red},f.prototype.clone=function(){var a=new f(null);return this.copy(a),a},f.prototype._expand=function(a){for(;this.length<a;)this.words[this.length++]=0;return this},f.prototype.strip=function(){for(;this.length>1&&0===this.words[this.length-1];)this.length--;return this._normSign()},f.prototype._normSign=function(){return 1===this.length&&0===this.words[0]&&(this.negative=0),this},f.prototype.inspect=function(){return(this.red?"<BN-R: ":"<BN: ")+this.toString(16)+">"};var w=["","0","00","000","0000","00000","000000","0000000","00000000","000000000","0000000000","00000000000","000000000000","0000000000000","00000000000000","000000000000000","0000000000000000","00000000000000000","000000000000000000","0000000000000000000","00000000000000000000","000000000000000000000","0000000000000000000000","00000000000000000000000","000000000000000000000000","0000000000000000000000000"],x=[0,0,25,16,12,11,10,9,8,8,7,7,7,7,6,6,6,6,6,6,6,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5],y=[0,0,33554432,43046721,16777216,48828125,60466176,40353607,16777216,43046721,1e7,19487171,35831808,62748517,7529536,11390625,16777216,24137569,34012224,47045881,64e6,4084101,5153632,6436343,7962624,9765625,11881376,14348907,17210368,20511149,243e5,28629151,33554432,39135393,45435424,52521875,60466176];f.prototype.toString=function(a,b){a=a||10,b=0|b||1;var c;if(16===a||"hex"===a){c="";for(var e=0,f=0,g=0;g<this.length;g++){var h=this.words[g],i=(16777215&(h<<e|f)).toString(16);f=h>>>24-e&16777215,c=0!==f||g!==this.length-1?w[6-i.length]+i+c:i+c,e+=2,e>=26&&(e-=26,g--)}for(0!==f&&(c=f.toString(16)+c);c.length%b!==0;)c="0"+c;return 0!==this.negative&&(c="-"+c),c}if(a===(0|a)&&a>=2&&a<=36){var j=x[a],k=y[a];c="";var l=this.clone();for(l.negative=0;!l.isZero();){var m=l.modn(k).toString(a);l=l.idivn(k),c=l.isZero()?m+c:w[j-m.length]+m+c}for(this.isZero()&&(c="0"+c);c.length%b!==0;)c="0"+c;return 0!==this.negative&&(c="-"+c),c}d(!1,"Base should be between 2 and 36")},f.prototype.toNumber=function(){var a=this.words[0];return 2===this.length?a+=67108864*this.words[1]:3===this.length&&1===this.words[2]?a+=4503599627370496+67108864*this.words[1]:this.length>2&&d(!1,"Number can only safely store up to 53 bits"),0!==this.negative?-a:a},f.prototype.toJSON=function(){return this.toString(16)},f.prototype.toBuffer=function(a,b){return d("undefined"!=typeof u),this.toArrayLike(u,a,b)},f.prototype.toArray=function(a,b){return this.toArrayLike(Array,a,b)},f.prototype.toArrayLike=function(a,b,c){var e=this.byteLength(),f=c||Math.max(1,e);d(e<=f,"byte array longer than desired length"),d(f>0,"Requested array length <= 0"),this.strip();var g,h,i="le"===b,j=new a(f),k=this.clone();if(i){for(h=0;!k.isZero();h++)g=k.andln(255),k.iushrn(8),j[h]=g;for(;h<f;h++)j[h]=0}else{for(h=0;h<f-e;h++)j[h]=0;for(h=0;!k.isZero();h++)g=k.andln(255),k.iushrn(8),j[f-h-1]=g}return j},Math.clz32?f.prototype._countBits=function(a){return 32-Math.clz32(a)}:f.prototype._countBits=function(a){var b=a,c=0;return b>=4096&&(c+=13,b>>>=13),b>=64&&(c+=7,b>>>=7),b>=8&&(c+=4,b>>>=4),b>=2&&(c+=2,b>>>=2),c+b},f.prototype._zeroBits=function(a){if(0===a)return 26;var b=a,c=0;return 0===(8191&b)&&(c+=13,b>>>=13),0===(127&b)&&(c+=7,b>>>=7),0===(15&b)&&(c+=4,b>>>=4),0===(3&b)&&(c+=2,b>>>=2),0===(1&b)&&c++,c},f.prototype.bitLength=function(){var a=this.words[this.length-1],b=this._countBits(a);return 26*(this.length-1)+b},f.prototype.zeroBits=function(){if(this.isZero())return 0;for(var a=0,b=0;b<this.length;b++){var c=this._zeroBits(this.words[b]);if(a+=c,26!==c)break}return a},f.prototype.byteLength=function(){return Math.ceil(this.bitLength()/8)},f.prototype.toTwos=function(a){return 0!==this.negative?this.abs().inotn(a).iaddn(1):this.clone()},f.prototype.fromTwos=function(a){return this.testn(a-1)?this.notn(a).iaddn(1).ineg():this.clone()},f.prototype.isNeg=function(){return 0!==this.negative},f.prototype.neg=function(){return this.clone().ineg()},f.prototype.ineg=function(){return this.isZero()||(this.negative^=1),this},f.prototype.iuor=function(a){for(;this.length<a.length;)this.words[this.length++]=0;for(var b=0;b<a.length;b++)this.words[b]=this.words[b]|a.words[b];return this.strip()},f.prototype.ior=function(a){return d(0===(this.negative|a.negative)),this.iuor(a)},f.prototype.or=function(a){return this.length>a.length?this.clone().ior(a):a.clone().ior(this)},f.prototype.uor=function(a){return this.length>a.length?this.clone().iuor(a):a.clone().iuor(this)},f.prototype.iuand=function(a){var b;b=this.length>a.length?a:this;for(var c=0;c<b.length;c++)this.words[c]=this.words[c]&a.words[c];return this.length=b.length,this.strip()},f.prototype.iand=function(a){return d(0===(this.negative|a.negative)),this.iuand(a)},f.prototype.and=function(a){return this.length>a.length?this.clone().iand(a):a.clone().iand(this)},f.prototype.uand=function(a){return this.length>a.length?this.clone().iuand(a):a.clone().iuand(this)},f.prototype.iuxor=function(a){var b,c;this.length>a.length?(b=this,c=a):(b=a,c=this);for(var d=0;d<c.length;d++)this.words[d]=b.words[d]^c.words[d];if(this!==b)for(;d<b.length;d++)this.words[d]=b.words[d];return this.length=b.length,this.strip()},f.prototype.ixor=function(a){return d(0===(this.negative|a.negative)),this.iuxor(a)},f.prototype.xor=function(a){return this.length>a.length?this.clone().ixor(a):a.clone().ixor(this)},f.prototype.uxor=function(a){return this.length>a.length?this.clone().iuxor(a):a.clone().iuxor(this)},f.prototype.inotn=function(a){d("number"==typeof a&&a>=0);var b=0|Math.ceil(a/26),c=a%26;this._expand(b),c>0&&b--;for(var e=0;e<b;e++)this.words[e]=67108863&~this.words[e];return c>0&&(this.words[e]=~this.words[e]&67108863>>26-c),this.strip()},f.prototype.notn=function(a){return this.clone().inotn(a)},f.prototype.setn=function(a,b){d("number"==typeof a&&a>=0);var c=a/26|0,e=a%26;return this._expand(c+1),b?this.words[c]=this.words[c]|1<<e:this.words[c]=this.words[c]&~(1<<e),this.strip()},f.prototype.iadd=function(a){var b;if(0!==this.negative&&0===a.negative)return this.negative=0,b=this.isub(a),this.negative^=1,this._normSign();if(0===this.negative&&0!==a.negative)return a.negative=0,b=this.isub(a),a.negative=1,b._normSign();var c,d;this.length>a.length?(c=this,d=a):(c=a,d=this);for(var e=0,f=0;f<d.length;f++)b=(0|c.words[f])+(0|d.words[f])+e,this.words[f]=67108863&b,e=b>>>26;for(;0!==e&&f<c.length;f++)b=(0|c.words[f])+e,this.words[f]=67108863&b,e=b>>>26;if(this.length=c.length,0!==e)this.words[this.length]=e,this.length++;else if(c!==this)for(;f<c.length;f++)this.words[f]=c.words[f];return this},f.prototype.add=function(a){var b;return 0!==a.negative&&0===this.negative?(a.negative=0,b=this.sub(a),a.negative^=1,b):0===a.negative&&0!==this.negative?(this.negative=0,b=a.sub(this),this.negative=1,b):this.length>a.length?this.clone().iadd(a):a.clone().iadd(this)},f.prototype.isub=function(a){if(0!==a.negative){a.negative=0;var b=this.iadd(a);return a.negative=1,b._normSign()}if(0!==this.negative)return this.negative=0,this.iadd(a),this.negative=1,this._normSign();var c=this.cmp(a);if(0===c)return this.negative=0,this.length=1,this.words[0]=0,this;var d,e;c>0?(d=this,e=a):(d=a,e=this);for(var f=0,g=0;g<e.length;g++)b=(0|d.words[g])-(0|e.words[g])+f,f=b>>26,this.words[g]=67108863&b;for(;0!==f&&g<d.length;g++)b=(0|d.words[g])+f,f=b>>26,this.words[g]=67108863&b;if(0===f&&g<d.length&&d!==this)for(;g<d.length;g++)this.words[g]=d.words[g];return this.length=Math.max(this.length,g),d!==this&&(this.negative=1),this.strip()},f.prototype.sub=function(a){return this.clone().isub(a)};var z=function(a,b,c){var d,e,f,g=a.words,h=b.words,i=c.words,j=0,k=0|g[0],l=8191&k,m=k>>>13,n=0|g[1],o=8191&n,p=n>>>13,q=0|g[2],r=8191&q,s=q>>>13,t=0|g[3],u=8191&t,v=t>>>13,w=0|g[4],x=8191&w,y=w>>>13,z=0|g[5],A=8191&z,B=z>>>13,C=0|g[6],D=8191&C,E=C>>>13,F=0|g[7],G=8191&F,H=F>>>13,I=0|g[8],J=8191&I,K=I>>>13,L=0|g[9],M=8191&L,N=L>>>13,O=0|h[0],P=8191&O,Q=O>>>13,R=0|h[1],S=8191&R,T=R>>>13,U=0|h[2],V=8191&U,W=U>>>13,X=0|h[3],Y=8191&X,Z=X>>>13,$=0|h[4],_=8191&$,aa=$>>>13,ba=0|h[5],ca=8191&ba,da=ba>>>13,ea=0|h[6],fa=8191&ea,ga=ea>>>13,ha=0|h[7],ia=8191&ha,ja=ha>>>13,ka=0|h[8],la=8191&ka,ma=ka>>>13,na=0|h[9],oa=8191&na,pa=na>>>13;c.negative=a.negative^b.negative,c.length=19,d=Math.imul(l,P),e=Math.imul(l,Q),e=e+Math.imul(m,P)|0,f=Math.imul(m,Q);var qa=(j+d|0)+((8191&e)<<13)|0;j=(f+(e>>>13)|0)+(qa>>>26)|0,qa&=67108863,d=Math.imul(o,P),e=Math.imul(o,Q),e=e+Math.imul(p,P)|0,f=Math.imul(p,Q),d=d+Math.imul(l,S)|0,e=e+Math.imul(l,T)|0,e=e+Math.imul(m,S)|0,f=f+Math.imul(m,T)|0;var ra=(j+d|0)+((8191&e)<<13)|0;j=(f+(e>>>13)|0)+(ra>>>26)|0,ra&=67108863,d=Math.imul(r,P),e=Math.imul(r,Q),e=e+Math.imul(s,P)|0,f=Math.imul(s,Q),d=d+Math.imul(o,S)|0,e=e+Math.imul(o,T)|0,e=e+Math.imul(p,S)|0,f=f+Math.imul(p,T)|0,d=d+Math.imul(l,V)|0,e=e+Math.imul(l,W)|0,e=e+Math.imul(m,V)|0,f=f+Math.imul(m,W)|0;var sa=(j+d|0)+((8191&e)<<13)|0;j=(f+(e>>>13)|0)+(sa>>>26)|0,sa&=67108863,d=Math.imul(u,P),e=Math.imul(u,Q),e=e+Math.imul(v,P)|0,f=Math.imul(v,Q),d=d+Math.imul(r,S)|0,e=e+Math.imul(r,T)|0,e=e+Math.imul(s,S)|0,f=f+Math.imul(s,T)|0,d=d+Math.imul(o,V)|0,e=e+Math.imul(o,W)|0,e=e+Math.imul(p,V)|0,f=f+Math.imul(p,W)|0,d=d+Math.imul(l,Y)|0,e=e+Math.imul(l,Z)|0,e=e+Math.imul(m,Y)|0,f=f+Math.imul(m,Z)|0;var ta=(j+d|0)+((8191&e)<<13)|0;j=(f+(e>>>13)|0)+(ta>>>26)|0,ta&=67108863,d=Math.imul(x,P),e=Math.imul(x,Q),e=e+Math.imul(y,P)|0,f=Math.imul(y,Q),d=d+Math.imul(u,S)|0,e=e+Math.imul(u,T)|0,e=e+Math.imul(v,S)|0,f=f+Math.imul(v,T)|0,d=d+Math.imul(r,V)|0,e=e+Math.imul(r,W)|0,e=e+Math.imul(s,V)|0,f=f+Math.imul(s,W)|0,d=d+Math.imul(o,Y)|0,e=e+Math.imul(o,Z)|0,e=e+Math.imul(p,Y)|0,f=f+Math.imul(p,Z)|0,d=d+Math.imul(l,_)|0,e=e+Math.imul(l,aa)|0,e=e+Math.imul(m,_)|0,f=f+Math.imul(m,aa)|0;var ua=(j+d|0)+((8191&e)<<13)|0;j=(f+(e>>>13)|0)+(ua>>>26)|0,ua&=67108863,d=Math.imul(A,P),e=Math.imul(A,Q),e=e+Math.imul(B,P)|0,f=Math.imul(B,Q),d=d+Math.imul(x,S)|0,e=e+Math.imul(x,T)|0,e=e+Math.imul(y,S)|0,f=f+Math.imul(y,T)|0,d=d+Math.imul(u,V)|0,e=e+Math.imul(u,W)|0,e=e+Math.imul(v,V)|0,f=f+Math.imul(v,W)|0,d=d+Math.imul(r,Y)|0,e=e+Math.imul(r,Z)|0,e=e+Math.imul(s,Y)|0,f=f+Math.imul(s,Z)|0,d=d+Math.imul(o,_)|0,e=e+Math.imul(o,aa)|0,e=e+Math.imul(p,_)|0,f=f+Math.imul(p,aa)|0,d=d+Math.imul(l,ca)|0,e=e+Math.imul(l,da)|0,e=e+Math.imul(m,ca)|0,f=f+Math.imul(m,da)|0;var va=(j+d|0)+((8191&e)<<13)|0;j=(f+(e>>>13)|0)+(va>>>26)|0,va&=67108863,d=Math.imul(D,P),e=Math.imul(D,Q),e=e+Math.imul(E,P)|0,f=Math.imul(E,Q),d=d+Math.imul(A,S)|0,e=e+Math.imul(A,T)|0,e=e+Math.imul(B,S)|0,f=f+Math.imul(B,T)|0,d=d+Math.imul(x,V)|0,e=e+Math.imul(x,W)|0,e=e+Math.imul(y,V)|0,f=f+Math.imul(y,W)|0,d=d+Math.imul(u,Y)|0,e=e+Math.imul(u,Z)|0,e=e+Math.imul(v,Y)|0,f=f+Math.imul(v,Z)|0,d=d+Math.imul(r,_)|0,e=e+Math.imul(r,aa)|0,e=e+Math.imul(s,_)|0,f=f+Math.imul(s,aa)|0,d=d+Math.imul(o,ca)|0,e=e+Math.imul(o,da)|0,e=e+Math.imul(p,ca)|0,f=f+Math.imul(p,da)|0,d=d+Math.imul(l,fa)|0,e=e+Math.imul(l,ga)|0,e=e+Math.imul(m,fa)|0,f=f+Math.imul(m,ga)|0;var wa=(j+d|0)+((8191&e)<<13)|0;j=(f+(e>>>13)|0)+(wa>>>26)|0,wa&=67108863,d=Math.imul(G,P),e=Math.imul(G,Q),e=e+Math.imul(H,P)|0,f=Math.imul(H,Q),d=d+Math.imul(D,S)|0,e=e+Math.imul(D,T)|0,e=e+Math.imul(E,S)|0,f=f+Math.imul(E,T)|0,d=d+Math.imul(A,V)|0,e=e+Math.imul(A,W)|0,e=e+Math.imul(B,V)|0,f=f+Math.imul(B,W)|0,d=d+Math.imul(x,Y)|0,e=e+Math.imul(x,Z)|0,e=e+Math.imul(y,Y)|0,f=f+Math.imul(y,Z)|0,d=d+Math.imul(u,_)|0,e=e+Math.imul(u,aa)|0,e=e+Math.imul(v,_)|0,f=f+Math.imul(v,aa)|0,d=d+Math.imul(r,ca)|0,e=e+Math.imul(r,da)|0,e=e+Math.imul(s,ca)|0,f=f+Math.imul(s,da)|0,d=d+Math.imul(o,fa)|0,e=e+Math.imul(o,ga)|0,e=e+Math.imul(p,fa)|0,f=f+Math.imul(p,ga)|0,d=d+Math.imul(l,ia)|0,e=e+Math.imul(l,ja)|0,e=e+Math.imul(m,ia)|0,f=f+Math.imul(m,ja)|0;var xa=(j+d|0)+((8191&e)<<13)|0;j=(f+(e>>>13)|0)+(xa>>>26)|0,xa&=67108863,d=Math.imul(J,P),e=Math.imul(J,Q),e=e+Math.imul(K,P)|0,f=Math.imul(K,Q),d=d+Math.imul(G,S)|0,e=e+Math.imul(G,T)|0,e=e+Math.imul(H,S)|0,f=f+Math.imul(H,T)|0,d=d+Math.imul(D,V)|0,e=e+Math.imul(D,W)|0,e=e+Math.imul(E,V)|0,f=f+Math.imul(E,W)|0,d=d+Math.imul(A,Y)|0,e=e+Math.imul(A,Z)|0,e=e+Math.imul(B,Y)|0,f=f+Math.imul(B,Z)|0,d=d+Math.imul(x,_)|0,e=e+Math.imul(x,aa)|0,e=e+Math.imul(y,_)|0,f=f+Math.imul(y,aa)|0,d=d+Math.imul(u,ca)|0,e=e+Math.imul(u,da)|0,e=e+Math.imul(v,ca)|0,f=f+Math.imul(v,da)|0,d=d+Math.imul(r,fa)|0,e=e+Math.imul(r,ga)|0,e=e+Math.imul(s,fa)|0,f=f+Math.imul(s,ga)|0,d=d+Math.imul(o,ia)|0,e=e+Math.imul(o,ja)|0,e=e+Math.imul(p,ia)|0,f=f+Math.imul(p,ja)|0,d=d+Math.imul(l,la)|0,e=e+Math.imul(l,ma)|0,e=e+Math.imul(m,la)|0,f=f+Math.imul(m,ma)|0;var ya=(j+d|0)+((8191&e)<<13)|0;j=(f+(e>>>13)|0)+(ya>>>26)|0,ya&=67108863,d=Math.imul(M,P),e=Math.imul(M,Q),e=e+Math.imul(N,P)|0,f=Math.imul(N,Q),d=d+Math.imul(J,S)|0,e=e+Math.imul(J,T)|0,e=e+Math.imul(K,S)|0,f=f+Math.imul(K,T)|0,d=d+Math.imul(G,V)|0,e=e+Math.imul(G,W)|0,e=e+Math.imul(H,V)|0,f=f+Math.imul(H,W)|0,d=d+Math.imul(D,Y)|0,e=e+Math.imul(D,Z)|0,e=e+Math.imul(E,Y)|0,f=f+Math.imul(E,Z)|0,d=d+Math.imul(A,_)|0,e=e+Math.imul(A,aa)|0,e=e+Math.imul(B,_)|0,f=f+Math.imul(B,aa)|0,d=d+Math.imul(x,ca)|0,e=e+Math.imul(x,da)|0,e=e+Math.imul(y,ca)|0,f=f+Math.imul(y,da)|0,d=d+Math.imul(u,fa)|0,e=e+Math.imul(u,ga)|0,e=e+Math.imul(v,fa)|0,f=f+Math.imul(v,ga)|0,d=d+Math.imul(r,ia)|0,e=e+Math.imul(r,ja)|0,e=e+Math.imul(s,ia)|0,f=f+Math.imul(s,ja)|0,d=d+Math.imul(o,la)|0,e=e+Math.imul(o,ma)|0,e=e+Math.imul(p,la)|0,f=f+Math.imul(p,ma)|0,d=d+Math.imul(l,oa)|0,e=e+Math.imul(l,pa)|0,e=e+Math.imul(m,oa)|0,f=f+Math.imul(m,pa)|0;var za=(j+d|0)+((8191&e)<<13)|0;j=(f+(e>>>13)|0)+(za>>>26)|0,za&=67108863,d=Math.imul(M,S),e=Math.imul(M,T),e=e+Math.imul(N,S)|0,f=Math.imul(N,T),d=d+Math.imul(J,V)|0,e=e+Math.imul(J,W)|0,e=e+Math.imul(K,V)|0,f=f+Math.imul(K,W)|0,d=d+Math.imul(G,Y)|0,e=e+Math.imul(G,Z)|0,e=e+Math.imul(H,Y)|0,f=f+Math.imul(H,Z)|0,d=d+Math.imul(D,_)|0,e=e+Math.imul(D,aa)|0,e=e+Math.imul(E,_)|0,f=f+Math.imul(E,aa)|0,d=d+Math.imul(A,ca)|0,e=e+Math.imul(A,da)|0,e=e+Math.imul(B,ca)|0,f=f+Math.imul(B,da)|0,d=d+Math.imul(x,fa)|0,e=e+Math.imul(x,ga)|0,e=e+Math.imul(y,fa)|0,f=f+Math.imul(y,ga)|0,d=d+Math.imul(u,ia)|0,e=e+Math.imul(u,ja)|0,e=e+Math.imul(v,ia)|0,f=f+Math.imul(v,ja)|0,d=d+Math.imul(r,la)|0,e=e+Math.imul(r,ma)|0,e=e+Math.imul(s,la)|0,f=f+Math.imul(s,ma)|0,d=d+Math.imul(o,oa)|0,e=e+Math.imul(o,pa)|0,e=e+Math.imul(p,oa)|0,f=f+Math.imul(p,pa)|0;var Aa=(j+d|0)+((8191&e)<<13)|0;j=(f+(e>>>13)|0)+(Aa>>>26)|0,Aa&=67108863,d=Math.imul(M,V),e=Math.imul(M,W),e=e+Math.imul(N,V)|0,f=Math.imul(N,W),d=d+Math.imul(J,Y)|0,e=e+Math.imul(J,Z)|0,e=e+Math.imul(K,Y)|0,f=f+Math.imul(K,Z)|0,d=d+Math.imul(G,_)|0,e=e+Math.imul(G,aa)|0,e=e+Math.imul(H,_)|0,f=f+Math.imul(H,aa)|0,d=d+Math.imul(D,ca)|0,e=e+Math.imul(D,da)|0,e=e+Math.imul(E,ca)|0,f=f+Math.imul(E,da)|0,d=d+Math.imul(A,fa)|0,e=e+Math.imul(A,ga)|0,e=e+Math.imul(B,fa)|0,f=f+Math.imul(B,ga)|0,d=d+Math.imul(x,ia)|0,e=e+Math.imul(x,ja)|0,e=e+Math.imul(y,ia)|0,f=f+Math.imul(y,ja)|0,d=d+Math.imul(u,la)|0,e=e+Math.imul(u,ma)|0,e=e+Math.imul(v,la)|0,f=f+Math.imul(v,ma)|0,d=d+Math.imul(r,oa)|0,e=e+Math.imul(r,pa)|0,e=e+Math.imul(s,oa)|0,f=f+Math.imul(s,pa)|0;var Ba=(j+d|0)+((8191&e)<<13)|0;j=(f+(e>>>13)|0)+(Ba>>>26)|0,Ba&=67108863,d=Math.imul(M,Y),e=Math.imul(M,Z),e=e+Math.imul(N,Y)|0,f=Math.imul(N,Z),d=d+Math.imul(J,_)|0,e=e+Math.imul(J,aa)|0,e=e+Math.imul(K,_)|0,f=f+Math.imul(K,aa)|0,d=d+Math.imul(G,ca)|0,e=e+Math.imul(G,da)|0,e=e+Math.imul(H,ca)|0,f=f+Math.imul(H,da)|0,d=d+Math.imul(D,fa)|0,e=e+Math.imul(D,ga)|0,e=e+Math.imul(E,fa)|0,f=f+Math.imul(E,ga)|0,d=d+Math.imul(A,ia)|0,e=e+Math.imul(A,ja)|0,e=e+Math.imul(B,ia)|0,f=f+Math.imul(B,ja)|0,d=d+Math.imul(x,la)|0,e=e+Math.imul(x,ma)|0,e=e+Math.imul(y,la)|0,f=f+Math.imul(y,ma)|0,d=d+Math.imul(u,oa)|0,e=e+Math.imul(u,pa)|0,e=e+Math.imul(v,oa)|0,f=f+Math.imul(v,pa)|0;var Ca=(j+d|0)+((8191&e)<<13)|0;j=(f+(e>>>13)|0)+(Ca>>>26)|0,Ca&=67108863,d=Math.imul(M,_),e=Math.imul(M,aa),e=e+Math.imul(N,_)|0,f=Math.imul(N,aa),d=d+Math.imul(J,ca)|0,e=e+Math.imul(J,da)|0,e=e+Math.imul(K,ca)|0,f=f+Math.imul(K,da)|0,d=d+Math.imul(G,fa)|0,e=e+Math.imul(G,ga)|0,e=e+Math.imul(H,fa)|0,f=f+Math.imul(H,ga)|0,d=d+Math.imul(D,ia)|0,e=e+Math.imul(D,ja)|0,e=e+Math.imul(E,ia)|0,f=f+Math.imul(E,ja)|0,d=d+Math.imul(A,la)|0,e=e+Math.imul(A,ma)|0,e=e+Math.imul(B,la)|0,f=f+Math.imul(B,ma)|0,d=d+Math.imul(x,oa)|0,e=e+Math.imul(x,pa)|0,e=e+Math.imul(y,oa)|0,f=f+Math.imul(y,pa)|0;var Da=(j+d|0)+((8191&e)<<13)|0;j=(f+(e>>>13)|0)+(Da>>>26)|0,Da&=67108863,d=Math.imul(M,ca),e=Math.imul(M,da),e=e+Math.imul(N,ca)|0,f=Math.imul(N,da),d=d+Math.imul(J,fa)|0,e=e+Math.imul(J,ga)|0,e=e+Math.imul(K,fa)|0,f=f+Math.imul(K,ga)|0,d=d+Math.imul(G,ia)|0,e=e+Math.imul(G,ja)|0,e=e+Math.imul(H,ia)|0,f=f+Math.imul(H,ja)|0,d=d+Math.imul(D,la)|0,e=e+Math.imul(D,ma)|0,e=e+Math.imul(E,la)|0,f=f+Math.imul(E,ma)|0,d=d+Math.imul(A,oa)|0,e=e+Math.imul(A,pa)|0,e=e+Math.imul(B,oa)|0,f=f+Math.imul(B,pa)|0;var Ea=(j+d|0)+((8191&e)<<13)|0;j=(f+(e>>>13)|0)+(Ea>>>26)|0,Ea&=67108863,d=Math.imul(M,fa),e=Math.imul(M,ga),e=e+Math.imul(N,fa)|0,f=Math.imul(N,ga),d=d+Math.imul(J,ia)|0,e=e+Math.imul(J,ja)|0,e=e+Math.imul(K,ia)|0,f=f+Math.imul(K,ja)|0,d=d+Math.imul(G,la)|0,e=e+Math.imul(G,ma)|0,e=e+Math.imul(H,la)|0,f=f+Math.imul(H,ma)|0,d=d+Math.imul(D,oa)|0,e=e+Math.imul(D,pa)|0,e=e+Math.imul(E,oa)|0,f=f+Math.imul(E,pa)|0;var Fa=(j+d|0)+((8191&e)<<13)|0;j=(f+(e>>>13)|0)+(Fa>>>26)|0,Fa&=67108863,d=Math.imul(M,ia),e=Math.imul(M,ja),e=e+Math.imul(N,ia)|0,f=Math.imul(N,ja),d=d+Math.imul(J,la)|0,e=e+Math.imul(J,ma)|0,e=e+Math.imul(K,la)|0,f=f+Math.imul(K,ma)|0,d=d+Math.imul(G,oa)|0,e=e+Math.imul(G,pa)|0,e=e+Math.imul(H,oa)|0,f=f+Math.imul(H,pa)|0;var Ga=(j+d|0)+((8191&e)<<13)|0;j=(f+(e>>>13)|0)+(Ga>>>26)|0,Ga&=67108863,d=Math.imul(M,la),e=Math.imul(M,ma),e=e+Math.imul(N,la)|0,f=Math.imul(N,ma),d=d+Math.imul(J,oa)|0,e=e+Math.imul(J,pa)|0,e=e+Math.imul(K,oa)|0,f=f+Math.imul(K,pa)|0;var Ha=(j+d|0)+((8191&e)<<13)|0;j=(f+(e>>>13)|0)+(Ha>>>26)|0,Ha&=67108863,d=Math.imul(M,oa),e=Math.imul(M,pa),e=e+Math.imul(N,oa)|0,f=Math.imul(N,pa);var Ia=(j+d|0)+((8191&e)<<13)|0;return j=(f+(e>>>13)|0)+(Ia>>>26)|0,Ia&=67108863,i[0]=qa,i[1]=ra,i[2]=sa,i[3]=ta,i[4]=ua,i[5]=va,i[6]=wa,i[7]=xa,i[8]=ya,i[9]=za,i[10]=Aa,i[11]=Ba,i[12]=Ca,i[13]=Da,i[14]=Ea,i[15]=Fa,i[16]=Ga,i[17]=Ha,i[18]=Ia,0!==j&&(i[19]=j,c.length++),c};Math.imul||(z=j),f.prototype.mulTo=function(a,b){var c,d=this.length+a.length;return c=10===this.length&&10===a.length?z(this,a,b):d<63?j(this,a,b):d<1024?k(this,a,b):l(this,a,b)},m.prototype.makeRBT=function(a){for(var b=new Array(a),c=f.prototype._countBits(a)-1,d=0;d<a;d++)b[d]=this.revBin(d,c,a);return b},m.prototype.revBin=function(a,b,c){if(0===a||a===c-1)return a;for(var d=0,e=0;e<b;e++)d|=(1&a)<<b-e-1,a>>=1;return d},m.prototype.permute=function(a,b,c,d,e,f){for(var g=0;g<f;g++)d[g]=b[a[g]],e[g]=c[a[g]]},m.prototype.transform=function(a,b,c,d,e,f){this.permute(f,a,b,c,d,e);for(var g=1;g<e;g<<=1)for(var h=g<<1,i=Math.cos(2*Math.PI/h),j=Math.sin(2*Math.PI/h),k=0;k<e;k+=h)for(var l=i,m=j,n=0;n<g;n++){var o=c[k+n],p=d[k+n],q=c[k+n+g],r=d[k+n+g],s=l*q-m*r;r=l*r+m*q,q=s,c[k+n]=o+q,d[k+n]=p+r,c[k+n+g]=o-q,d[k+n+g]=p-r,n!==h&&(s=i*l-j*m,m=i*m+j*l,l=s)}},m.prototype.guessLen13b=function(a,b){var c=1|Math.max(b,a),d=1&c,e=0;for(c=c/2|0;c;c>>>=1)e++;return 1<<e+1+d},m.prototype.conjugate=function(a,b,c){if(!(c<=1))for(var d=0;d<c/2;d++){var e=a[d];a[d]=a[c-d-1],a[c-d-1]=e,e=b[d],b[d]=-b[c-d-1],b[c-d-1]=-e}},m.prototype.normalize13b=function(a,b){for(var c=0,d=0;d<b/2;d++){var e=8192*Math.round(a[2*d+1]/b)+Math.round(a[2*d]/b)+c;a[d]=67108863&e,c=e<67108864?0:e/67108864|0}return a},m.prototype.convert13b=function(a,b,c,e){for(var f=0,g=0;g<b;g++)f+=0|a[g],c[2*g]=8191&f,f>>>=13,c[2*g+1]=8191&f,f>>>=13;for(g=2*b;g<e;++g)c[g]=0;d(0===f),d(0===(f&-8192))},m.prototype.stub=function(a){for(var b=new Array(a),c=0;c<a;c++)b[c]=0;return b},m.prototype.mulp=function(a,b,c){var d=2*this.guessLen13b(a.length,b.length),e=this.makeRBT(d),f=this.stub(d),g=new Array(d),h=new Array(d),i=new Array(d),j=new Array(d),k=new Array(d),l=new Array(d),m=c.words;m.length=d,this.convert13b(a.words,a.length,g,d),this.convert13b(b.words,b.length,j,d),this.transform(g,f,h,i,d,e),this.transform(j,f,k,l,d,e);for(var n=0;n<d;n++){var o=h[n]*k[n]-i[n]*l[n];i[n]=h[n]*l[n]+i[n]*k[n],h[n]=o}return this.conjugate(h,i,d),this.transform(h,i,m,f,d,e),this.conjugate(m,f,d),this.normalize13b(m,d),c.negative=a.negative^b.negative,c.length=a.length+b.length,c.strip()},f.prototype.mul=function(a){var b=new f(null);return b.words=new Array(this.length+a.length),this.mulTo(a,b)},f.prototype.mulf=function(a){var b=new f(null);return b.words=new Array(this.length+a.length),l(this,a,b)},f.prototype.imul=function(a){return this.clone().mulTo(a,this)},f.prototype.imuln=function(a){d("number"==typeof a),d(a<67108864);for(var b=0,c=0;c<this.length;c++){var e=(0|this.words[c])*a,f=(67108863&e)+(67108863&b);b>>=26,b+=e/67108864|0,b+=f>>>26,this.words[c]=67108863&f}return 0!==b&&(this.words[c]=b,this.length++),this},f.prototype.muln=function(a){return this.clone().imuln(a)},f.prototype.sqr=function(){return this.mul(this)},f.prototype.isqr=function(){return this.imul(this.clone())},f.prototype.pow=function(a){var b=i(a);if(0===b.length)return new f(1);for(var c=this,d=0;d<b.length&&0===b[d];d++,c=c.sqr());if(++d<b.length)for(var e=c.sqr();d<b.length;d++,e=e.sqr())0!==b[d]&&(c=c.mul(e));return c},f.prototype.iushln=function(a){d("number"==typeof a&&a>=0);var b,c=a%26,e=(a-c)/26,f=67108863>>>26-c<<26-c;if(0!==c){var g=0;for(b=0;b<this.length;b++){var h=this.words[b]&f,i=(0|this.words[b])-h<<c;this.words[b]=i|g,g=h>>>26-c}g&&(this.words[b]=g,this.length++)}if(0!==e){for(b=this.length-1;b>=0;b--)this.words[b+e]=this.words[b];for(b=0;b<e;b++)this.words[b]=0;this.length+=e}return this.strip()},f.prototype.ishln=function(a){return d(0===this.negative),this.iushln(a)},f.prototype.iushrn=function(a,b,c){d("number"==typeof a&&a>=0);var e;e=b?(b-b%26)/26:0;var f=a%26,g=Math.min((a-f)/26,this.length),h=67108863^67108863>>>f<<f,i=c;if(e-=g,e=Math.max(0,e),i){for(var j=0;j<g;j++)i.words[j]=this.words[j];i.length=g}if(0===g);else if(this.length>g)for(this.length-=g,j=0;j<this.length;j++)this.words[j]=this.words[j+g];else this.words[0]=0,this.length=1;var k=0;for(j=this.length-1;j>=0&&(0!==k||j>=e);j--){var l=0|this.words[j];this.words[j]=k<<26-f|l>>>f,k=l&h}return i&&0!==k&&(i.words[i.length++]=k),0===this.length&&(this.words[0]=0,this.length=1),this.strip()},f.prototype.ishrn=function(a,b,c){return d(0===this.negative),this.iushrn(a,b,c)},f.prototype.shln=function(a){return this.clone().ishln(a)},f.prototype.ushln=function(a){return this.clone().iushln(a)},f.prototype.shrn=function(a){return this.clone().ishrn(a)},f.prototype.ushrn=function(a){return this.clone().iushrn(a)},f.prototype.testn=function(a){d("number"==typeof a&&a>=0);var b=a%26,c=(a-b)/26,e=1<<b;if(this.length<=c)return!1;var f=this.words[c];return!!(f&e)},f.prototype.imaskn=function(a){d("number"==typeof a&&a>=0);var b=a%26,c=(a-b)/26;if(d(0===this.negative,"imaskn works only with positive numbers"),this.length<=c)return this;if(0!==b&&c++,this.length=Math.min(c,this.length),0!==b){var e=67108863^67108863>>>b<<b;this.words[this.length-1]&=e}return this.strip()},f.prototype.maskn=function(a){return this.clone().imaskn(a)},f.prototype.iaddn=function(a){return d("number"==typeof a),d(a<67108864),a<0?this.isubn(-a):0!==this.negative?1===this.length&&(0|this.words[0])<a?(this.words[0]=a-(0|this.words[0]),this.negative=0,this):(this.negative=0,this.isubn(a),this.negative=1,this):this._iaddn(a)},f.prototype._iaddn=function(a){this.words[0]+=a;for(var b=0;b<this.length&&this.words[b]>=67108864;b++)this.words[b]-=67108864,b===this.length-1?this.words[b+1]=1:this.words[b+1]++;return this.length=Math.max(this.length,b+1),this},f.prototype.isubn=function(a){if(d("number"==typeof a),d(a<67108864),a<0)return this.iaddn(-a);if(0!==this.negative)return this.negative=0,this.iaddn(a),this.negative=1,this;if(this.words[0]-=a,1===this.length&&this.words[0]<0)this.words[0]=-this.words[0],this.negative=1;else for(var b=0;b<this.length&&this.words[b]<0;b++)this.words[b]+=67108864,this.words[b+1]-=1;return this.strip()},f.prototype.addn=function(a){return this.clone().iaddn(a)},f.prototype.subn=function(a){return this.clone().isubn(a)},f.prototype.iabs=function(){return this.negative=0,this},f.prototype.abs=function(){return this.clone().iabs()},f.prototype._ishlnsubmul=function(a,b,c){var e,f=a.length+c;this._expand(f);var g,h=0;for(e=0;e<a.length;e++){g=(0|this.words[e+c])+h;var i=(0|a.words[e])*b;g-=67108863&i,h=(g>>26)-(i/67108864|0),this.words[e+c]=67108863&g}for(;e<this.length-c;e++)g=(0|this.words[e+c])+h,h=g>>26,this.words[e+c]=67108863&g;if(0===h)return this.strip();for(d(h===-1),h=0,e=0;e<this.length;e++)g=-(0|this.words[e])+h,h=g>>26,this.words[e]=67108863&g;return this.negative=1,this.strip()},f.prototype._wordDiv=function(a,b){var c=this.length-a.length,d=this.clone(),e=a,g=0|e.words[e.length-1],h=this._countBits(g);c=26-h,0!==c&&(e=e.ushln(c),d.iushln(c),g=0|e.words[e.length-1]);var i,j=d.length-e.length;if("mod"!==b){i=new f(null),i.length=j+1,i.words=new Array(i.length);for(var k=0;k<i.length;k++)i.words[k]=0}var l=d.clone()._ishlnsubmul(e,1,j);0===l.negative&&(d=l,i&&(i.words[j]=1));for(var m=j-1;m>=0;m--){var n=67108864*(0|d.words[e.length+m])+(0|d.words[e.length+m-1]);for(n=Math.min(n/g|0,67108863),d._ishlnsubmul(e,n,m);0!==d.negative;)n--,d.negative=0,d._ishlnsubmul(e,1,m),d.isZero()||(d.negative^=1);
+i&&(i.words[m]=n)}return i&&i.strip(),d.strip(),"div"!==b&&0!==c&&d.iushrn(c),{div:i||null,mod:d}},f.prototype.divmod=function(a,b,c){if(d(!a.isZero()),this.isZero())return{div:new f(0),mod:new f(0)};var e,g,h;return 0!==this.negative&&0===a.negative?(h=this.neg().divmod(a,b),"mod"!==b&&(e=h.div.neg()),"div"!==b&&(g=h.mod.neg(),c&&0!==g.negative&&g.iadd(a)),{div:e,mod:g}):0===this.negative&&0!==a.negative?(h=this.divmod(a.neg(),b),"mod"!==b&&(e=h.div.neg()),{div:e,mod:h.mod}):0!==(this.negative&a.negative)?(h=this.neg().divmod(a.neg(),b),"div"!==b&&(g=h.mod.neg(),c&&0!==g.negative&&g.isub(a)),{div:h.div,mod:g}):a.length>this.length||this.cmp(a)<0?{div:new f(0),mod:this}:1===a.length?"div"===b?{div:this.divn(a.words[0]),mod:null}:"mod"===b?{div:null,mod:new f(this.modn(a.words[0]))}:{div:this.divn(a.words[0]),mod:new f(this.modn(a.words[0]))}:this._wordDiv(a,b)},f.prototype.div=function(a){return this.divmod(a,"div",!1).div},f.prototype.mod=function(a){return this.divmod(a,"mod",!1).mod},f.prototype.umod=function(a){return this.divmod(a,"mod",!0).mod},f.prototype.divRound=function(a){var b=this.divmod(a);if(b.mod.isZero())return b.div;var c=0!==b.div.negative?b.mod.isub(a):b.mod,d=a.ushrn(1),e=a.andln(1),f=c.cmp(d);return f<0||1===e&&0===f?b.div:0!==b.div.negative?b.div.isubn(1):b.div.iaddn(1)},f.prototype.modn=function(a){d(a<=67108863);for(var b=(1<<26)%a,c=0,e=this.length-1;e>=0;e--)c=(b*c+(0|this.words[e]))%a;return c},f.prototype.idivn=function(a){d(a<=67108863);for(var b=0,c=this.length-1;c>=0;c--){var e=(0|this.words[c])+67108864*b;this.words[c]=e/a|0,b=e%a}return this.strip()},f.prototype.divn=function(a){return this.clone().idivn(a)},f.prototype.egcd=function(a){d(0===a.negative),d(!a.isZero());var b=this,c=a.clone();b=0!==b.negative?b.umod(a):b.clone();for(var e=new f(1),g=new f(0),h=new f(0),i=new f(1),j=0;b.isEven()&&c.isEven();)b.iushrn(1),c.iushrn(1),++j;for(var k=c.clone(),l=b.clone();!b.isZero();){for(var m=0,n=1;0===(b.words[0]&n)&&m<26;++m,n<<=1);if(m>0)for(b.iushrn(m);m-- >0;)(e.isOdd()||g.isOdd())&&(e.iadd(k),g.isub(l)),e.iushrn(1),g.iushrn(1);for(var o=0,p=1;0===(c.words[0]&p)&&o<26;++o,p<<=1);if(o>0)for(c.iushrn(o);o-- >0;)(h.isOdd()||i.isOdd())&&(h.iadd(k),i.isub(l)),h.iushrn(1),i.iushrn(1);b.cmp(c)>=0?(b.isub(c),e.isub(h),g.isub(i)):(c.isub(b),h.isub(e),i.isub(g))}return{a:h,b:i,gcd:c.iushln(j)}},f.prototype._invmp=function(a){d(0===a.negative),d(!a.isZero());var b=this,c=a.clone();b=0!==b.negative?b.umod(a):b.clone();for(var e=new f(1),g=new f(0),h=c.clone();b.cmpn(1)>0&&c.cmpn(1)>0;){for(var i=0,j=1;0===(b.words[0]&j)&&i<26;++i,j<<=1);if(i>0)for(b.iushrn(i);i-- >0;)e.isOdd()&&e.iadd(h),e.iushrn(1);for(var k=0,l=1;0===(c.words[0]&l)&&k<26;++k,l<<=1);if(k>0)for(c.iushrn(k);k-- >0;)g.isOdd()&&g.iadd(h),g.iushrn(1);b.cmp(c)>=0?(b.isub(c),e.isub(g)):(c.isub(b),g.isub(e))}var m;return m=0===b.cmpn(1)?e:g,m.cmpn(0)<0&&m.iadd(a),m},f.prototype.gcd=function(a){if(this.isZero())return a.abs();if(a.isZero())return this.abs();var b=this.clone(),c=a.clone();b.negative=0,c.negative=0;for(var d=0;b.isEven()&&c.isEven();d++)b.iushrn(1),c.iushrn(1);for(;;){for(;b.isEven();)b.iushrn(1);for(;c.isEven();)c.iushrn(1);var e=b.cmp(c);if(e<0){var f=b;b=c,c=f}else if(0===e||0===c.cmpn(1))break;b.isub(c)}return c.iushln(d)},f.prototype.invm=function(a){return this.egcd(a).a.umod(a)},f.prototype.isEven=function(){return 0===(1&this.words[0])},f.prototype.isOdd=function(){return 1===(1&this.words[0])},f.prototype.andln=function(a){return this.words[0]&a},f.prototype.bincn=function(a){d("number"==typeof a);var b=a%26,c=(a-b)/26,e=1<<b;if(this.length<=c)return this._expand(c+1),this.words[c]|=e,this;for(var f=e,g=c;0!==f&&g<this.length;g++){var h=0|this.words[g];h+=f,f=h>>>26,h&=67108863,this.words[g]=h}return 0!==f&&(this.words[g]=f,this.length++),this},f.prototype.isZero=function(){return 1===this.length&&0===this.words[0]},f.prototype.cmpn=function(a){var b=a<0;if(0!==this.negative&&!b)return-1;if(0===this.negative&&b)return 1;this.strip();var c;if(this.length>1)c=1;else{b&&(a=-a),d(a<=67108863,"Number is too big");var e=0|this.words[0];c=e===a?0:e<a?-1:1}return 0!==this.negative?0|-c:c},f.prototype.cmp=function(a){if(0!==this.negative&&0===a.negative)return-1;if(0===this.negative&&0!==a.negative)return 1;var b=this.ucmp(a);return 0!==this.negative?0|-b:b},f.prototype.ucmp=function(a){if(this.length>a.length)return 1;if(this.length<a.length)return-1;for(var b=0,c=this.length-1;c>=0;c--){var d=0|this.words[c],e=0|a.words[c];if(d!==e){d<e?b=-1:d>e&&(b=1);break}}return b},f.prototype.gtn=function(a){return 1===this.cmpn(a)},f.prototype.gt=function(a){return 1===this.cmp(a)},f.prototype.gten=function(a){return this.cmpn(a)>=0},f.prototype.gte=function(a){return this.cmp(a)>=0},f.prototype.ltn=function(a){return this.cmpn(a)===-1},f.prototype.lt=function(a){return this.cmp(a)===-1},f.prototype.lten=function(a){return this.cmpn(a)<=0},f.prototype.lte=function(a){return this.cmp(a)<=0},f.prototype.eqn=function(a){return 0===this.cmpn(a)},f.prototype.eq=function(a){return 0===this.cmp(a)},f.red=function(a){return new s(a)},f.prototype.toRed=function(a){return d(!this.red,"Already a number in reduction context"),d(0===this.negative,"red works only with positives"),a.convertTo(this)._forceRed(a)},f.prototype.fromRed=function(){return d(this.red,"fromRed works only with numbers in reduction context"),this.red.convertFrom(this)},f.prototype._forceRed=function(a){return this.red=a,this},f.prototype.forceRed=function(a){return d(!this.red,"Already a number in reduction context"),this._forceRed(a)},f.prototype.redAdd=function(a){return d(this.red,"redAdd works only with red numbers"),this.red.add(this,a)},f.prototype.redIAdd=function(a){return d(this.red,"redIAdd works only with red numbers"),this.red.iadd(this,a)},f.prototype.redSub=function(a){return d(this.red,"redSub works only with red numbers"),this.red.sub(this,a)},f.prototype.redISub=function(a){return d(this.red,"redISub works only with red numbers"),this.red.isub(this,a)},f.prototype.redShl=function(a){return d(this.red,"redShl works only with red numbers"),this.red.shl(this,a)},f.prototype.redMul=function(a){return d(this.red,"redMul works only with red numbers"),this.red._verify2(this,a),this.red.mul(this,a)},f.prototype.redIMul=function(a){return d(this.red,"redMul works only with red numbers"),this.red._verify2(this,a),this.red.imul(this,a)},f.prototype.redSqr=function(){return d(this.red,"redSqr works only with red numbers"),this.red._verify1(this),this.red.sqr(this)},f.prototype.redISqr=function(){return d(this.red,"redISqr works only with red numbers"),this.red._verify1(this),this.red.isqr(this)},f.prototype.redSqrt=function(){return d(this.red,"redSqrt works only with red numbers"),this.red._verify1(this),this.red.sqrt(this)},f.prototype.redInvm=function(){return d(this.red,"redInvm works only with red numbers"),this.red._verify1(this),this.red.invm(this)},f.prototype.redNeg=function(){return d(this.red,"redNeg works only with red numbers"),this.red._verify1(this),this.red.neg(this)},f.prototype.redPow=function(a){return d(this.red&&!a.red,"redPow(normalNum)"),this.red._verify1(this),this.red.pow(this,a)};var A={k256:null,p224:null,p192:null,p25519:null};n.prototype._tmp=function(){var a=new f(null);return a.words=new Array(Math.ceil(this.n/13)),a},n.prototype.ireduce=function(a){var b,c=a;do this.split(c,this.tmp),c=this.imulK(c),c=c.iadd(this.tmp),b=c.bitLength();while(b>this.n);var d=b<this.n?-1:c.ucmp(this.p);return 0===d?(c.words[0]=0,c.length=1):d>0?c.isub(this.p):c.strip(),c},n.prototype.split=function(a,b){a.iushrn(this.n,0,b)},n.prototype.imulK=function(a){return a.imul(this.k)},e(o,n),o.prototype.split=function(a,b){for(var c=4194303,d=Math.min(a.length,9),e=0;e<d;e++)b.words[e]=a.words[e];if(b.length=d,a.length<=9)return a.words[0]=0,void(a.length=1);var f=a.words[9];for(b.words[b.length++]=f&c,e=10;e<a.length;e++){var g=0|a.words[e];a.words[e-10]=(g&c)<<4|f>>>22,f=g}f>>>=22,a.words[e-10]=f,0===f&&a.length>10?a.length-=10:a.length-=9},o.prototype.imulK=function(a){a.words[a.length]=0,a.words[a.length+1]=0,a.length+=2;for(var b=0,c=0;c<a.length;c++){var d=0|a.words[c];b+=977*d,a.words[c]=67108863&b,b=64*d+(b/67108864|0)}return 0===a.words[a.length-1]&&(a.length--,0===a.words[a.length-1]&&a.length--),a},e(p,n),e(q,n),e(r,n),r.prototype.imulK=function(a){for(var b=0,c=0;c<a.length;c++){var d=19*(0|a.words[c])+b,e=67108863&d;d>>>=26,a.words[c]=e,b=d}return 0!==b&&(a.words[a.length++]=b),a},f._prime=function B(a){if(A[a])return A[a];var B;if("k256"===a)B=new o;else if("p224"===a)B=new p;else if("p192"===a)B=new q;else{if("p25519"!==a)throw new Error("Unknown prime "+a);B=new r}return A[a]=B,B},s.prototype._verify1=function(a){d(0===a.negative,"red works only with positives"),d(a.red,"red works only with red numbers")},s.prototype._verify2=function(a,b){d(0===(a.negative|b.negative),"red works only with positives"),d(a.red&&a.red===b.red,"red works only with red numbers")},s.prototype.imod=function(a){return this.prime?this.prime.ireduce(a)._forceRed(this):a.umod(this.m)._forceRed(this)},s.prototype.neg=function(a){return a.isZero()?a.clone():this.m.sub(a)._forceRed(this)},s.prototype.add=function(a,b){this._verify2(a,b);var c=a.add(b);return c.cmp(this.m)>=0&&c.isub(this.m),c._forceRed(this)},s.prototype.iadd=function(a,b){this._verify2(a,b);var c=a.iadd(b);return c.cmp(this.m)>=0&&c.isub(this.m),c},s.prototype.sub=function(a,b){this._verify2(a,b);var c=a.sub(b);return c.cmpn(0)<0&&c.iadd(this.m),c._forceRed(this)},s.prototype.isub=function(a,b){this._verify2(a,b);var c=a.isub(b);return c.cmpn(0)<0&&c.iadd(this.m),c},s.prototype.shl=function(a,b){return this._verify1(a),this.imod(a.ushln(b))},s.prototype.imul=function(a,b){return this._verify2(a,b),this.imod(a.imul(b))},s.prototype.mul=function(a,b){return this._verify2(a,b),this.imod(a.mul(b))},s.prototype.isqr=function(a){return this.imul(a,a.clone())},s.prototype.sqr=function(a){return this.mul(a,a)},s.prototype.sqrt=function(a){if(a.isZero())return a.clone();var b=this.m.andln(3);if(d(b%2===1),3===b){var c=this.m.add(new f(1)).iushrn(2);return this.pow(a,c)}for(var e=this.m.subn(1),g=0;!e.isZero()&&0===e.andln(1);)g++,e.iushrn(1);d(!e.isZero());var h=new f(1).toRed(this),i=h.redNeg(),j=this.m.subn(1).iushrn(1),k=this.m.bitLength();for(k=new f(2*k*k).toRed(this);0!==this.pow(k,j).cmp(i);)k.redIAdd(i);for(var l=this.pow(k,e),m=this.pow(a,e.addn(1).iushrn(1)),n=this.pow(a,e),o=g;0!==n.cmp(h);){for(var p=n,q=0;0!==p.cmp(h);q++)p=p.redSqr();d(q<o);var r=this.pow(l,new f(1).iushln(o-q-1));m=m.redMul(r),l=r.redSqr(),n=n.redMul(l),o=q}return m},s.prototype.invm=function(a){var b=a._invmp(this.m);return 0!==b.negative?(b.negative=0,this.imod(b).redNeg()):this.imod(b)},s.prototype.pow=function(a,b){if(b.isZero())return new f(1);if(0===b.cmpn(1))return a.clone();var c=4,d=new Array(1<<c);d[0]=new f(1).toRed(this),d[1]=a;for(var e=2;e<d.length;e++)d[e]=this.mul(d[e-1],a);var g=d[0],h=0,i=0,j=b.bitLength()%26;for(0===j&&(j=26),e=b.length-1;e>=0;e--){for(var k=b.words[e],l=j-1;l>=0;l--){var m=k>>l&1;g!==d[0]&&(g=this.sqr(g)),0!==m||0!==h?(h<<=1,h|=m,i++,(i===c||0===e&&0===l)&&(g=this.mul(g,d[h]),i=0,h=0)):i=0}j=26}return g},s.prototype.convertTo=function(a){var b=a.umod(this.m);return b===a?b.clone():b},s.prototype.convertFrom=function(a){var b=a.clone();return b.red=null,b},f.mont=function(a){return new t(a)},e(t,s),t.prototype.convertTo=function(a){return this.imod(a.ushln(this.shift))},t.prototype.convertFrom=function(a){var b=this.imod(a.mul(this.rinv));return b.red=null,b},t.prototype.imul=function(a,b){if(a.isZero()||b.isZero())return a.words[0]=0,a.length=1,a;var c=a.imul(b),d=c.maskn(this.shift).mul(this.minv).imaskn(this.shift).mul(this.m),e=c.isub(d).iushrn(this.shift),f=e;return e.cmp(this.m)>=0?f=e.isub(this.m):e.cmpn(0)<0&&(f=e.iadd(this.m)),f._forceRed(this)},t.prototype.mul=function(a,b){if(a.isZero()||b.isZero())return new f(0)._forceRed(this);var c=a.mul(b),d=c.maskn(this.shift).mul(this.minv).imaskn(this.shift).mul(this.m),e=c.isub(d).iushrn(this.shift),g=e;return e.cmp(this.m)>=0?g=e.isub(this.m):e.cmpn(0)<0&&(g=e.iadd(this.m)),g._forceRed(this)},t.prototype.invm=function(a){var b=this.imod(a._invmp(this.m).mul(this.r2));return b._forceRed(this)}}("undefined"==typeof b||b,this)},{}],17:[function(a,b,c){function d(a){this.rand=a}var e;if(b.exports=function(a){return e||(e=new d(null)),e.generate(a)},b.exports.Rand=d,d.prototype.generate=function(a){return this._rand(a)},"object"==typeof self)self.crypto&&self.crypto.getRandomValues?d.prototype._rand=function(a){var b=new Uint8Array(a);return self.crypto.getRandomValues(b),b}:self.msCrypto&&self.msCrypto.getRandomValues?d.prototype._rand=function(a){var b=new Uint8Array(a);return self.msCrypto.getRandomValues(b),b}:d.prototype._rand=function(){throw new Error("Not implemented yet")};else try{var f=a("crypto");d.prototype._rand=function(a){return f.randomBytes(a)}}catch(g){d.prototype._rand=function(a){for(var b=new Uint8Array(a),c=0;c<b.length;c++)b[c]=this.rand.getByte();return b}}},{crypto:18}],18:[function(a,b,c){},{}],19:[function(a,b,c){var d=c;d.utils=a("./hash/utils"),d.common=a("./hash/common"),d.sha=a("./hash/sha"),d.ripemd=a("./hash/ripemd"),d.hmac=a("./hash/hmac"),d.sha1=d.sha.sha1,d.sha256=d.sha.sha256,d.sha224=d.sha.sha224,d.sha384=d.sha.sha384,d.sha512=d.sha.sha512,d.ripemd160=d.ripemd.ripemd160},{"./hash/common":20,"./hash/hmac":21,"./hash/ripemd":22,"./hash/sha":23,"./hash/utils":24}],20:[function(a,b,c){function d(){this.pending=null,this.pendingTotal=0,this.blockSize=this.constructor.blockSize,this.outSize=this.constructor.outSize,this.hmacStrength=this.constructor.hmacStrength,this.padLength=this.constructor.padLength/8,this.endian="big",this._delta8=this.blockSize/8,this._delta32=this.blockSize/32}var e=a("../hash"),f=e.utils,g=f.assert;c.BlockHash=d,d.prototype.update=function(a,b){if(a=f.toArray(a,b),this.pending?this.pending=this.pending.concat(a):this.pending=a,this.pendingTotal+=a.length,this.pending.length>=this._delta8){a=this.pending;var c=a.length%this._delta8;this.pending=a.slice(a.length-c,a.length),0===this.pending.length&&(this.pending=null),a=f.join32(a,0,a.length-c,this.endian);for(var d=0;d<a.length;d+=this._delta32)this._update(a,d,d+this._delta32)}return this},d.prototype.digest=function(a){return this.update(this._pad()),g(null===this.pending),this._digest(a)},d.prototype._pad=function(){var a=this.pendingTotal,b=this._delta8,c=b-(a+this.padLength)%b,d=new Array(c+this.padLength);d[0]=128;for(var e=1;e<c;e++)d[e]=0;if(a<<=3,"big"===this.endian){for(var f=8;f<this.padLength;f++)d[e++]=0;d[e++]=0,d[e++]=0,d[e++]=0,d[e++]=0,d[e++]=a>>>24&255,d[e++]=a>>>16&255,d[e++]=a>>>8&255,d[e++]=255&a}else{d[e++]=255&a,d[e++]=a>>>8&255,d[e++]=a>>>16&255,d[e++]=a>>>24&255,d[e++]=0,d[e++]=0,d[e++]=0,d[e++]=0;for(var f=8;f<this.padLength;f++)d[e++]=0}return d}},{"../hash":19}],21:[function(a,b,c){function d(a,b,c){return this instanceof d?(this.Hash=a,this.blockSize=a.blockSize/8,this.outSize=a.outSize/8,this.inner=null,this.outer=null,void this._init(f.toArray(b,c))):new d(a,b,c)}var e=a("../hash"),f=e.utils,g=f.assert;b.exports=d,d.prototype._init=function(a){a.length>this.blockSize&&(a=(new this.Hash).update(a).digest()),g(a.length<=this.blockSize);for(var b=a.length;b<this.blockSize;b++)a.push(0);for(var b=0;b<a.length;b++)a[b]^=54;this.inner=(new this.Hash).update(a);for(var b=0;b<a.length;b++)a[b]^=106;this.outer=(new this.Hash).update(a)},d.prototype.update=function(a,b){return this.inner.update(a,b),this},d.prototype.digest=function(a){return this.outer.update(this.inner.digest()),this.outer.digest(a)}},{"../hash":19}],22:[function(a,b,c){function d(){return this instanceof d?(n.call(this),this.h=[1732584193,4023233417,2562383102,271733878,3285377520],void(this.endian="little")):new d}function e(a,b,c,d){return a<=15?b^c^d:a<=31?b&c|~b&d:a<=47?(b|~c)^d:a<=63?b&d|c&~d:b^(c|~d)}function f(a){return a<=15?0:a<=31?1518500249:a<=47?1859775393:a<=63?2400959708:2840853838}function g(a){return a<=15?1352829926:a<=31?1548603684:a<=47?1836072691:a<=63?2053994217:0}var h=a("../hash"),i=h.utils,j=i.rotl32,k=i.sum32,l=i.sum32_3,m=i.sum32_4,n=h.common.BlockHash;i.inherits(d,n),c.ripemd160=d,d.blockSize=512,d.outSize=160,d.hmacStrength=192,d.padLength=64,d.prototype._update=function(a,b){for(var c=this.h[0],d=this.h[1],h=this.h[2],i=this.h[3],n=this.h[4],s=c,t=d,u=h,v=i,w=n,x=0;x<80;x++){var y=k(j(m(c,e(x,d,h,i),a[o[x]+b],f(x)),q[x]),n);c=n,n=i,i=j(h,10),h=d,d=y,y=k(j(m(s,e(79-x,t,u,v),a[p[x]+b],g(x)),r[x]),w),s=w,w=v,v=j(u,10),u=t,t=y}y=l(this.h[1],h,v),this.h[1]=l(this.h[2],i,w),this.h[2]=l(this.h[3],n,s),this.h[3]=l(this.h[4],c,t),this.h[4]=l(this.h[0],d,u),this.h[0]=y},d.prototype._digest=function(a){return"hex"===a?i.toHex32(this.h,"little"):i.split32(this.h,"little")};var o=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,7,4,13,1,10,6,15,3,12,0,9,5,2,14,11,8,3,10,14,4,9,15,8,1,2,7,0,6,13,11,5,12,1,9,11,10,0,8,12,4,13,3,7,15,14,5,6,2,4,0,5,9,7,12,2,10,14,1,3,8,11,6,15,13],p=[5,14,7,0,9,2,11,4,13,6,15,8,1,10,3,12,6,11,3,7,0,13,5,10,14,15,8,12,4,9,1,2,15,5,1,3,7,14,6,9,11,8,12,2,10,0,4,13,8,6,4,1,3,11,15,0,5,12,2,13,9,7,10,14,12,15,10,4,1,5,8,7,6,2,13,14,0,3,9,11],q=[11,14,15,12,5,8,7,9,11,13,14,15,6,7,9,8,7,6,8,13,11,9,7,15,7,12,15,9,11,7,13,12,11,13,6,7,14,9,13,15,14,8,13,6,5,12,7,5,11,12,14,15,14,15,9,8,9,14,5,6,8,6,5,12,9,15,5,11,6,8,13,12,5,12,13,14,11,8,5,6],r=[8,9,9,11,13,15,15,5,7,7,8,11,14,14,12,6,9,13,15,7,12,8,9,11,7,7,12,7,6,15,13,11,9,7,15,11,8,6,6,14,12,13,5,14,13,13,7,5,15,5,8,11,14,14,6,14,6,9,12,9,12,5,15,8,8,5,12,9,12,5,14,6,8,13,6,5,15,13,11,11]},{"../hash":19}],23:[function(a,b,c){function d(){return this instanceof d?(V.call(this),this.h=[1779033703,3144134277,1013904242,2773480762,1359893119,2600822924,528734635,1541459225],this.k=W,void(this.W=new Array(64))):new d}function e(){return this instanceof e?(d.call(this),void(this.h=[3238371032,914150663,812702999,4144912697,4290775857,1750603025,1694076839,3204075428])):new e}function f(){return this instanceof f?(V.call(this),this.h=[1779033703,4089235720,3144134277,2227873595,1013904242,4271175723,2773480762,1595750129,1359893119,2917565137,2600822924,725511199,528734635,4215389547,1541459225,327033209],this.k=X,void(this.W=new Array(160))):new f}function g(){return this instanceof g?(f.call(this),void(this.h=[3418070365,3238371032,1654270250,914150663,2438529370,812702999,355462360,4144912697,1731405415,4290775857,2394180231,1750603025,3675008525,1694076839,1203062813,3204075428])):new g}function h(){return this instanceof h?(V.call(this),this.h=[1732584193,4023233417,2562383102,271733878,3285377520],void(this.W=new Array(80))):new h}function i(a,b,c){return a&b^~a&c}function j(a,b,c){return a&b^a&c^b&c}function k(a,b,c){return a^b^c}function l(a){return F(a,2)^F(a,13)^F(a,22)}function m(a){return F(a,6)^F(a,11)^F(a,25)}function n(a){return F(a,7)^F(a,18)^a>>>3}function o(a){return F(a,17)^F(a,19)^a>>>10}function p(a,b,c,d){return 0===a?i(b,c,d):1===a||3===a?k(b,c,d):2===a?j(b,c,d):void 0}function q(a,b,c,d,e,f){var g=a&c^~a&e;return g<0&&(g+=4294967296),g}function r(a,b,c,d,e,f){var g=b&d^~b&f;return g<0&&(g+=4294967296),g}function s(a,b,c,d,e,f){var g=a&c^a&e^c&e;return g<0&&(g+=4294967296),g}function t(a,b,c,d,e,f){var g=b&d^b&f^d&f;return g<0&&(g+=4294967296),g}function u(a,b){var c=K(a,b,28),d=K(b,a,2),e=K(b,a,7),f=c^d^e;return f<0&&(f+=4294967296),f}function v(a,b){var c=L(a,b,28),d=L(b,a,2),e=L(b,a,7),f=c^d^e;return f<0&&(f+=4294967296),f}function w(a,b){var c=K(a,b,14),d=K(a,b,18),e=K(b,a,9),f=c^d^e;return f<0&&(f+=4294967296),f}function x(a,b){var c=L(a,b,14),d=L(a,b,18),e=L(b,a,9),f=c^d^e;return f<0&&(f+=4294967296),f}function y(a,b){var c=K(a,b,1),d=K(a,b,8),e=M(a,b,7),f=c^d^e;return f<0&&(f+=4294967296),f}function z(a,b){var c=L(a,b,1),d=L(a,b,8),e=N(a,b,7),f=c^d^e;return f<0&&(f+=4294967296),f}function A(a,b){var c=K(a,b,19),d=K(b,a,29),e=M(a,b,6),f=c^d^e;return f<0&&(f+=4294967296),f}function B(a,b){var c=L(a,b,19),d=L(b,a,29),e=N(a,b,6),f=c^d^e;return f<0&&(f+=4294967296),f}var C=a("../hash"),D=C.utils,E=D.assert,F=D.rotr32,G=D.rotl32,H=D.sum32,I=D.sum32_4,J=D.sum32_5,K=D.rotr64_hi,L=D.rotr64_lo,M=D.shr64_hi,N=D.shr64_lo,O=D.sum64,P=D.sum64_hi,Q=D.sum64_lo,R=D.sum64_4_hi,S=D.sum64_4_lo,T=D.sum64_5_hi,U=D.sum64_5_lo,V=C.common.BlockHash,W=[1116352408,1899447441,3049323471,3921009573,961987163,1508970993,2453635748,2870763221,3624381080,310598401,607225278,1426881987,1925078388,2162078206,2614888103,3248222580,3835390401,4022224774,264347078,604807628,770255983,1249150122,1555081692,1996064986,2554220882,2821834349,2952996808,3210313671,3336571891,3584528711,113926993,338241895,666307205,773529912,1294757372,1396182291,1695183700,1986661051,2177026350,2456956037,2730485921,2820302411,3259730800,3345764771,3516065817,3600352804,4094571909,275423344,430227734,506948616,659060556,883997877,958139571,1322822218,1537002063,1747873779,1955562222,2024104815,2227730452,2361852424,2428436474,2756734187,3204031479,3329325298],X=[1116352408,3609767458,1899447441,602891725,3049323471,3964484399,3921009573,2173295548,961987163,4081628472,1508970993,3053834265,2453635748,2937671579,2870763221,3664609560,3624381080,2734883394,310598401,1164996542,607225278,1323610764,1426881987,3590304994,1925078388,4068182383,2162078206,991336113,2614888103,633803317,3248222580,3479774868,3835390401,2666613458,4022224774,944711139,264347078,2341262773,604807628,2007800933,770255983,1495990901,1249150122,1856431235,1555081692,3175218132,1996064986,2198950837,2554220882,3999719339,2821834349,766784016,2952996808,2566594879,3210313671,3203337956,3336571891,1034457026,3584528711,2466948901,113926993,3758326383,338241895,168717936,666307205,1188179964,773529912,1546045734,1294757372,1522805485,1396182291,2643833823,1695183700,2343527390,1986661051,1014477480,2177026350,1206759142,2456956037,344077627,2730485921,1290863460,2820302411,3158454273,3259730800,3505952657,3345764771,106217008,3516065817,3606008344,3600352804,1432725776,4094571909,1467031594,275423344,851169720,430227734,3100823752,506948616,1363258195,659060556,3750685593,883997877,3785050280,958139571,3318307427,1322822218,3812723403,1537002063,2003034995,1747873779,3602036899,1955562222,1575990012,2024104815,1125592928,2227730452,2716904306,2361852424,442776044,2428436474,593698344,2756734187,3733110249,3204031479,2999351573,3329325298,3815920427,3391569614,3928383900,3515267271,566280711,3940187606,3454069534,4118630271,4000239992,116418474,1914138554,174292421,2731055270,289380356,3203993006,460393269,320620315,685471733,587496836,852142971,1086792851,1017036298,365543100,1126000580,2618297676,1288033470,3409855158,1501505948,4234509866,1607167915,987167468,1816402316,1246189591],Y=[1518500249,1859775393,2400959708,3395469782];D.inherits(d,V),c.sha256=d,d.blockSize=512,d.outSize=256,d.hmacStrength=192,d.padLength=64,d.prototype._update=function(a,b){for(var c=this.W,d=0;d<16;d++)c[d]=a[b+d];for(;d<c.length;d++)c[d]=I(o(c[d-2]),c[d-7],n(c[d-15]),c[d-16]);var e=this.h[0],f=this.h[1],g=this.h[2],h=this.h[3],k=this.h[4],p=this.h[5],q=this.h[6],r=this.h[7];E(this.k.length===c.length);for(var d=0;d<c.length;d++){var s=J(r,m(k),i(k,p,q),this.k[d],c[d]),t=H(l(e),j(e,f,g));r=q,q=p,p=k,k=H(h,s),h=g,g=f,f=e,e=H(s,t)}this.h[0]=H(this.h[0],e),this.h[1]=H(this.h[1],f),this.h[2]=H(this.h[2],g),this.h[3]=H(this.h[3],h),this.h[4]=H(this.h[4],k),this.h[5]=H(this.h[5],p),this.h[6]=H(this.h[6],q),this.h[7]=H(this.h[7],r)},d.prototype._digest=function(a){return"hex"===a?D.toHex32(this.h,"big"):D.split32(this.h,"big")},D.inherits(e,d),c.sha224=e,e.blockSize=512,e.outSize=224,e.hmacStrength=192,e.padLength=64,e.prototype._digest=function(a){return"hex"===a?D.toHex32(this.h.slice(0,7),"big"):D.split32(this.h.slice(0,7),"big")},D.inherits(f,V),c.sha512=f,f.blockSize=1024,f.outSize=512,f.hmacStrength=192,f.padLength=128,f.prototype._prepareBlock=function(a,b){for(var c=this.W,d=0;d<32;d++)c[d]=a[b+d];for(;d<c.length;d+=2){var e=A(c[d-4],c[d-3]),f=B(c[d-4],c[d-3]),g=c[d-14],h=c[d-13],i=y(c[d-30],c[d-29]),j=z(c[d-30],c[d-29]),k=c[d-32],l=c[d-31];c[d]=R(e,f,g,h,i,j,k,l),c[d+1]=S(e,f,g,h,i,j,k,l)}},f.prototype._update=function(a,b){this._prepareBlock(a,b);var c=this.W,d=this.h[0],e=this.h[1],f=this.h[2],g=this.h[3],h=this.h[4],i=this.h[5],j=this.h[6],k=this.h[7],l=this.h[8],m=this.h[9],n=this.h[10],o=this.h[11],p=this.h[12],y=this.h[13],z=this.h[14],A=this.h[15];E(this.k.length===c.length);for(var B=0;B<c.length;B+=2){var C=z,D=A,F=w(l,m),G=x(l,m),H=q(l,m,n,o,p,y),I=r(l,m,n,o,p,y),J=this.k[B],K=this.k[B+1],L=c[B],M=c[B+1],N=T(C,D,F,G,H,I,J,K,L,M),R=U(C,D,F,G,H,I,J,K,L,M),C=u(d,e),D=v(d,e),F=s(d,e,f,g,h,i),G=t(d,e,f,g,h,i),S=P(C,D,F,G),V=Q(C,D,F,G);z=p,A=y,p=n,y=o,n=l,o=m,l=P(j,k,N,R),m=Q(k,k,N,R),j=h,k=i,h=f,i=g,f=d,g=e,d=P(N,R,S,V),e=Q(N,R,S,V)}O(this.h,0,d,e),O(this.h,2,f,g),O(this.h,4,h,i),O(this.h,6,j,k),O(this.h,8,l,m),O(this.h,10,n,o),O(this.h,12,p,y),O(this.h,14,z,A)},f.prototype._digest=function(a){return"hex"===a?D.toHex32(this.h,"big"):D.split32(this.h,"big")},D.inherits(g,f),c.sha384=g,g.blockSize=1024,g.outSize=384,g.hmacStrength=192,g.padLength=128,g.prototype._digest=function(a){return"hex"===a?D.toHex32(this.h.slice(0,12),"big"):D.split32(this.h.slice(0,12),"big")},D.inherits(h,V),c.sha1=h,h.blockSize=512,h.outSize=160,h.hmacStrength=80,h.padLength=64,h.prototype._update=function(a,b){for(var c=this.W,d=0;d<16;d++)c[d]=a[b+d];for(;d<c.length;d++)c[d]=G(c[d-3]^c[d-8]^c[d-14]^c[d-16],1);for(var e=this.h[0],f=this.h[1],g=this.h[2],h=this.h[3],i=this.h[4],d=0;d<c.length;d++){var j=~~(d/20),k=J(G(e,5),p(j,f,g,h),i,c[d],Y[j]);i=h,h=g,g=G(f,30),f=e,e=k}this.h[0]=H(this.h[0],e),this.h[1]=H(this.h[1],f),this.h[2]=H(this.h[2],g),this.h[3]=H(this.h[3],h),this.h[4]=H(this.h[4],i)},h.prototype._digest=function(a){return"hex"===a?D.toHex32(this.h,"big"):D.split32(this.h,"big")}},{"../hash":19}],24:[function(a,b,c){function d(a,b){if(Array.isArray(a))return a.slice();if(!a)return[];var c=[];if("string"==typeof a)if(b){if("hex"===b){a=a.replace(/[^a-z0-9]+/gi,""),a.length%2!==0&&(a="0"+a);for(var d=0;d<a.length;d+=2)c.push(parseInt(a[d]+a[d+1],16))}}else for(var d=0;d<a.length;d++){var e=a.charCodeAt(d),f=e>>8,g=255&e;f?c.push(f,g):c.push(g)}else for(var d=0;d<a.length;d++)c[d]=0|a[d];return c}function e(a){for(var b="",c=0;c<a.length;c++)b+=h(a[c].toString(16));return b}function f(a){var b=a>>>24|a>>>8&65280|a<<8&16711680|(255&a)<<24;return b>>>0}function g(a,b){for(var c="",d=0;d<a.length;d++){var e=a[d];"little"===b&&(e=f(e)),c+=i(e.toString(16))}return c}function h(a){return 1===a.length?"0"+a:a}function i(a){return 7===a.length?"0"+a:6===a.length?"00"+a:5===a.length?"000"+a:4===a.length?"0000"+a:3===a.length?"00000"+a:2===a.length?"000000"+a:1===a.length?"0000000"+a:a}function j(a,b,c,d){var e=c-b;r(e%4===0);for(var f=new Array(e/4),g=0,h=b;g<f.length;g++,h+=4){var i;i="big"===d?a[h]<<24|a[h+1]<<16|a[h+2]<<8|a[h+3]:a[h+3]<<24|a[h+2]<<16|a[h+1]<<8|a[h],f[g]=i>>>0}return f}function k(a,b){for(var c=new Array(4*a.length),d=0,e=0;d<a.length;d++,e+=4){var f=a[d];"big"===b?(c[e]=f>>>24,c[e+1]=f>>>16&255,c[e+2]=f>>>8&255,c[e+3]=255&f):(c[e+3]=f>>>24,c[e+2]=f>>>16&255,c[e+1]=f>>>8&255,c[e]=255&f)}return c}function l(a,b){return a>>>b|a<<32-b}function m(a,b){return a<<b|a>>>32-b}function n(a,b){return a+b>>>0}function o(a,b,c){return a+b+c>>>0}function p(a,b,c,d){return a+b+c+d>>>0}function q(a,b,c,d,e){return a+b+c+d+e>>>0}function r(a,b){if(!a)throw new Error(b||"Assertion failed")}function s(a,b,c,d){var e=a[b],f=a[b+1],g=d+f>>>0,h=(g<d?1:0)+c+e;a[b]=h>>>0,a[b+1]=g}function t(a,b,c,d){var e=b+d>>>0,f=(e<b?1:0)+a+c;return f>>>0}function u(a,b,c,d){var e=b+d;return e>>>0}function v(a,b,c,d,e,f,g,h){var i=0,j=b;j=j+d>>>0,i+=j<b?1:0,j=j+f>>>0,i+=j<f?1:0,j=j+h>>>0,i+=j<h?1:0;var k=a+c+e+g+i;return k>>>0}function w(a,b,c,d,e,f,g,h){var i=b+d+f+h;return i>>>0}function x(a,b,c,d,e,f,g,h,i,j){var k=0,l=b;l=l+d>>>0,k+=l<b?1:0,l=l+f>>>0,k+=l<f?1:0,l=l+h>>>0,k+=l<h?1:0,l=l+j>>>0,k+=l<j?1:0;var m=a+c+e+g+i+k;return m>>>0}function y(a,b,c,d,e,f,g,h,i,j){var k=b+d+f+h+j;return k>>>0}function z(a,b,c){var d=b<<32-c|a>>>c;return d>>>0}function A(a,b,c){var d=a<<32-c|b>>>c;return d>>>0}function B(a,b,c){return a>>>c}function C(a,b,c){var d=a<<32-c|b>>>c;return d>>>0}var D=c,E=a("inherits");D.toArray=d,D.toHex=e,D.htonl=f,D.toHex32=g,D.zero2=h,D.zero8=i,D.join32=j,D.split32=k,D.rotr32=l,D.rotl32=m,D.sum32=n,D.sum32_3=o,D.sum32_4=p,D.sum32_5=q,D.assert=r,D.inherits=E,c.sum64=s,c.sum64_hi=t,c.sum64_lo=u,c.sum64_4_hi=v,c.sum64_4_lo=w,c.sum64_5_hi=x,c.sum64_5_lo=y,c.rotr64_hi=z,c.rotr64_lo=A,c.shr64_hi=B,c.shr64_lo=C},{inherits:27}],25:[function(a,b,c){"use strict";function d(a){if(!(this instanceof d))return new d(a);this.hash=a.hash,this.predResist=!!a.predResist,this.outLen=this.hash.outSize,this.minEntropy=a.minEntropy||this.hash.hmacStrength,this.reseed=null,this.reseedInterval=null,this.K=null,this.V=null;var b=f.toArray(a.entropy,a.entropyEnc||"hex"),c=f.toArray(a.nonce,a.nonceEnc||"hex"),e=f.toArray(a.pers,a.persEnc||"hex");g(b.length>=this.minEntropy/8,"Not enough entropy. Minimum is: "+this.minEntropy+" bits"),this._init(b,c,e)}var e=a("hash.js"),f=a("minimalistic-crypto-utils"),g=a("minimalistic-assert");b.exports=d,d.prototype._init=function(a,b,c){var d=a.concat(b).concat(c);this.K=new Array(this.outLen/8),this.V=new Array(this.outLen/8);for(var e=0;e<this.V.length;e++)this.K[e]=0,this.V[e]=1;this._update(d),this.reseed=1,this.reseedInterval=281474976710656},d.prototype._hmac=function(){return new e.hmac(this.hash,this.K)},d.prototype._update=function(a){var b=this._hmac().update(this.V).update([0]);a&&(b=b.update(a)),this.K=b.digest(),this.V=this._hmac().update(this.V).digest(),a&&(this.K=this._hmac().update(this.V).update([1]).update(a).digest(),this.V=this._hmac().update(this.V).digest())},d.prototype.reseed=function(a,b,c,d){"string"!=typeof b&&(d=c,c=b,b=null),a=f.toArray(a,b),c=f.toArray(c,d),g(a.length>=this.minEntropy/8,"Not enough entropy. Minimum is: "+this.minEntropy+" bits"),this._update(a.concat(c||[])),this.reseed=1},d.prototype.generate=function(a,b,c,d){if(this.reseed>this.reseedInterval)throw new Error("Reseed is required");"string"!=typeof b&&(d=c,c=b,b=null),c&&(c=f.toArray(c,d||"hex"),this._update(c));for(var e=[];e.length<a;)this.V=this._hmac().update(this.V).digest(),e=e.concat(this.V);var g=e.slice(0,a);return this._update(c),this.reseed++,f.encode(g,b)}},{"hash.js":19,"minimalistic-assert":28,"minimalistic-crypto-utils":26}],26:[function(a,b,c){"use strict";function d(a,b){if(Array.isArray(a))return a.slice();if(!a)return[];var c=[];if("string"!=typeof a){for(var d=0;d<a.length;d++)c[d]=0|a[d];return c}if("hex"===b){a=a.replace(/[^a-z0-9]+/gi,""),a.length%2!==0&&(a="0"+a);for(var d=0;d<a.length;d+=2)c.push(parseInt(a[d]+a[d+1],16))}else for(var d=0;d<a.length;d++){var e=a.charCodeAt(d),f=e>>8,g=255&e;f?c.push(f,g):c.push(g)}return c}function e(a){return 1===a.length?"0"+a:a}function f(a){for(var b="",c=0;c<a.length;c++)b+=e(a[c].toString(16));return b}var g=c;g.toArray=d,g.zero2=e,g.toHex=f,g.encode=function(a,b){return"hex"===b?f(a):a}},{}],27:[function(a,b,c){"function"==typeof Object.create?b.exports=function(a,b){a.super_=b,a.prototype=Object.create(b.prototype,{constructor:{value:a,enumerable:!1,writable:!0,configurable:!0}})}:b.exports=function(a,b){a.super_=b;var c=function(){};c.prototype=b.prototype,a.prototype=new c,a.prototype.constructor=a}},{}],28:[function(a,b,c){function d(a,b){if(!a)throw new Error(b||"Assertion failed")}b.exports=d,d.equal=function(a,b,c){if(a!=b)throw new Error(c||"Assertion failed: "+a+" != "+b)}},{}],29:[function(a,b,c){"use strict";function d(a,b){if(Array.isArray(a))return a.slice();if(!a)return[];var c=[];if("string"!=typeof a){for(var d=0;d<a.length;d++)c[d]=0|a[d];return c}if(b){if("hex"===b){a=a.replace(/[^a-z0-9]+/gi,""),a.length%2!==0&&(a="0"+a);for(var d=0;d<a.length;d+=2)c.push(parseInt(a[d]+a[d+1],16));
+}}else for(var d=0;d<a.length;d++){var e=a.charCodeAt(d),f=e>>8,g=255&e;f?c.push(f,g):c.push(g)}return c}function e(a){return 1===a.length?"0"+a:a}function f(a){for(var b="",c=0;c<a.length;c++)b+=e(a[c].toString(16));return b}var g=c;g.toArray=d,g.zero2=e,g.toHex=f,g.encode=function(a,b){return"hex"===b?f(a):a}},{}],30:[function(a,b,c){b.exports={name:"elliptic",version:"6.4.0",description:"EC cryptography",main:"lib/elliptic.js",files:["lib"],scripts:{jscs:"jscs benchmarks/*.js lib/*.js lib/**/*.js lib/**/**/*.js test/index.js",jshint:"jscs benchmarks/*.js lib/*.js lib/**/*.js lib/**/**/*.js test/index.js",lint:"npm run jscs && npm run jshint",unit:"istanbul test _mocha --reporter=spec test/index.js",test:"npm run lint && npm run unit",version:"grunt dist && git add dist/"},repository:{type:"git",url:"git@github.com:indutny/elliptic"},keywords:["EC","Elliptic","curve","Cryptography"],author:"Fedor Indutny <fedor@indutny.com>",license:"MIT",bugs:{url:"https://github.com/indutny/elliptic/issues"},homepage:"https://github.com/indutny/elliptic",devDependencies:{brfs:"^1.4.3",coveralls:"^2.11.3",grunt:"^0.4.5","grunt-browserify":"^5.0.0","grunt-cli":"^1.2.0","grunt-contrib-connect":"^1.0.0","grunt-contrib-copy":"^1.0.0","grunt-contrib-uglify":"^1.0.1","grunt-mocha-istanbul":"^3.0.1","grunt-saucelabs":"^8.6.2",istanbul:"^0.4.2",jscs:"^2.9.0",jshint:"^2.6.0",mocha:"^2.1.0"},dependencies:{"bn.js":"^4.4.0",brorand:"^1.0.1","hash.js":"^1.0.0","hmac-drbg":"^1.0.0",inherits:"^2.0.1","minimalistic-assert":"^1.0.0","minimalistic-crypto-utils":"^1.0.0"}}},{}]},{},[1])(1)});
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],8:[function(require,module,exports){
 var BigInt = require('./BigInt.js');
 
 function s2c(x) {
@@ -1994,7 +2002,7 @@ exports.fromHex = fromHex;
 exports.toHex = toHex;
 exports.serializeHeader = serializeHeader;
 
-},{"./BigInt.js":5}],8:[function(require,module,exports){
+},{"./BigInt.js":5}],9:[function(require,module,exports){
 var network = require('../controller/network-controller.js');
 var formatUtility = require('./format-utility.js');
 var cryptoUtility = require('./crypto-utility.js');
@@ -2185,7 +2193,7 @@ exports.verify = verify;
 exports.serialize = serialize;
 exports.serializeKey = serializeKey;
 
-},{"../controller/network-controller.js":2,"./crypto-utility.js":6,"./format-utility.js":7}],9:[function(require,module,exports){
+},{"../controller/network-controller.js":2,"./crypto-utility.js":6,"./format-utility.js":8}],10:[function(require,module,exports){
 var request = require('request');
 
 function get(url, headers, callback) {
@@ -2235,7 +2243,7 @@ function put(url, headers, data, callback) {
 exports.get = get;
 exports.post = post;
 exports.put = put;
-},{"request":126}],10:[function(require,module,exports){
+},{"request":126}],11:[function(require,module,exports){
 const extension = require('extensionizer')
 const height = 620
 const width = 360
@@ -2345,7 +2353,7 @@ class NotificationManager {
 }
 
 module.exports = NotificationManager
-},{"extensionizer":77}],11:[function(require,module,exports){
+},{"extensionizer":77}],12:[function(require,module,exports){
 var cryptoUtility = require('./crypto-utility.js')
 
 function setStorage(values, callback) {
@@ -2481,28 +2489,29 @@ exports.setConnectionInfo = setConnectionInfo;
 exports.hasPasswordBeenSet = hasPasswordBeenSet;
 exports.setPasswordBeenSet = setPasswordBeenSet;
 
-},{"./crypto-utility.js":6}],12:[function(require,module,exports){
-var NotificationManager = require('./lib/notification-manager.js');
-var notificationManager = new NotificationManager();
-const { pull_channel_state } = require('./ui/spk');
+},{"./crypto-utility.js":6}],13:[function(require,module,exports){
+const NotificationManager = require('./lib/notification-manager.js');
+const notificationManager = new NotificationManager();
 const formatUtility = require('./lib/format-utility');
+const cryptoUtility = require('./lib/crypto-utility');
 const storage = require('./lib/storage');
 const userController = require('./controller/user-controller');
 const passwordController = require('./controller/password-controller');
 const merkle = require('./lib/merkle-proofs');
 const network = require('./controller/network-controller');
+const elliptic = require('./lib/elliptic.min.js');
 
 const fee = 152050;
-const DECIMALS = 100000
+const DECIMALS = 100000;
 
-var ec = new elliptic.ec('secp256k1');
+const ec = new elliptic.ec('secp256k1');
 
 function getParameterByName(name, url) {
     if (!url) url = window.location.href;
     name = name.replace(/[\[\]]/g, "\\$&");
-    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-        results = regex.exec(url);
-    console.log(results);
+	const regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)");
+	let results = regex.exec(url);
+	console.log(results);
     if (!results) return null;
     if (!results[2]) return '';
     return decodeURIComponent(results[2]);
@@ -2524,24 +2533,24 @@ function initChannel() {
     setTitle("New Channel");
 
     //xss safety
-    var div = document.createElement('div');
-    div.setAttribute('data-ip', getParameterByName('ip'));
-    var ip = div.getAttribute('data-ip');
-    div.setAttribute('data-duration', getParameterByName('duration'));
-    var duration = div.getAttribute('data-duration');
-    div.setAttribute('data-locked', getParameterByName('locked'));
-    var locked = div.getAttribute('data-locked');
-    div.setAttribute('data-delay', getParameterByName('delay'));
-    var delay = div.getAttribute('data-delay');
+	const div = document.createElement('div');
+	div.setAttribute('data-ip', getParameterByName('ip'));
+	const ip = div.getAttribute('data-ip');
+	div.setAttribute('data-duration', getParameterByName('duration'));
+	const duration = div.getAttribute('data-duration');
+	div.setAttribute('data-locked', getParameterByName('locked'));
+	const locked = div.getAttribute('data-locked');
+	div.setAttribute('data-delay', getParameterByName('delay'));
+	const delay = div.getAttribute('data-delay');
 
-    var ipInput = document.getElementById('channel-ip-address');
-    ipInput.innerHTML = ip;
-    var lockedInput = document.getElementById('new-channel-amount');
-    lockedInput.innerHTML = locked;
-    var delayInput = document.getElementById('new-channel-delay');
-    delayInput.innerHTML = delay;
-    var lengthInput = document.getElementById('new-channel-length');
-    lengthInput.innerHTML = duration;
+	const ipInput = document.getElementById('channel-ip-address');
+	ipInput.innerHTML = ip;
+	const lockedInput = document.getElementById('new-channel-amount');
+	lockedInput.innerHTML = locked;
+	const delayInput = document.getElementById('new-channel-delay');
+	delayInput.innerHTML = delay;
+	const lengthInput = document.getElementById('new-channel-length');
+	lengthInput.innerHTML = duration;
 
     document.getElementById('new-channel-container').classList.remove('hidden');
 
@@ -2556,13 +2565,13 @@ function initChannel() {
     network.send(["time_value"], function(error, timeValue) {
         initFee(timeValue);
 
-        var channelButton = document.getElementById('create-channel-button');
-        channelButton.onclick = function() {
-            var locked = safeFloat(lockedInput.value);
-            var delay = safeFloat(delayInput.value);
-            var length = safeFloat(lengthInput.value);
+	    const channelButton = document.getElementById('create-channel-button');
+	    channelButton.onclick = function() {
+	        const locked = safeFloat(lockedInput.value);
+	        const delay = safeFloat(delayInput.value);
+	        const length = safeFloat(lengthInput.value);
 
-            if (locked === 0 || delay === 0 || length === 0) {
+	        if (locked === 0 || delay === 0 || length === 0) {
                 showChannelError("Fields may not be 0.")
             } else {
                 makeChannel(locked, delay, length, timeValue);
@@ -2574,8 +2583,8 @@ function initChannel() {
 }
 
 function safeFloat(f) {
-    var val = parseFloat(f);
-    if (isNaN(val)) {
+	let val = parseFloat(f);
+	if (isNaN(val)) {
         val = 0;
     }
     return val;
@@ -2583,9 +2592,9 @@ function safeFloat(f) {
 
 function reloadWeb() {
     chrome.tabs.query({}, function (tabs) {
-        for (var i = 0; i < tabs.length; i++) {
-            var tab = tabs[i];
-            if (tab.url.indexOf("localhost:8000") !== -1 || tab.url.indexOf("amoveobook") !== -1) {
+        for (let i = 0; i < tabs.length; i++) {
+	        const tab = tabs[i];
+	        if (tab.url.indexOf("localhost:8000") !== -1 || tab.url.indexOf("amoveobook") !== -1) {
                 chrome.tabs.reload(tab.id);
             }
         }
@@ -2593,40 +2602,40 @@ function reloadWeb() {
 }
 
 function showChannelError(message) {
-    var error = document.getElementById("new-channel-error-text");
-    error.classList.remove("invisible");
+	const error = document.getElementById("new-channel-error-text");
+	error.classList.remove("invisible");
     error.innerHTML = message;
 }
 
 function showBetError(message) {
-    var error = document.getElementById("bet-error-text");
-    error.classList.remove("invisible");
+	const error = document.getElementById("bet-error-text");
+	error.classList.remove("invisible");
     error.innerHTML = message;
 }
 
 function initFee(timeValue) {
     function updateFee() {
-        var timeValueFee = timeValue / 100000000;
-        var amount = parseFloat(document.getElementById('new-channel-amount').value);
-        if (isNaN(amount)) {
+	    const timeValueFee = timeValue / 100000000;
+	    let amount = parseFloat(document.getElementById('new-channel-amount').value);
+	    if (isNaN(amount)) {
             amount = 0;
         }
-        var length = parseFloat(document.getElementById('new-channel-length').value);
-        if (isNaN(length)) {
+	    let length = parseFloat(document.getElementById('new-channel-length').value);
+	    if (isNaN(length)) {
             length = 0;
         }
 
-        var rate = document.getElementById('total-rate');
-        var blocks = document.getElementById('fee-block-number');
-        var locked = document.getElementById('fee-amount-number');
-        var total = document.getElementById('total-fee');
-        var total2 = document.getElementById('total-fee2');
+	    const rate = document.getElementById('total-rate');
+	    const blocks = document.getElementById('fee-block-number');
+	    const locked = document.getElementById('fee-amount-number');
+	    const total = document.getElementById('total-fee');
+	    const total2 = document.getElementById('total-fee2');
 
-        rate.innerHTML = timeValueFee;
+	    rate.innerHTML = timeValueFee;
         blocks.innerHTML = length;
         locked.innerHTML = amount;
-        var totalFee = 0.0015205 + timeValueFee * amount * length;
-        total.innerHTML = totalFee + " " + "VEO";
+	    const totalFee = 0.0015205 + timeValueFee * amount * length;
+	    total.innerHTML = totalFee + " " + "VEO";
         total2.innerHTML = totalFee + " " + "VEO";
     }
 
@@ -2642,23 +2651,23 @@ function initBet() {
 
     document.getElementById('make-bet-container').classList.remove('hidden');
 
-    var amountText = document.getElementById('bet-amount');
-    var oddsText = document.getElementById('bet-price');
+	const amountText = document.getElementById('bet-amount');
+	const oddsText = document.getElementById('bet-price');
 
-    var amount = parseFloat(getParameterByName('amount'));
-    amountText.value = amount;
+	const amount = parseFloat(getParameterByName('amount'));
+	amountText.value = amount;
     oddsText.value = parseFloat(getParameterByName('price'));
-    var side = getParameterByName('side');
-    var oid = getParameterByName('oid');
+	const side = getParameterByName('side');
+	const oid = getParameterByName('oid');
 
-    document.getElementById("bet-side").innerText = capitalize(side);
+	document.getElementById("bet-side").innerText = capitalize(side);
 
-    var betButton = document.getElementById('create-bet-button');
-    betButton.onclick = function() {
-        var amount = parseFloat(amountText.value);
-        var odds = parseFloat(oddsText.value) * 100;
+	const betButton = document.getElementById('create-bet-button');
+	betButton.onclick = function() {
+	    const amount = parseFloat(amountText.value);
+	    const odds = parseFloat(oddsText.value) * 100;
 
-        if (amount > 0 && odds > 0) {
+	    if (amount > 0 && odds > 0) {
             makeBet(amount, odds, side, oid, function() {
                 reloadWeb();
 
@@ -2671,7 +2680,7 @@ function initBet() {
 
     document.getElementById('cancel-bet-button').onclick = function() {
         notificationManager.closePopup();
-    }
+    };
 
     showMaxBalance(amount);
 }
@@ -2692,16 +2701,16 @@ function makeChannel(amount, delay, length, timeValue) {
                             if (accounts.length === 0) {
                                 showChannelError("Please open the wallet and create an account.")
                             } else {
-                                var account = accounts[0];
-                                amount = Math.floor(parseFloat(amount, 10) * DECIMALS) - fee;
+	                            const account = accounts[0];
+	                            amount = Math.floor(parseFloat(amount, 10) * DECIMALS) - fee;
                                 delay = parseInt(delay, 10);
-                                var expiration = parseInt(length, 10) + topHeader[1];
-                                var bal2 = amount - 1;
+	                            const expiration = parseInt(length, 10) + topHeader[1];
+	                            const bal2 = amount - 1;
 
-                                var acc1 = account.publicKey;
-                                var acc2 = pubkey;
+	                            const acc1 = account.publicKey;
+	                            const acc2 = pubkey;
 
-                                userController.getBalance(account, topHeader, function (error, balance) {
+	                            userController.getBalance(account, topHeader, function (error, balance) {
                                     if ((amount / DECIMALS) > balance) {
                                         showChannelError("You do not have enough VEO.")
                                     } else {
@@ -2724,22 +2733,22 @@ function makeChannel(amount, delay, length, timeValue) {
 }
 
 function makeChannelCallback2(tx, amount, bal2, acc1, acc2, delay, expiration, pubkey, topHeader, timeValue) {
-    var amount0 = tx[5];
-    var bal20 = tx[6];
-    var fee0 = tx[3];
-    var acc10 = tx[1];
-    var acc20 = tx[2];
-    var cid = tx[8];
-    var delay0 = tx[7];
-    if ((delay !== delay0) || (amount !== amount0) || (bal2 !== bal20) || (fee !== fee0) ||
+	const amount0 = tx[5];
+	const bal20 = tx[6];
+	const fee0 = tx[3];
+	const acc10 = tx[1];
+	const acc20 = tx[2];
+	const cid = tx[8];
+	const delay0 = tx[7];
+	if ((delay !== delay0) || (amount !== amount0) || (bal2 !== bal20) || (fee !== fee0) ||
         (acc1 !== acc10) || (acc2 !== acc20)) {
         console.log(JSON.stringify([[delay, delay0], [amount, amount0], [bal2, bal20], [fee, fee0], [acc1, acc10], [acc2, acc20]]));
         console.log("server edited the tx. aborting");
     } else {
-        var lifespan = expiration - topHeader[1];
-        var spk_amount = Math.floor((timeValue * (delay + lifespan) * (amount + bal2) ) / DECIMALS);
-        var spk = ["spk", acc1, acc2, [-6], 0, 0, cid, spk_amount, 0, delay];
-        passwordController.getPassword(function(password) {
+	    const lifespan = expiration - topHeader[1];
+	    const spk_amount = Math.floor((timeValue * (delay + lifespan) * (amount + bal2)) / DECIMALS);
+	    const spk = ["spk", acc1, acc2, [-6], 0, 0, cid, spk_amount, 0, delay];
+	    passwordController.getPassword(function(password) {
             if (!password) {
                 showChannelError("Your wallet is locked.  Please unlock your wallet and try again.")
             } else {
@@ -2747,12 +2756,12 @@ function makeChannelCallback2(tx, amount, bal2, acc1, acc2, delay, expiration, p
                     if (accounts.length === 0) {
                         showChannelError("Please open the wallet and create account");
                     } else {
-                        var account = accounts[0];
-                        var keys = ec.keyFromPrivate(account.privateKey, "hex");
-                        var stx = signTx(keys, tx);
-                        var sspk = signTx(keys, spk);
+	                    const account = accounts[0];
+	                    const keys = ec.keyFromPrivate(account.privateKey, "hex");
+	                    const stx = signTx(keys, tx);
+	                    const sspk = signTx(keys, spk);
 
-                        try {
+	                    try {
                             network.send(["new_channel", stx, sspk, expiration],
                                 function(error, x) {
                                     return channels3(x, expiration, pubkey, spk, tx)
@@ -2770,22 +2779,22 @@ function makeChannelCallback2(tx, amount, bal2, acc1, acc2, delay, expiration, p
 }
 
 function channels3(x, expiration, pubkey, spk, tx_original) {
-    var sstx = x[1];
+	let sstx = x[1];
 
-    if (!sstx || sstx.lenght < 1) {
+	if (!sstx || sstx.length < 1) {
         showChannelError("An error occurred.");
         return;
     }
 
-    var s2spk = x[2];
-    var tx = sstx[1];
-    if (JSON.stringify(tx) !== JSON.stringify(tx_original)) {
+	const s2spk = x[2];
+	const tx = sstx[1];
+	if (JSON.stringify(tx) !== JSON.stringify(tx_original)) {
         console.log(JSON.stringify(tx));
         console.log(JSON.stringify(tx_original));
         throw("the server illegally manipulated the tx");
     }
-    var a = verifyBoth(sstx);
-    if (!(a)) {
+	let a = verifyBoth(sstx);
+	if (!(a)) {
         throw("bad signature on tx in channels 3");
     }
     a = verify2(s2spk);
@@ -2795,12 +2804,12 @@ function channels3(x, expiration, pubkey, spk, tx_original) {
     if (JSON.stringify(spk) !== JSON.stringify(s2spk[1])) {
         throw("the server illegally manipulated the spk");
     }
-    var cid = tx[8];
-    var acc2 = tx[2];
+	const cid = tx[8];
+	const acc2 = tx[2];
 
-    var spk = s2spk[1];
-    var channel = newChannel(spk, s2spk, [], [], expiration, cid);
-    channel["serverPubKey"] = pubkey;
+	var spk = s2spk[1];
+	const channel = newChannel(spk, s2spk, [], [], expiration, cid);
+	channel["serverPubKey"] = pubkey;
 
     console.log(JSON.stringify(channel));
 
@@ -2821,10 +2830,10 @@ function saveChannel(channel, callback) {
 }
 
 function verify(data, sig0, key) {
-    var sig = bin2rs(atob(sig0));
-    var d2 = serialize(data);
-    var h = hash(d2);
-    return key.verify(h, sig, "hex");
+	const sig = bin2rs(atob(sig0));
+	const d2 = serialize(data);
+	const h = hash(d2);
+	return key.verify(h, sig, "hex");
 }
 
 function bin2rs(x) {
@@ -2838,11 +2847,11 @@ function bin2rs(x) {
       (vr) is the signed big-endian encoding of the value "r", of minimal length;
       (vs) is the signed big-endian encoding of the value "s", of minimal length.
     */
-    var h = formatUtility.toHex(x);
-    var a2 = x.charCodeAt(3);
-    var r = h.slice(8, 8+(a2*2));
-    var s = h.slice(12+(a2*2));
-    return {"r": r, "s": s};
+	const h = formatUtility.toHex(x);
+	const a2 = x.charCodeAt(3);
+	const r = h.slice(8, 8 + (a2 * 2));
+	const s = h.slice(12 + (a2 * 2));
+	return {"r": r, "s": s};
 }
 
 function verify1(tx) {
@@ -2862,7 +2871,7 @@ function newChannel(me, them, ssme, ssthem, expiration, cid) {
 }
 
 function newSs(code, prove, meta) {
-    if (meta == undefined) {
+    if (meta === undefined) {
         meta = 0;
     }
     return {"code": code, "prove": prove, "meta": meta};
@@ -2870,47 +2879,47 @@ function newSs(code, prove, meta) {
 
 function makeBet(amount, price, type, oid, callback) {
     network.send(["market_data", oid], function (error, l) {
-        var price_final = Math.floor(100 * parseFloat(price, 10));
-        var type_final;
-        var ttv = type;
-        if ((ttv == "true") ||
-            (ttv == 1) ||
-            (ttv == "yes") ||
-            (ttv == "si") ||
-            (ttv == "cierto") ||
-            (ttv == "lon") ||
-            (ttv == "真正") ||
-            (ttv == "既不是")) {
+	    const price_final = Math.floor(100 * parseFloat(price, 10));
+	    let type_final;
+	    const ttv = type;
+	    if ((ttv === "true") ||
+            (ttv === 1) ||
+            (ttv === "yes") ||
+            (ttv === "si") ||
+            (ttv === "cierto") ||
+            (ttv === "lon") ||
+            (ttv === "真正") ||
+            (ttv === "既不是")) {
             type_final = 1;
-        } else if ((ttv == "false") ||
-            (ttv == 0) ||
-            (ttv == 2) ||
-            (ttv == "falso") ||
-            (ttv == "no") ||
-            (ttv == "lon ala") ||
-            (ttv == "也不是") ||
-            (ttv == "假")) {
+        } else if ((ttv === "false") ||
+            (ttv === 0) ||
+            (ttv === 2) ||
+            (ttv === "falso") ||
+            (ttv === "no") ||
+            (ttv === "lon ala") ||
+            (ttv === "也不是") ||
+            (ttv === "假")) {
             type_final = 2;
         }
-        var amount_final = Math.floor(parseFloat(amount, 10) * DECIMALS);
-        var oid_final = oid;
-        var expires = l[1];
-        var server_pubkey = l[2];
-        var period = l[3];
+	    const amount_final = Math.floor(parseFloat(amount, 10) * DECIMALS);
+	    const oid_final = oid;
+	    const expires = l[1];
+	    const server_pubkey = l[2];
+	    const period = l[3];
 
-        storage.getTopHeader(function(error, topHeader) {
+	    storage.getTopHeader(function(error, topHeader) {
             if (topHeader !== 0) {
                 passwordController.getPassword(function(password) {
                     if (!password) {
                         showBetError("Your wallet is locked.  Please unlock your wallet and try again.")
                     } else {
                         storage.getAccounts(password, function(error, accounts) {
-                            var account = accounts[0];
-                            var sc = marketContract(type_final, expires, price_final, server_pubkey, period, amount_final, oid_final, topHeader[1]);
-                            storage.getChannels(function (error, channels) {
-                                var channelFound = false;
-                                var channel;
-                                for (var i = 0; i < channels.length; i++) {
+	                        const account = accounts[0];
+	                        const sc = marketContract(type_final, expires, price_final, server_pubkey, period, amount_final, oid_final, topHeader[1]);
+	                        storage.getChannels(function (error, channels) {
+	                            let channelFound = false;
+	                            let channel;
+	                            for (let i = 0; i < channels.length; i++) {
                                     channel = channels[i];
                                     if (channel.me[1] === account.publicKey && channel.serverPubKey === server_pubkey) {
                                         channelFound = true;
@@ -2919,23 +2928,23 @@ function makeBet(amount, price, type, oid, callback) {
                                 }
 
                                 if (channelFound) {
-                                    var spk = marketTrade(channel, amount_final, price_final, sc, server_pubkey, oid_final);
-                                    var keys = ec.keyFromPrivate(account.privateKey, "hex");
-                                    var sspk = signTx(keys, spk);
+	                                const spk = marketTrade(channel, amount_final, price_final, sc, server_pubkey, oid_final);
+	                                const keys = ec.keyFromPrivate(account.privateKey, "hex");
+	                                const sspk = signTx(keys, spk);
 
-                                    var trie_key = channel.me[6];
+	                                const trie_key = channel.me[6];
 
-                                    try {
+	                                try {
                                         merkle.requestProof(topHeader, "channels", trie_key, function(error, val) {
-                                            var spk = channel.them[1];
-                                            var expiration = channel.expiration;
-                                            var height = topHeader[1];
-                                            var amount = spk[7];
-                                            var betAmount = sumBets(spk[3]);
-                                            var mybalance = ((val[4] - amount - betAmount));
-                                            var serverbalance = ((val[5] + amount) / DECIMALS);
+	                                        const spk = channel.them[1];
+	                                        const expiration = channel.expiration;
+	                                        const height = topHeader[1];
+	                                        const amount = spk[7];
+	                                        const betAmount = sumBets(spk[3]);
+	                                        const mybalance = ((val[4] - amount - betAmount));
+	                                        const serverbalance = ((val[5] + amount) / DECIMALS);
 
-                                            if (amount_final > mybalance) {
+	                                        if (amount_final > mybalance) {
                                                 showBetError("You do not have enough VEO in this channel.")
                                             } else {
                                                 try {
@@ -2965,25 +2974,25 @@ function makeBet(amount, price, type, oid, callback) {
 }
 
 function sumBets(bets) {
-    var x = 0;
-    for (var i = 1; i < bets.length; i++) {
+	let x = 0;
+	for (let i = 1; i < bets.length; i++) {
         x += bets[i][2];
     }
     return x;
 }
 
 function marketContract(direction, expires, maxprice, server_pubkey, period, amount, oid, bet_height) {
-    var a;
-    var a2 = formatUtility.stringToArray(atob("AAAAAAJ4AA=="));
-    var b = formatUtility.stringToArray(atob("AAAAAAN4AA=="));
-    var c = formatUtility.stringToArray(atob("AAAAAAR4AgAAACA="));
-    var d = formatUtility.stringToArray(atob("AAAAAAV4AA=="));
-    var e = formatUtility.stringToArray(atob("AAAAAAZ4AgAAAEE="));
-    var f;
-	if (direction == 1) {
+	let a;
+	const a2 = formatUtility.stringToArray(atob("AAAAAAJ4AA=="));
+	const b = formatUtility.stringToArray(atob("AAAAAAN4AA=="));
+	const c = formatUtility.stringToArray(atob("AAAAAAR4AgAAACA="));
+	const d = formatUtility.stringToArray(atob("AAAAAAV4AA=="));
+	const e = formatUtility.stringToArray(atob("AAAAAAZ4AgAAAEE="));
+	let f;
+	if (direction === 1) {
 		a = formatUtility.stringToArray(atob("AAAAJxAAAAAAAXgA"));
 		f = formatUtility.stringToArray(atob("AAAAAAd4AAAAAMgAAAAACHgWAAAAAAA6RhQUAAAAAAZ5FV4WNQAAAAAARxQAAAAAATpGFBQWAAAAACiHFRcAAAAAB3kpAAAAAAA6RgAAAAAIeQ1HAAAAAAh5AAAAAAEyAAAAAAh4SBQUAAAAAASHFgAAAAAChwIAAAACAAAWhhYAAAAAAocCAAAAAgAAFoYWAAAAAAV5OgAAAAAAOkYAAAAACHkNRwAAAAAIeQAAAAABMgAAAAAIeEgUFBQUGBUAAAAAAnk3UAAAAAAAOkYAAAAACHkNRwAAAAAIeQAAAAABMgAAAAAIeEgUFBcAAAAACXgVAAAAAAp4FQAAAAAEeQAAAAAAFjI2UAAAAAAAOkYAAAAACHkNRwAAAAAIeQAAAAABMgAAAAAIeEgUFB4AAAAAC3iDFIMWFIMWFIMUAAAAACCHFAAAAAABhxYUAgAAAAMAAAAWhgAAAAABOkYUFAAAAAAAAAAAAAMAAAAAAXlHFAAAAAACOkYUFAAAAAAAAAAAAAMAAAAnEAAAAAABeTNHFAAAAAADOkYUFAAAAAAAAAAAAAMAAAAnEAAAAAAEeTNHFAAAAAAAOkYUFAAAAAABAAAAAAEAAAAnEAAAAAAEeTNHSEhISBgAAAAAA3leGTZGM0cUFAAAAAAASAAAAAADeTI0FxYAAAAAA3kAAAAAC3kZNkYzRxQUAAAAAABIMhYAAAAACnkAAAAAABYyAAAAAAR5OkYUFAAAAAAJeTQAAAAnEDUAAAAnEAAAAAAEeTMAAAAnEAAAAAAJeTM0AAAAJxA1MkcWMx4AAAAAADpGFB8yRxQfM0hIRxQAAAAAAjpGFBQUAAAAACiHFRcAAAAAB3kpAAAAAAA6RgAAAAAIeQ1HAAAAAAh5AAAAAAEyAAAAAAh4SBQUAAAAAASHFgAAAAAChwIAAAACAAAWhhYAAAAAAocCAAAAAgAAFoYWAAAAAAV5OgAAAAAAOkYAAAAACHkNRwAAAAAIeQAAAAABMgAAAAAIeEgUFBQUGBUAAAAAAnk3UAAAAAAAOkYAAAAACHkNRwAAAAAIeQAAAAABMgAAAAAIeEgUFBcAAAAADHgeHgAAAAAohxUXAAAAAAd5KQAAAAAAOkYAAAAACHkNRwAAAAAIeQAAAAABMgAAAAAIeEgUFAAAAAAEhxYAAAAAAocCAAAAAgAAFoYWAAAAAAKHAgAAAAIAABaGFgAAAAAFeToAAAAAADpGAAAAAAh5DUcAAAAACHkAAAAAATIAAAAACHhIFBQUFBgVAAAAAAJ5N1AAAAAAADpGAAAAAAh5DUcAAAAACHkAAAAAATIAAAAACHhIFBQXAAAAAA14Fh8ZGTZGFhRHFEgeGTZGFEcWFEgfMwAAAAAGeQAAAAACNTcAAAAAADpGAAAAAAh5DUcAAAAACHkAAAAAATIAAAAACHhIFBQfOlAXFBQAAAAADHkAAAAADXk6UBcUFFIAAAAAADpGAAAAAAh5DUcAAAAACHkAAAAAATIAAAAACHhIFBQAAAAAAAAAD0JAAAAPQkAyAAAAAABHFAAAAAADOkYUFBQAAAAAKIcVFwAAAAAHeSkAAAAAADpGAAAAAAh5DUcAAAAACHkAAAAAATIAAAAACHhIFBQAAAAABIcWAAAAAAKHAgAAAAIAABaGFgAAAAAChwIAAAACAAAWhhYAAAAABXk6AAAAAAA6RgAAAAAIeQ1HAAAAAAh5AAAAAAEyAAAAAAh4SBQUFBQYFQAAAAACeTdQAAAAAAA6RgAAAAAIeQ1HAAAAAAh5AAAAAAEyAAAAAAh4SBQUF14AAAAABnkzNgAAAAAAOkYAAAAACHkNRwAAAAAIeQAAAAABMgAAAAAIeEgUFBQAAAAABnk1AAAAAAEyHgAAAAADeV4zHwAAACcQAAAAAAR5M0cUAAAAAAQ6RhQUgxSDFhSDFhSDFAAAAAAghxQAAAAAAYcWFAIAAAADAAAAFoYAAAAAADpGAAAAAAN5AAAAAAZ5MgAAAAfQMgAAAAAAAAAAJxAAAAAABHkzRwAAAAAGeQAAAAABAAAAJxAAAAAABHkzSEcUSEhISEgL"));
-	} else if (direction == 2) {
+	} else if (direction === 2) {
 		a = formatUtility.stringToArray(atob("AAAAAAAAAAAAAXgA"));
 		f = formatUtility.stringToArray(atob("AAAAAAd4AAAAAMgAAAAACHgWAAAAAAA6RhQUAAAAAAZ5FV4WNQAAAAAARxQAAAAAATpGFBQWAAAAACiHFRcAAAAAB3kpAAAAAAA6RgAAAAAIeQ1HAAAAAAh5AAAAAAEyAAAAAAh4SBQUAAAAAASHFgAAAAAChwIAAAACAAAWhhYAAAAAAocCAAAAAgAAFoYWAAAAAAV5OgAAAAAAOkYAAAAACHkNRwAAAAAIeQAAAAABMgAAAAAIeEgUFBQUGBUAAAAAAnk3UAAAAAAAOkYAAAAACHkNRwAAAAAIeQAAAAABMgAAAAAIeEgUFBcAAAAACXgVAAAAAAp4FQAAAAAEeQAAACcQFjM3UAAAAAAAOkYAAAAACHkNRwAAAAAIeQAAAAABMgAAAAAIeEgUFB4AAAAAC3iDFIMWFIMWFIMUAAAAACCHFAAAAAABhxYUAgAAAAMAAAAWhgAAAAABOkYUFAAAAAAAAAAAAAMAAAAAAXlHFAAAAAACOkYUFAAAAAAAAAAAAAMAAAAnEAAAAAABeTNHFAAAAAADOkYUFAAAAAAAAAAAAAMAAAAnEAAAAAAEeTNHFAAAAAAAOkYUFAAAAAABAAAAAAEAAAAnEAAAAAAEeTNHSEhISBgAAAAAA3leGTZGM0cUFAAAAAAASAAAAAADeTI0FxYAAAAAA3kAAAAAC3kZNkYzRxQUAAAAAABIMhYAAAAACnkAAAAnEBYzAAAAAAR5OkYUFAAAAAAJeTQAAAAnEDUAAAAnEAAAAAAEeTMAAAAnEAAAAAAJeTM0AAAAJxA1MkcWMx4AAAAAADpGFB8yRxQfM0hIRxQAAAAAAjpGFBQUAAAAACiHFRcAAAAAB3kpAAAAAAA6RgAAAAAIeQ1HAAAAAAh5AAAAAAEyAAAAAAh4SBQUAAAAAASHFgAAAAAChwIAAAACAAAWhhYAAAAAAocCAAAAAgAAFoYWAAAAAAV5OgAAAAAAOkYAAAAACHkNRwAAAAAIeQAAAAABMgAAAAAIeEgUFBQUGBUAAAAAAnk3UAAAAAAAOkYAAAAACHkNRwAAAAAIeQAAAAABMgAAAAAIeEgUFBcAAAAADHgeHgAAAAAohxUXAAAAAAd5KQAAAAAAOkYAAAAACHkNRwAAAAAIeQAAAAABMgAAAAAIeEgUFAAAAAAEhxYAAAAAAocCAAAAAgAAFoYWAAAAAAKHAgAAAAIAABaGFgAAAAAFeToAAAAAADpGAAAAAAh5DUcAAAAACHkAAAAAATIAAAAACHhIFBQUFBgVAAAAAAJ5N1AAAAAAADpGAAAAAAh5DUcAAAAACHkAAAAAATIAAAAACHhIFBQXAAAAAA14Fh8ZGTZGFhRHFEgeGTZGFEcWFEgfMwAAAAAGeQAAAAACNTcAAAAAADpGAAAAAAh5DUcAAAAACHkAAAAAATIAAAAACHhIFBQfOlAXFBQAAAAADHkAAAAADXk6UBcUFFIAAAAAADpGAAAAAAh5DUcAAAAACHkAAAAAATIAAAAACHhIFBQAAAAAAAAAD0JAAAAPQkAyAAAAAABHFAAAAAADOkYUFBQAAAAAKIcVFwAAAAAHeSkAAAAAADpGAAAAAAh5DUcAAAAACHkAAAAAATIAAAAACHhIFBQAAAAABIcWAAAAAAKHAgAAAAIAABaGFgAAAAAChwIAAAACAAAWhhYAAAAABXk6AAAAAAA6RgAAAAAIeQ1HAAAAAAh5AAAAAAEyAAAAAAh4SBQUFBQYFQAAAAACeTdQAAAAAAA6RgAAAAAIeQ1HAAAAAAh5AAAAAAEyAAAAAAh4SBQUF14AAAAABnkzNgAAAAAAOkYAAAAACHkNRwAAAAAIeQAAAAABMgAAAAAIeEgUFBQAAAAABnk1AAAAAAEyHgAAAAADeV4zHwAAACcQAAAAAAR5M0cUAAAAAAQ6RhQUgxSDFhSDFhSDFAAAAAAghxQAAAAAAYcWFAIAAAADAAAAFoYAAAAAADpGAAAAAAN5AAAAAAZ5MgAAAAfQMgAAAAAAAAAAJxAAAAAABHkzRwAAAAAGeQAAAAABAAAAJxAAAAAABHkzSEcUSEhISEgL"));
 	} else {
@@ -2994,27 +3003,27 @@ function marketContract(direction, expires, maxprice, server_pubkey, period, amo
 
     console.log("market oid is ");
     console.log(oid);
-    var g = a.concat(formatUtility.intToArray(bet_height, 4)).concat(a2).concat(formatUtility.intToArray(expires, 4))
-        .concat(b).concat(formatUtility.intToArray(maxprice, 4)).concat(c).concat(formatUtility.intToArray(atob(oid)))
-        .concat(d).concat(formatUtility.intToArray(period, 4)).concat(e).concat(formatUtility.intToArray(atob(server_pubkey)))
-        .concat(f);
-    console.log("compiled contract");
+	const g = a.concat(formatUtility.intToArray(bet_height, 4)).concat(a2).concat(formatUtility.intToArray(expires, 4))
+	.concat(b).concat(formatUtility.intToArray(maxprice, 4)).concat(c).concat(formatUtility.intToArray(atob(oid)))
+	.concat(d).concat(formatUtility.intToArray(period, 4)).concat(e).concat(formatUtility.intToArray(atob(server_pubkey)))
+	.concat(f);
+	console.log("compiled contract");
     console.log(JSON.stringify(g));
-    var contract =  btoa(formatUtility.arrayToString(g));
-    var codekey = ["market", 1, oid, expires, server_pubkey, period, oid]
-    return ["bet", contract, amount, codekey, [-7, direction, maxprice]]; //codekey is insttructions on how to re-create the contract, so we can do pattern matching when updating channels.
+	const contract = btoa(formatUtility.arrayToString(g));
+	const codekey = ["market", 1, oid, expires, server_pubkey, period, oid];
+	return ["bet", contract, amount, codekey, [-7, direction, maxprice]]; //codekey is insttructions on how to re-create the contract, so we can do pattern matching when updating channels.
 }
 
 function marketTrade(channel, amount, price, bet, oid) { //oid unused
-    var market_spk = channel.me;
-    console.log("market trade spk before ");
+	const market_spk = channel.me;
+	console.log("market trade spk before ");
     console.log(JSON.stringify(market_spk));
-    var cid = market_spk[6];
-    var time_limit = 10000;//actually constants:time_limit div 10
-    var space_limit = 100000;
-    var cGran = 10000;
-    var a = Math.floor((amount * price) / cGran);
-    market_spk[3][0] = bet;
+	const cid = market_spk[6];
+	const time_limit = 10000;//actually constants:time_limit div 10
+	const space_limit = 100000;
+	const cGran = 10000;
+	const a = Math.floor((amount * price) / cGran);
+	market_spk[3][0] = bet;
     market_spk[3] = ([-6]).concat(market_spk[3]);//add new bet to front
     market_spk[8] = market_spk[8] + 1; //nonce
     market_spk[5] = market_spk[5] + time_limit;// time_gas/10
@@ -3026,13 +3035,12 @@ function marketTrade(channel, amount, price, bet, oid) { //oid unused
 }
 
 function make_bet3(sspk2, sspk, server_pubkey, oid_final, callback) {
-    var bool = verifyBoth(sspk2);
-    if (!(bool)) {
+    if (!verifyBoth(sspk2)) {
         throw("make bet3, badly signed sspk2");
     }
-    var hspk2 = JSON.stringify(sspk2[1]);
-    var hspk = JSON.stringify(sspk[1]);
-    if (!(hspk == hspk2)) {
+	const hspk2 = JSON.stringify(sspk2[1]);
+	const hspk = JSON.stringify(sspk[1]);
+	if (hspk !== hspk2) {
         console.log("error, we calculated the spk differently from the server. you calculated this: ");
         console.log(JSON.stringify(sspk[1]));
         console.log("the server calculated this: ");
@@ -3040,13 +3048,13 @@ function make_bet3(sspk2, sspk, server_pubkey, oid_final, callback) {
     }
 
     storage.getChannels(function(error, channels) {
-        for (var i = 0; i < channels.length; i++) {
-            var channel = channels[i];
-            if (channel.serverPubKey === server_pubkey) {
+        for (let i = 0; i < channels.length; i++) {
+	        const channel = channels[i];
+	        if (channel.serverPubKey === server_pubkey) {
                 channel.me = sspk[1];
                 channel.them = sspk2;
-                var newss = newSs([0,0,0,0,4], [-6, ["oracles", oid_final]]);
-                channel.ssme = ([newss]).concat(channel.ssme);
+	            const newss = newSs([0, 0, 0, 0, 4], [-6, ["oracles", oid_final]]);
+	            channel.ssme = ([newss]).concat(channel.ssme);
                 channel.ssthem = ([newss]).concat(channel.ssthem);
                 break;
             }
@@ -3062,21 +3070,21 @@ function initCancel() {
 
     document.getElementById('cancel-container').classList.remove('hidden');
 
-    var index = parseInt(getParameterByName('index'));
-    var amount = parseInt(getParameterByName('amount'));
-    var price = parseFloat(getParameterByName('price'));
-    var side = getParameterByName('side');
+	const index = parseInt(getParameterByName('index'));
+	const amount = parseInt(getParameterByName('amount'));
+	const price = parseFloat(getParameterByName('price'));
+	const side = getParameterByName('side');
 
-    document.getElementById("cancel-bet-side").innerHTML = capitalize(side);
-    document.getElementById("cancel-bet-amount").innerHTML = amount;
-    document.getElementById("cancel-bet-price").innerHTML = price;
+	document.getElementById("cancel-bet-side").innerHTML = capitalize(side);
+    document.getElementById("cancel-bet-amount").innerHTML = "" + amount;
+    document.getElementById("cancel-bet-price").innerHTML = "" + price;
 
-    var cancelButton = document.getElementById("cancel-button");
-    cancelButton.onclick = function() {
+	const cancelButton = document.getElementById("cancel-button");
+	cancelButton.onclick = function() {
         network.send(["pubkey"], function(error, pubkey) {
             cancelTrade(index + 2, pubkey);
         });
-    }
+    };
 
     document.getElementById('cancel-cancel-button').onclick = function() {
         notificationManager.closePopup();
@@ -3085,34 +3093,34 @@ function initCancel() {
 
 function cancelTrade(n, server_pubkey) {
     storage.getChannels(function(error, channels) {
-        var oldCD;
-        for (var i = 0; i < channels.length; i++) {
-            var channel = channels[i];
-            if (channel.serverPubKey === server_pubkey) {
+	    let oldCD;
+	    for (let i = 0; i < channels.length; i++) {
+	        const channel = channels[i];
+	        if (channel.serverPubKey === server_pubkey) {
                 oldCD = channel;
                 break;
             }
         }
 
         if (oldCD) {
-            var spk = oldCD.me;
-            var ss = oldCD.ssme[n - 2];
+	        const spk = oldCD.me;
+	        const ss = oldCD.ssme[n - 2];
 
-            if (JSON.stringify(ss.code) === JSON.stringify([0,0,0,0,4])) {//this is what an unmatched trade looks like.
-                var spk2 = removeBet(n-1, spk);
-                spk2[8] += 1000000;
+	        if (JSON.stringify(ss.code) === JSON.stringify([0,0,0,0,4])) {//this is what an unmatched trade looks like.
+	            const spk2 = removeBet(n - 1, spk);
+	            spk2[8] += 1000000;
                 passwordController.getPassword(function(password) {
                     if (!password) {
                         showCancelError("Your wallet is locked.  Please unlock your wallet and try again.")
                     } else {
                         storage.getAccounts(password, function (error, accounts) {
-                            var account = accounts[0];
-                            var keys = ec.keyFromPrivate(account.privateKey, "hex");
-                            var sspk2 = signTx(keys, spk2);
-                            var pubPoint = keys.getPublic("hex");
-                            var pubKey = btoa(formatUtility.fromHex(pubPoint));
-                            var msg = ["cancel_trade", pubKey, n, sspk2];
-                            network.send(msg, function (error, x) {
+	                        const account = accounts[0];
+	                        const keys = ec.keyFromPrivate(account.privateKey, "hex");
+	                        const sspk2 = signTx(keys, spk2);
+	                        const pubPoint = keys.getPublic("hex");
+	                        const pubKey = btoa(formatUtility.fromHex(pubPoint));
+	                        const msg = ["cancel_trade", pubKey, n, sspk2];
+	                        network.send(msg, function (error, x) {
                                 return cancelTradeResponse(x, sspk2, server_pubkey, n - 2);
                             });
                         })
@@ -3129,25 +3137,25 @@ function cancelTrade(n, server_pubkey) {
 }
 
 function showCancelError(message) {
-    var error = document.getElementById("cancel-error-text");
-    error.classList.remove("invisible");
+	const error = document.getElementById("cancel-error-text");
+	error.classList.remove("invisible");
     error.innerHTML = message;
 }
 
 function removeBet(n, spk0) {
-    var spk = JSON.parse(JSON.stringify(spk0));
-    var bets = spk[3];
-    var bet = bets[n];
-    var bets2 = removeNth(n, bets);
-    var bet_meta = bet[4];
-    var a;
-    if (bet_meta == 0) {
+	const spk = JSON.parse(JSON.stringify(spk0));
+	const bets = spk[3];
+	const bet = bets[n];
+	const bets2 = removeNth(n, bets);
+	const bet_meta = bet[4];
+	let a;
+	if (bet_meta === 0) {
         a = 0;
     } else {
-        var bet_amount = bet[2];
-        var cgran = 10000;
-        var price = bet_meta[2];
-        a = Math.floor((bet_amount * price) / cgran);
+	    const bet_amount = bet[2];
+	    const cgran = 10000;
+	    const price = bet_meta[2];
+	    a = Math.floor((bet_amount * price) / cgran);
     }
     spk[3] = bets2;
     spk[7] = spk[7] + a;
@@ -3156,18 +3164,18 @@ function removeBet(n, spk0) {
 
 function cancelTradeResponse(sspk2, sspk, server_pubkey, n) {
     storage.getChannels(function(error, channels) {
-        for (var i = 0; i < channels.length; i++) {
-            var channel = channels[i];
-            if (channel.serverPubKey === server_pubkey) {
+        for (let i = 0; i < channels.length; i++) {
+	        const channel = channels[i];
+	        if (channel.serverPubKey === server_pubkey) {
                 console.log("cancel trade2, fail to verify this: ");
                 console.log(JSON.stringify(sspk2));
-                var bool = verifyBoth(sspk2);
-                if (!(bool)) {
+	            const bool = verifyBoth(sspk2);
+	            if (!(bool)) {
                     throw("cancel trade badly signed");
                 }
-                var spk = sspk[1];
-                var spk2 = sspk2[1];
-                if (JSON.stringify(spk) != JSON.stringify(spk2)) {
+	            const spk = sspk[1];
+	            const spk2 = sspk2[1];
+	            if (JSON.stringify(spk) !== JSON.stringify(spk2)) {
                     console.log("the server didn't calculate the same update as us");
                     console.log(spk);
                     console.log(spk2);
@@ -3189,9 +3197,9 @@ function cancelTradeResponse(sspk2, sspk, server_pubkey, n) {
 }
 
 function removeNth(n, a) {
-    var b = a.slice(0, n);
-    var c = a.slice(n+1, a.length);
-    return b.concat(c);
+	const b = a.slice(0, n);
+	const c = a.slice(n + 1, a.length);
+	return b.concat(c);
 }
 
 function showMaxBalance(amount) {
@@ -3203,11 +3211,11 @@ function showMaxBalance(amount) {
 						showBetError("Your wallet is locked.  Please unlock your wallet and try again.")
 					} else {
 						storage.getAccounts(password, function (error, accounts) {
-							var account = accounts[0];
+							const account = accounts[0];
 							storage.getChannels(function (error, channels) {
-								var channelFound = false;
-								var channel;
-								for (var i = 0; i < channels.length; i++) {
+								let channelFound = false;
+								let channel;
+								for (let i = 0; i < channels.length; i++) {
 									channel = channels[i];
 									if (channel.me[1] === account.publicKey && channel.serverPubKey === serverPubkey) {
 										channelFound = true;
@@ -3216,19 +3224,19 @@ function showMaxBalance(amount) {
 								}
 
 								if (channelFound) {
-									var spk = marketTrade(channel, amount, price_final, sc, serverPubkey, oid_final);
-									var keys = ec.keyFromPrivate(account.privateKey, "hex");
-									var sspk = signTx(keys, spk);
+									const spk = marketTrade(channel, amount, price_final, sc, serverPubkey, oid_final);
+									const keys = ec.keyFromPrivate(account.privateKey, "hex");
+									const sspk = cryptoUtility.signTx(keys, spk);
 
-									var trie_key = channel.me[6];
+									const trie_key = channel.me[6];
 
 									merkle.requestProof(topHeader, "channels", trie_key, function (error, val) {
-										var spk = channel.them[1];
-										var amount = spk[7];
-										var betAmount = sumBets(spk[3]);
-										var mybalance = ((val[4] - amount - betAmount));
+										const spk = channel.them[1];
+										const amount = spk[7];
+										const betAmount = sumBets(spk[3]);
+										const mybalance = ((val[4] - amount - betAmount));
 
-										var userBalance = document.getElementById("bet-user-balance");
+										const userBalance = document.getElementById("bet-user-balance");
 										userBalance.classList.remove("invisible");
 										userBalance.innerHTML = "Max bet: " + mybalance + " VEO";
 
@@ -3259,10 +3267,10 @@ function getUserBalance() {
                         if (accounts.length === 0) {
                             showChannelError("Please open the wallet and create an account.")
                         } else {
-                            var account = accounts[0];
-                            userController.getBalance(account, topHeader, function (error, balance) {
-                                var userBalance = document.getElementById("channel-user-balance");
-                                userBalance.classList.remove("invisible");
+	                        const account = accounts[0];
+	                        userController.getBalance(account, topHeader, function (error, balance) {
+	                            const userBalance = document.getElementById("channel-user-balance");
+	                            userBalance.classList.remove("invisible");
                                 userBalance.innerHTML = "Max: " + balance + " VEO";
                             });
                         }
@@ -3274,7 +3282,7 @@ function getUserBalance() {
         }
     });
 }
-},{"./controller/network-controller":2,"./controller/password-controller":3,"./controller/user-controller":4,"./lib/format-utility":7,"./lib/merkle-proofs":8,"./lib/notification-manager.js":10,"./lib/storage":11,"./ui/spk":14}],13:[function(require,module,exports){
+},{"./controller/network-controller":2,"./controller/password-controller":3,"./controller/user-controller":4,"./lib/crypto-utility":6,"./lib/elliptic.min.js":7,"./lib/format-utility":8,"./lib/merkle-proofs":9,"./lib/notification-manager.js":11,"./lib/storage":12}],14:[function(require,module,exports){
 "use strict";var sjcl={cipher:{},hash:{},keyexchange:{},mode:{},misc:{},codec:{},exception:{corrupt:function(a){this.toString=function(){return"CORRUPT: "+this.message};this.message=a},invalid:function(a){this.toString=function(){return"INVALID: "+this.message};this.message=a},bug:function(a){this.toString=function(){return"BUG: "+this.message};this.message=a},notReady:function(a){this.toString=function(){return"NOT READY: "+this.message};this.message=a}}};
 sjcl.cipher.aes=function(a){this.s[0][0][0]||this.O();var b,c,d,e,f=this.s[0][4],g=this.s[1];b=a.length;var h=1;if(4!==b&&6!==b&&8!==b)throw new sjcl.exception.invalid("invalid aes key size");this.b=[d=a.slice(0),e=[]];for(a=b;a<4*b+28;a++){c=d[a-1];if(0===a%b||8===b&&4===a%b)c=f[c>>>24]<<24^f[c>>16&255]<<16^f[c>>8&255]<<8^f[c&255],0===a%b&&(c=c<<8^c>>>24^h<<24,h=h<<1^283*(h>>7));d[a]=d[a-b]^c}for(b=0;a;b++,a--)c=d[b&3?a:a-4],e[b]=4>=a||4>b?c:g[0][f[c>>>24]]^g[1][f[c>>16&255]]^g[2][f[c>>8&255]]^g[3][f[c&
 255]]};
@@ -3336,1628 +3344,7 @@ null!=d[3]?b[d[2]]=parseInt(d[3],10):null!=d[4]?b[d[2]]=d[2].match(/^(ct|adata|s
 b){var c={},d;for(d=0;d<b.length;d++)void 0!==a[b[d]]&&(c[b[d]]=a[b[d]]);return c}};sjcl.encrypt=sjcl.json.encrypt;sjcl.decrypt=sjcl.json.decrypt;sjcl.misc.pa={};sjcl.misc.cachedPbkdf2=function(a,b){var c=sjcl.misc.pa,d;b=b||{};d=b.iter||1E3;c=c[a]=c[a]||{};d=c[d]=c[d]||{firstSalt:b.salt&&b.salt.length?b.salt.slice(0):sjcl.random.randomWords(2,0)};c=void 0===b.salt?d.firstSalt:b.salt;d[c]=d[c]||sjcl.misc.pbkdf2(a,c,b.iter);return{key:d[c].slice(0),salt:c.slice(0)}};
 "undefined"!==typeof module&&module.exports&&(module.exports=sjcl);"function"===typeof define&&define([],function(){return sjcl});
 
-},{"crypto":241}],14:[function(require,module,exports){
-function chalang_main() {
-    const word_size = 4294967296,
-        hash_size = 12;
-    const ops =
-        {int_op: 0,
-            binary_op: 2,
-            print: 10,
-            finish: 11, //because 'return' is reserved.
-            nop: 12,
-            fail: 13,
-            drop: 20,
-            dup: 21,
-            swap: 22,
-            tuck: 23,
-            rot: 24,
-            ddup: 25,
-            tuckn: 26,
-            pickn: 27,
-            to_r: 30,
-            from_r: 31,
-            r_fetch: 32,
-            hash_op: 40,
-            verify_sig: 41,
-            add: 50,
-            subtract: 51,
-            mul: 52,
-            div: 53,
-            gt: 54,
-            lt: 55,
-            pow: 56,
-            rem: 57,
-            eq: 58,
-            caseif: 70,
-            caseelse: 71,
-            casethen: 72,
-            bool_flip: 80,
-            bool_and: 81,
-            bool_or: 82,
-            bool_xor: 83,
-            bin_and: 84,
-            bin_or: 85,
-            bin_xor: 86,
-            stack_size: 90,
-            height: 94,
-            gas: 96,
-            ram: 97,
-            many_vars: 100,
-            many_funs: 101,
-            define: 110,
-            fun_end: 111,
-            recurse: 112,
-            call: 113,
-            set: 120,
-            fetch: 121,
-            cons: 130,
-            car: 131,
-            empty_list: 132,
-            append: 134,
-            split: 135,
-            reverse: 136,
-            is_list: 137};
-    function memory(x) {
-        if (JSON.stringify(x) == "[]") {
-            return 1;
-        } else if (Number.isInteger(x)) {
-            return 4;
-        } else if (x[0] == "binary") {
-            return x.length - 1;
-        } else {
-            var y = x.slice(1);
-            return memory(x[0]) + memory(y);
-        }
-    }
-    function underflow_check(d, min_size, op_name) {
-        if (d.stack.length < min_size) {
-            throw(JSON.stringify(["error", "stack underflow", op_name]));
-        }
-    }
-    function exponential(b, a) {
-        if (b == 0) { return 0; }
-        else if (a == 0) { return 1; }
-        var n = 1;
-        while (a > 1) {
-            if ((a % 2) == 0) {
-                b = b*b;
-                a = Math.floor(a / 2);
-            } else {
-                a = a - 1;
-                n = n * b;
-            }
-        }
-        return b * n;
-    }
-    function arithmetic_chalang(op, a, b) { //returns a list to concat with stack.
-        var x;
-        var d = {"stack":[]};
-        var i = 0;
-        if (op == ops.add) {
-            op_print(d, i, "add op");
-            x = a + b;
-        } else if (op == ops.subtract) {
-            op_print(d, i, "subtract op");
-            x = b - a;
-        } else if (op == ops.mul) {
-            op_print(d, i, "mul op");
-            x = b * a;
-        } else if (op == ops.div) {
-            op_print(d, i, "div op");
-            x = Math.floor(b / a);
-        } else if (op == ops.pow) {
-            op_print(d, i, "pow op");
-            x = exponential(b, a);
-        } else if (op == ops.rem) {
-            op_print(d, i, "rem op");
-            x = b % a;
-        } else if (op == ops.gt) {
-            op_print(d, i, "gt op");
-            if (b > a) {
-                x = 1;
-            } else {
-                x = 0;
-            }
-        } else if (op == ops.lt) {
-            op_print(d, i, "lt op");
-            if (b < a) {
-                x = 1;
-            } else {
-                x = 0;
-            }
-        }
-        x = ((x % word_size) + word_size) % word_size;
-        return [x];
-    }
-    function small_hash(l) {
-        var h = hash(l);
-        return h.slice(0, 12);
-    }
-    function split_if(opcode, code) {
-        var a = 0;
-        for (var i = 0; i < code.length; i++) {
-            if ((code[i]) == ops.int_op) {
-                i += 4;
-            } else if (code[i] == ops.binary_op) {
-                var h = array_to_int(code.slice(i+1, i+5));
-                i += (4 + h);
-            } else if ((code[i] == ops.caseif)){
-                var k = count_till(code, i+1, ops.casethen);
-                i += (k);
-            } else if (opcode == code[i]) {
-                return {"rest": code.slice(i),
-                    "code": code.slice(0, i),
-                    "n": i};
-            }
-        }
-        throw("split if error");
-    }
-    function count_till(code, i, opcode) {
-        for (var j = 0; (j + i) < code.length; j++) {
-            if ((code[i+j]) == ops.int_op) {
-                j += 4;
-            } else if (opcode == code[i+j]) {
-                return j;
-            } else if (code[i+j] == ops.binary_op) {
-                var h = array_to_int(code.slice(i+j+1, i+j+5));
-                j += (4 + h);
-            } else if ((code[i+j] == ops.caseif)){
-                var k = count_till(code, i+j+1, ops.casethen);
-                j += (k + 1);
-            }
-        }
-        console.log(opcode);
-        throw("count till reached end without finding goal");
-    }
-    function replace(old_character, new_code, binary) {
-        for (var i = 0; i < binary.length; i++) {
-            if (binary[i] == old_character) {
-                var r2 = replace(old_character, new_code, binary.slice(i+1));
-                return binary.slice(0,i).concat(new_code).concat(r2);
-            } else if (binary[i] == ops.int_op) {
-                i += 4;
-            } else if (binary[i] == ops.binary_op) {
-                var h = array_to_int(binary.slice(i+1, i+5));
-                i += (4 + h);
-            }
-        }
-        return binary;
-    }
-    var verbose = false;
-    var stack_verbose = false;
-    function op_print(d, i, x) {
-        if (verbose) {
-            console.log(("# ").concat(
-                (i).toString()).concat(
-                " ").concat(x));
-        }
-        if (stack_verbose) {
-            console.log(JSON.stringify(d.stack));
-        }
-    }
-    var op_code = {};
-    op_code[ops.int_op] = function(i, code, d) {
-        var int_array = code.slice(i+1, i+5);
-        var new_int = array_to_int(int_array);
-        d.stack = ([new_int]).concat(d.stack);
-        return {i: i+4, d: d, g: 1, s: "int op", r: 1};
-    };
-    op_code[ops.binary_op] = function(i, code, d) {
-        var int_array = code.slice(i+1, i+5);
-        var new_int = array_to_int(int_array);
-        var bin_array = code.slice(i+5, i+5+new_int);
-        var bin1 = (["binary"]).concat(bin_array);
-        d.stack = ([bin1]).concat(
-            d.stack);
-        return {i: i+4+new_int, d: d, g: new_int, s: "bin op", r: 1};
-    }
-    op_code[ops.caseif] = function(i, code, d) {
-        var b = d.stack[0];
-        var size_case1 = count_till(code, i + 1, ops.caseelse);
-        if (b == 0) {
-            i += (size_case1 + 1);
-        }
-        d.stack = d.stack.slice(1);
-        return {i: i, d: d, g: 0, s: "if op"};
-    }
-    op_code[ops.caseelse] = function(i, code, d) {
-        var skipped_size = count_till(code, i + 1, ops.casethen);
-        i += (skipped_size + 0);
-        return {i: i, d: d, g: 0, s: "else op"};
-    }
-    op_code[ops.casethen] = function(i, code, d) {
-        // do nothing.
-        return {i: i, d: d, g: 0, s: "then op"};
-    }
-    op_code[ops.call] = function(i, code, d) {
-        //non-optimized function call.
-        var code_hash=btoa(array_to_string(d.stack[0].slice(1)));
-        definition = d.funs[code_hash];
-        var s = definition.length;
-        d.stack = d.stack.slice(1);
-        d = run2(definition, d);
-        return {i: i, d: d, g: (s + 10), s: "slow call op", r: (s - 1)};
-    }
-    op_code[ops.define] = function(i, code, d) {
-        var skipped_size = count_till(code, i, ops.fun_end);
-        var definition = code.slice(i+1, i+skipped_size);
-        i += skipped_size;
-        var hash_array = small_hash(definition);
-        var b = btoa(array_to_string(hash_array));
-        var definition2 = replace(ops.recurse, ([ops.binary_op]).concat(integer_to_array(hash_size, 4)).concat(hash_array), definition);
-        d.funs[b] = definition2;
-        var s = definition2.length + 4;
-        var mf = d.many_funs + 1;
-        if (mf > d.fun_limit) {
-            throw("too many functions error");
-        } else {
-            d.many_funs = mf;
-        }
-        return {i: i, d: d, g: (s + 30), s: "define op", r: (s+s)};
-    }
-    op_code[ops.print] = function(i, code, d) {
-        console.log(JSON.stringify(d.stack));
-        return {i: i, d: d, g: 0, s: "print op"};
-    };
-    op_code[ops.drop] = function(i, code, d) {
-        underflow_check(d, 1, "drop");
-        var m = memory(d.stack[0]);
-        d.stack = d.stack.slice(1);
-        return {i: i, d: d, g: 1, s: "drop op", r: (-2 - m)};
-    };
-    op_code[ops.dup] = function(i, code, d) {
-        underflow_check(d, 1, "dup");
-        d.stack = ([d.stack[0]]).concat(d.stack);
-        return {i: i, d: d, g: 1, s: "dup op", r: memory(d.stack[0])};
-    };
-    op_code[ops.swap] = function(i, code, d) {
-        underflow_check(d, 2, "swap");
-        d.stack = ([d.stack[1]]).concat(
-            [d.stack[0]]).concat(
-            d.stack.slice(2));
-        return {i: i, d: d, g: 1, s: "swap op"};
-    };
-    op_code[ops.tuck] = function(i, code, d) {
-        underflow_check(d, 3, "tuck");
-        d.stack = ([d.stack[1]]).concat(
-            [d.stack[2]]).concat(
-            [d.stack[0]]).concat(
-            d.stack.slice(3));
-        return {i: i, d: d, g: 1, s: "tuck op"};
-    }
-    op_code[ops.rot] = function(i, code, d) {
-        underflow_check(d, 3, "rot");
-        d.stack = ([d.stack[2]]).concat(
-            [d.stack[0]]).concat(
-            [d.stack[1]]).concat(
-            d.stack.slice(3));
-        return {i: i, d: d, g: 1, s: "rot op"};
-    }
-    op_code[ops.ddup] = function(i, code, d) {
-        underflow_check(d, 2, "ddup");
-        d.stack = d.stack.slice(0, 2).concat(d.stack);
-        return {i: i, d: d, g: 1, s: "ddup op", r: (memory(d.stack[0]) + memory(d.stack[1]))};
-    }
-    op_code[ops.tuckn] = function(i, code, d) {
-        if (d.stack.length < 2) {
-            throw("tuckn stack underflow");
-        } else {
-            var n = d.stack[0];
-            underflow_check(d, 2+n,"tuckn");
-            d.stack = d.stack.slice(2, 2+n).concat(
-                [d.stack[1]]).concat(
-                d.stack.slice(3+n));
-        }
-        return {i: i, d: d, g: 1, s: "tuckn op"};
-    }
-    op_code[ops.pickn] = function(i, code, d) {
-        var n = d.stack[0];
-        if (d.stack.length < (n + 1)) {
-            throw("pickn stack underflow");
-        } else {
-            d.stack = ([d.stack[n]]).concat(
-                d.stack.slice(1, 1+n)).concat(
-                d.stack.slice(2+n));
-        }
-        return {i: i, d: d, g: 1, s: "pickn op"};
-    }
-    op_code[ops.to_r] = function(i, code, d) {
-        underflow_check(d, 1, "to_r");
-        d.alt = ([d.stack[0]]).concat(d.alt);
-        d.stack = d.stack.slice(1);
-        return {i: i, d: d, g: 1, s: ">r op"};
-    }
-    op_code[ops.from_r] = function(i, code, d) {
-        if (d.alt.length < 1) {
-            throw(">r alt stack underflow");
-        } else {
-            d.stack = ([d.alt[0]]).concat(d.stack);
-            d.alt = d.alt.slice(1);
-        }
-        return {i: i, d: d, g: 1, s: "r> op"};
-    }
-    op_code[ops.r_fetch] = function(i, code, d) {
-        if (d.alt.length < 1) {
-            throw("alt stack underflow");
-        } else {
-            d.stack = ([d.alt[0]]).concat(d.stack);
-        }
-        return {i: i, d: d, g: 1, s: "r@ op"};
-    }
-    op_code[ops.hash_op] = function(i, code, d) {
-        underflow_check(d, 1, "hash");
-        d.stack = ([["binary"].concat(hash(d.stack[0].slice(1)))]).concat(
-            d.stack.slice(1));
-        return {i: i, d: d, g: 20, s: "hash op"};
-    }
-    op_code[ops.verify_sig] = function(i, code, d) {
-        underflow_check(d, 3, "verify_sig");
-        //data, sig, key
-        var pub1 = d.stack[0].slice(1);//internal format puts "binary" at the front of each binary.
-        var data1 = d.stack[1].slice(1);
-        var sig1 = d.stack[2].slice(1);
-        var ec = keys.ec(),
-            temp_key = ec.keyFromPublic(toHex(array_to_string(pub1)), "hex");
-        var sig2 = bin2rs(array_to_string(sig1));
-        var b = temp_key.verify(hash(serialize(data1)), sig2, "hex")
-        var c;
-        if (b) { c = 1; }
-        else { c = 0; }
-        d.stack = ([c]).concat(
-            d.stack.slice(3));
-        return {i: i, d: d, g: 20, s: "verify_sig op"};
-    }
-    op_code[ops.eq] = function(i, code, d) {
-        underflow_check(d, 2, "eq");
-        if (JSON.stringify(d.stack[0]) == JSON.stringify(d.stack[1])) {
-            d.stack = ([1]).concat(d.stack);
-        } else {
-            d.stack = ([0]).concat(d.stack);
-        }
-        return {i: i, d: d, g: 1, s: "eq op", r: 1};
-    }
-    op_code[ops.bool_flip] = function(i, code, d) {
-        underflow_check(d, 1, "bool_flip");
-        if (d.stack[0] == 0) {
-            d.stack = ([1]).concat(d.stack.slice(1));
-        } else {
-            d.stack = ([0]).concat(d.stack.slice(1));
-        }
-        return {i: i, d: d, g: 1, s: "bool flip op"};
-    }
-    op_code[ops.bool_and] = function(i, code, d) {
-        underflow_check(d, 2, "bool_and");
-        if ((d.stack[0] == 0) || (d.stack[1] == 0)) {
-            d.stack = ([0]).concat(d.stack.slice(2));
-        } else {
-            d.stack = ([1]).concat(d.stack.slice(2));
-        }
-        return {i: i, d: d, g: 1, s: "bool and op", r: (-2)};
-    }
-    op_code[ops.bool_or] = function(i, code, d) {
-        underflow_check(d, 2, "bool_or");
-        if ((d.stack[0] == 0) && (d.stack[1] == 0)) {
-            d.stack = ([0]).concat(d.stack.slice(2));
-        } else {
-            d.stack = ([1]).concat(d.stack.slice(2));
-        }
-        return {i: i, d: d, g: 1, s: "bool or op", r: (-2)};
-    }
-    op_code[ops.bool_xor] = function(i, code, d) {
-        underflow_check(d, 2, "bool_xor");
-        var j = 0;
-        if ((d.stack[0] == 0) && (d.stack[1] == 0)) {
-            j = 0;
-        } else if ((d.stack[0] == 0) || (d.stack[1] == 0)) {
-            j=1;
-        }
-        d.stack = ([j]).concat(d.stack.slice(2));
-        return {i: i, d: d, g: 1, s: "bool xor op", r: (-2)};
-    }
-    op_code[ops.stack_size] = function(i, code, d) {
-        d.stack = ([d.stack.length]).concat(d.stack);
-        return {i: i, d: d, g: 1, s: "stack_size op", r: 2};
-    }
-    op_code[ops.height] = function(i, code, d) {
-        d.stack = ([d.state.height]).concat(d.stack);
-        return {i: i, d: d, g: 1, s: "height op", r: 2};
-    }
-    op_code[ops.gas] = function(i, code, d) {
-        d.stack = ([d.op_gas]).concat(d.stack);
-        return {i: i, d: d, g: 1, s: "gas op", r: 2};
-    }
-    op_code[ops.many_vars] = function(i, code, d) {
-        d.stack = ([d.vars.length]).concat(d.stack);
-        return {i: i, d: d, g: 1, s: "many vars op", r: 2};
-    }
-    op_code[ops.many_funs] = function(i, code, d) {
-        d.stack = (d.many_funs).concat(d.stack);
-        return {i: i, d: d, g: 1, s: "many funs op", r: 2};
-    }
-    op_code[ops.fun_end] = function(i, code, d) {
-        return {i: i, d: d, g: 1, s: "fun end op"};
-    }
-    op_code[ops.set] = function(i, code, d) {
-        underflow_check(d, 2, "set");
-        d.vars[d.stack[0]] = d.stack[1];
-        d.stack = d.stack.slice(2);
-        return {i: i, d: d, g: 1, s: "set op"};
-    }
-    op_code[ops.fetch] = function(i, code, d) {
-        underflow_check(d, 1, "fetch");
-        var val;
-        var foo = d.vars[d.stack[0]];
-        if (foo == undefined) {
-            val = [];
-        } else {
-            val = foo;
-        }
-        d.stack = ([val]).concat(d.stack.slice(1));
-        return {i: i, d: d, g: 1, s: "fetch op", r: (1+memory(val))};
-    }
-    op_code[ops.cons] = function(i, code, d) {
-        underflow_check(d, 2, "cons");
-        var l = ([d.stack[1]]).concat(
-            d.stack[0]);
-        d.stack = ([l]).concat(
-            d.stack.slice(2));
-        return {i: i, d: d, g: 1, s: "cons op", r: 1};
-    }
-    op_code[ops.car] = function(i, code, d) {
-        underflow_check(d, 1, "car");
-        if (!(Array.isArray(d.stack[0]))) {
-            console.log(JSON.stringify(d.stack));
-            throw("car op error");
-        } else {
-            d.stack = ([d.stack[0].slice(1)]).concat(
-                ([d.stack[0][0]])).concat(
-                d.stack.slice(1));
-        }
-        return {i: i, d: d, g: 1, s: "car op", r: (-1)};
-    }
-    op_code[ops.empty_list] = function(i, code, d) {
-        d.stack = ([[]]).concat(d.stack);
-        return {i: i, d: d, g: 1, s: "empty list op", r: 1};
-    }
-    op_code[ops.append] = function(i, code, d) {
-        underflow_check(d, 2, "append");
-        var a;
-        if (("binary" == d.stack[0][0]) &&
-            ("binary" == d.stack[1][0])) {
-            a = (d.stack[1]).concat(d.stack[0].slice(1));
-            if (a.length == 5) {
-                a = array_to_int(a.slice(1));
-            }
-        } else if (!("binary" == d.stack[0][0]) &&
-            !("binary" == d.stack[1][0])) {
-            a = (d.stack[1]).concat(d.stack[0]);
-        } else {
-            return ["error", "cannot append binary and list together", "append"];
-        }
-        d.stack = ([a]).concat(
-            d.stack.slice(2));
-        return {i: i, d: d, g: 1, s: "append op", r: 1};
-    }
-    op_code[ops.split] = function(i, code, d) {
-        underflow_check(d, 2, "split");
-        if (!(Array.isArray(d.stack[1]))) {
-            //treat the integer like a 4 byte binary
-            var n = d.stack[0];
-            var bin0 = integer_to_array(d.stack[1], 4);
-            var bin1 = bin0.slice(0, n);
-            var bin2 = bin0.slice(n, 4);
-            d.stack = ([(["binary"]).concat(bin1)]).concat(
-                ([(["binary"]).concat(bin2)]).concat(d.stack.slice(2)));
-
-        } else if (!(d.stack[1][0] == "binary")) {
-            throw("cannot split a list");
-        } else {
-            var n = d.stack[0];
-            var bin1;
-            if (n == 4) {
-                bin1 = array_to_int(d.stack[1].slice(1, n+1));
-            } else {
-                bin1 = d.stack[1].slice(0, n+1);
-            }
-            var bin2;
-            if ((d.stack[1].length - n - 1) == 4) {
-                bin2 = array_to_int(d.stack[1].slice(n+1));
-            } else {
-                bin2 = (["binary"]).concat(d.stack[1].slice(n+1));
-            }
-            d.stack = ([bin1]).concat(
-                [bin2]).concat(
-                d.stack.slice(2));
-        }
-        return {i: i, d: d, g: 1, s: "split op", r: (-1)};
-    };
-    op_code[ops.reverse] = function(i, code, d) {
-        underflow_check(d, 1, "reverse");
-        if (d.stack[0][0] == "binary") {
-            return ["error", "cannot reverse a binary", "reverse"];
-        } else {
-            d.stack = ([d.stack[0].reverse()]).concat(
-                d.stack.slice(1));
-        }
-        return {i: i, d: d, g: d.stack[0].length, s: "reverse op"};
-    };
-    op_code[ops.is_list] = function(i, code, d) {
-        var j;
-        underflow_check(d, 1, "is_list");
-        if (!(d.stack[0].is_array())) {
-            j = 0;
-        } else if (d.stack[0][0] == "binary") {
-            j = 0;
-        } else {
-            j = 1;
-        }
-        d.stack = ([j]).concat(d.stack);
-        return {i: i, d: d, g: 1, s: "is_list op", r: (-1)};
-    };
-    op_code[ops.nop] = function(i, code, d) {
-        return {i: i, d: d, g: 0, s: "nop op"};
-    };
-    op_code[ops.fail] = function(i, code, d) {
-        op_print(d, i, "fail op");
-        op_print(d, i, JSON.stringify(d.stack));
-        throw("fail error");
-    };
-    function run2(code, d) {
-        console.log("run 2");
-        for (var i = 0; i<code.length; i++) {
-            //console.log("run cycle");
-            //console.log(i);
-            if (d.ram_current > d.ram_most) {
-                d.ram_most = d.ram_current;
-            }
-            if (d.op_gas < 0) {
-                console.log(JSON.stringify(d));
-                console.log("out of time");
-                return ["error", "out of time"];
-            } else if (d.ram_current > d.ram_limit) {
-                console.log("out of space. limit was: ");
-                console.log(d.ram_limit);
-                return ["error", "out of space"];
-            } else if ((code[i] == ops.call) && (code[i+1] == ops.fun_end)){
-                //tail call optimized function call
-                //console.log("tail call optimized function call op");
-                //console.log(d.stack[0]);
-                definition = d.funs[d.stack[0]];
-                var s = definition.length;
-                d.op_gas = d.op_gas - s - 10;
-                d.ram_current = d.ram_current + s - 1;
-                d.stack = d.stack.slice(1);
-                code = definition.concat(code.slice(i+1));
-                i = 0;
-                op_print(d, i, "optimized call op");
-                //return run2(definition.concat(rest), d);
-            } else if (code[i] == ops.finish) {
-                op_print(d, i, "return op");
-                return d;
-            } else if ((!(code[i] < ops.add)) && (code[i] < ops.eq)) {
-                //console.log("arithmetic");
-                underflow_check(d, 2, "arithmetic");
-                d.op_gas = d.op_gas - 1;
-                d.ram_current = d.ram_current - 2;
-                var a = arithmetic_chalang(code[i], d.stack[0], d.stack[1]);
-                d.stack = a.concat(d.stack.slice(2));
-                op_print(d, i, ("math ").concat((code[i]).toString()));
-            } else {
-                var y = op_code[code[i]](i, code, d);
-                i = y.i;
-                d = y.d;
-                d.op_gas -= y.g;
-                if (!(y.r == undefined)) {
-                    d.ram_current += y.r;
-                }
-                op_print(d, i, y.s);
-            }
-        }
-        return d;
-    }
-    function is_balanced_f(code) {
-        var x = 0;
-        for (var i = 0; i<code.length; i++) {
-            if (code[i] == ops.int_op) {
-                i += 4;
-            } else if (code[i] == ops.binary_op) {
-                n = array_to_int(code.slice(i+1, i+5));
-                i += (4 + n);
-            } else if ((code[i] == ops.define) && (x == 0)){
-                x = 1;
-            } else if ((code[i] == ops.fun_end) && (x == 1)) {
-                x = 0;
-            } else if ((code[i] == ops.define) || (code[i] == ops.fun_end)) {
-                return false;
-            }
-        }
-        return true;
-    }
-    function run5(code, d) {
-        //console.log("run5 ");
-        //console.log(JSON.stringify(code));
-        if (is_balanced_f(code)) {
-            return run2(code, d);
-        } else {
-            throw("misformed function. : ; ");
-        }
-    }
-    //these are some compiled contracts from chalang/src/forth/. the chalang repository.
-    //each of these test contracts should return a stack like this: [1]
-    var hashlock_contract =
-        [2,0,0,0,32,169,243,219,139,234,91,46,239,146,55,229,72,9,221,164,63,12,33,143,128,208,211,40,163,63,91,76,255,255,51,72,230,40,10,
-            2,0,0,0,32,67,235,55,16,65,154,38,188,176,22,150,20,54,17,182,74,255,87,231,241,254,236,126,177,29,146,149,153,232,73,80,204,
-            ops.print,ops.eq,ops.swap,ops.drop,ops.swap,ops.drop];
-
-    var verify_signature_contract =
-        [2,0,0,0,71,48,69,2,32,112,134,203,180,124,166,163,247,
-            94,210,211,101,253,157,198,109,165,100,230,213,193,22,
-            236,82,240,187,161,163,143,174,252,77,2,33,0,252,160,42,
-            76,157,218,69,96,18,53,9,86,91,223,194,87,4,167,121,112,
-            117,103,139,226,37,133,252,41,247,43,137,118, //this is the signature.
-            2,0,0,0,3,1,2,3, //this is the data
-            2,0,0,0,65,4,133,89,134,205,122,130,218,16,254,
-            229,12,186,57,121,105,43,173,164,137,130,226,246,188,49,
-            236,32,10,247,161,232,193,46,14,58,3,190,212,42,97,158,
-            69,121,135,20,133,143,208,46,58,66,6,181,227,170,244,
-            237,22,35,120,150,45,13,134,58, //this is the pubkey
-            ops.print,ops.verify_sig];
-    var function_contract =
-        [ops.define,ops.dup,ops.mul,ops.fun_end, //square
-            ops.define, //quad
-            2,0,0,0,12,239,24,7,129,222,179,141,148,74,245,17,98,
-            ops.call, //square
-            2,0,0,0,12,239,24,7,129,222,179,141,148,74,245,17,98,
-            ops.call, //square
-            ops.fun_end,
-            0,0,0,0,2,
-            2,0,0,0,12,248,21,87,89,106,92,199,6,67,69,197,184,
-            ops.call, //quad
-            0,0,0,0,16,
-            ops.eq,ops.swap,ops.drop,ops.swap,ops.drop];
-    var variable_contract =
-        [0,0,0,0,12,
-            0,0,0,0,1,
-            ops.set,
-            0,0,0,0,11,
-            0,0,0,0,2,
-            ops.set,
-            0,0,0,0,1,
-            ops.fetch,
-            ops.print,
-            0,0,0,0,1,
-            ops.fetch,
-            0,0,0,0,10,
-            0,0,0,0,1,
-            ops.set,
-            0,0,0,0,1,
-            ops.fetch,
-            0,0,0,0,2,
-            ops.fetch,
-            0,0,0,0,11,
-            ops.eq,ops.to_r,ops.drop,ops.drop,
-            0,0,0,0,10,
-            ops.eq,ops.to_r,ops.drop,ops.drop,
-            0,0,0,0,12,
-            ops.eq,ops.to_r,ops.drop,ops.drop,
-            0,0,0,0,12,
-            ops.eq,ops.to_r,ops.drop,ops.drop,
-            ops.from_r,ops.from_r,ops.from_r,ops.from_r,
-            ops.bool_and,ops.bool_and,ops.bool_and
-        ];
-    var map_contract =
-        [ops.define,ops.dup,ops.mul,ops.fun_end, //square
-            ops.define,//map2
-            ops.car,ops.swap,
-            0,0,0,0,1,
-            ops.fetch,ops.call,ops.rot,ops.cons,ops.swap,
-            ops.empty_list,ops.eq,ops.caseif,
-            ops.drop,ops.drop,ops.reverse,
-            ops.caseelse,
-            ops.drop,ops.recurse,ops.call,
-            ops.casethen,
-            ops.fun_end,
-            ops.define, //map
-            0,0,0,0,1,
-            ops.set,ops.empty_list,ops.swap,
-            ops.binary_op,0,0,0,12,
-            71,192,142,101,22,36,27,88,17,55,152,169,
-            ops.call,
-            ops.fun_end,
-            ops.empty_list,
-            0,0,0,0,5,
-            ops.swap,ops.cons,
-            0,0,0,0,6,ops.swap,ops.cons,
-            0,0,0,0,7,
-            ops.swap,ops.cons,ops.reverse,
-            2,0,0,0,12,239,24,7,129,222,179,141,148,74,245,17,98,
-            2,0,0,0,12,53,181,176,16,58,242,45,201,243,134,253,139,
-            ops.call,
-            ops.empty_list,
-            0,0,0,0,25,
-            ops.swap,ops.cons,
-            0,0,0,0,36,
-            ops.swap,ops.cons,
-            0,0,0,0,49,
-            ops.swap,ops.cons,ops.reverse, ops.print,
-            ops.eq,ops.to_r,ops.drop,ops.drop,ops.from_r];
-    var recursion_contract =
-        [ops.define,
-            0,0,0,0,0,ops.eq,ops.bool_flip,
-            ops.caseif,
-            ops.drop,
-            0,0,0,0,1,
-            ops.subtract,
-            0,0,0,0,0,
-            ops.swap,ops.recurse,
-            ops.call,
-            ops.caseelse,
-            20,20,
-            ops.casethen,
-            ops.fun_end,
-            0,0,0,0,5,
-            2,0,0,0,12,95,171,14,87,107,52,162,208,56,196,48,154,
-            ops.call,
-            0,0,0,0,0,
-            ops.eq,ops.to_r,ops.drop,ops.drop,
-            0,0,0,0,0,
-            ops.eq,ops.to_r,ops.drop,ops.drop,
-            0,0,0,0,0,
-            ops.eq,ops.to_r,ops.drop,ops.drop,
-            0,0,0,0,0,
-            ops.eq,ops.to_r,ops.drop,ops.drop,
-            0,0,0,0,0,
-            ops.eq,ops.to_r,ops.drop,ops.drop,
-            ops.from_r,ops.from_r,ops.from_r,ops.from_r,ops.from_r,
-            ops.bool_and,ops.bool_and,ops.bool_and,ops.bool_and
-        ];
-    var case_contract = [
-        0,0,0,0,0,
-        ops.caseif,
-        0,0,0,0,3,
-        ops.caseif, 0,0,0,0,7,
-        ops.caseelse, 0,0,0,0,8, ops.casethen,
-        ops.caseif, ops.caseelse, 0,0,0,0,0,
-        ops.caseif, ops.caseelse, ops.casethen,
-        ops.casethen,
-        ops.caseelse,
-        0,0,0,0,0,
-        ops.caseif,
-        0,0,0,0,3,
-        ops.caseelse,
-        0,0,0,0,4,
-        ops.casethen,
-        0,0,0,0,27,
-        ops.casethen
-    ];
-    var split_append_contract = [
-        //should return <<2,3,1>>
-        ops.binary_op, 0,0,0,3, 1,2,3,
-        ops.int_op, 0,0,0,1,
-        ops.split, ops.append
-    ];
-    function chalang_test() {
-        var d = data_maker(1000, 1000, 50, 1000, [], [], new_state(0, 0));
-        console.log("chalang test");
-        //var x = run5(verify_signature_contract, d);
-        //var x = run5(case_contract, d);
-        //var x = run5(hashlock_contract, d);
-        //var x = run5(split_append_contract, d);
-        //var x = run5(recursion_contract, d);
-        var x = run5(variable_contract, d);
-        //var x = run5(function_contract, d);
-        //var x = run5(map_contract, d);
-        console.log(JSON.stringify(x.stack));
-        return x.stack;
-    }
-    function new_state(height, slash) {
-        return{"name": "state", "height": height, "slash": slash};
-    }
-    function data_maker(op_gas, ram_gas, many_vs, many_funs, script_sig, code, state) {
-        var arr = [];
-        arr.length = many_vs;
-        return {"name": "d", "op_gas":op_gas, "stack": [], "alt": [], "ram_most": 0, "ram_limit":ram_gas, "vars": arr, "funs":{}, "many_funs": 0, "fun_limit":many_funs, "ram_current":(script_sig.length + code.length), "state":state};
-    }
-    return {run5: run5,
-        test: chalang_test,
-        ops: function() {return(ops);},
-        new_state: new_state,
-        data_maker: data_maker};
-}
-
-var chalang_object = chalang_main();
-//var foo = chalang_object.test();//this is how you make the test run.
-//console.log(JSON.stringify(foo));
-
-
-const ops = chalang_object.ops();
-
-function prove_facts(facts, callback) {
-    if (JSON.stringify(facts) === JSON.stringify([])) {
-        return callback([ops.empty_list]);
-    }
-    return prove_facts2(facts, 1, [ops.empty_list], callback);
-}
-
-var tree2id = {accounts: 1, channels: 2, existence: 3, burn: 4, oracles: 5, governance: 6};
-
-function prove_facts2(facts, i, r, callback) {
-    var ops = chalang_object.ops();
-    if (i === facts.length) {
-        r.concat([ops.reverse]); // converts a , to a ]
-        return callback(r);
-    }
-    var tree = facts[i][0];
-    var key = facts[i][1];
-
-    merkle.request_proof(tree, key, function (value) {
-        //var value = merkle.verify(key, proof);
-        //we are making chalang like this:
-        //[ int id, key, binary size serialized_data ]
-        // '[', ']', and ',' are macros for making a list.
-        var id = tree2id[tree];
-        r = r.concat([ops.empty_list]); // [
-        r = r.concat([0]).concat(integer_to_array(id, 4));
-        r = r.concat([ops.swap, ops.cons]); // ,
-        if (Number.isInteger(key)) {
-            r = r.concat([0]);
-            r = r.concat(integer_to_array(key, 4));
-        } else {
-            key = string_to_array(atob(key));
-            r = r.concat([2]);
-            r = r.concat(integer_to_array(key.length, 4));
-            r = r.concat(key);
-        }
-        r = r.concat([ops.swap, ops.cons]); // ,
-        var serialized_data = merkle.serialize(value, key);//this is the serialized version of the thing who's existence we are proving. make it from value.
-        var s = serialized_data.length;
-        r = r.concat([2]).concat(integer_to_array(s, 4));
-        r = r.concat(serialized_data);
-        r = r.concat([ops.swap, ops.cons, ops.reverse]); // ]
-        r = r.concat([ops.swap, ops.cons]); // ,
-        return prove_facts2(facts, i + 1, r, callback);
-    });
-}
-
-function spk_run(mode, ss0, spk0, height, slash, fun_limit, var_limit, callback) {//mode unused
-    var spk = JSON.parse(JSON.stringify(spk0));
-    var ss = JSON.parse(JSON.stringify(ss0));
-    var state = chalang_object.new_state(height, slash);
-
-    var ret;
-    if (!(ss.length === (spk[3].length - 1))) { //spk[3] == bets is formated with a -6 in front for packer.erl
-        console.log(JSON.stringify(ss));
-        console.log(JSON.stringify(spk));
-        throw("ss and bets need to be the same length");
-    }
-    spk_run2(ss, spk[3], spk[5], spk[4], fun_limit, var_limit, state, spk[9], spk[8], 0, 1, function (ret) {
-        return callback(ret);
-    });
-}
-
-function spk_run2(ss, bets, opgas, ramgas, funs, vars, state, delay, nonce, amount, i, callback) {
-    if (i > (ss.length)) {
-        return callback({"amount": amount, "nonce": nonce, "delay": delay});//, "opgas": opgas});
-    }
-    spk_run3(ss[i - 1], bets[i], opgas, ramgas, funs, vars, state, function (run_object) {
-        if (!(Number.isInteger(run_object.nonce))) {
-            console.log(JSON.stringify(run_object.nonce));
-            throw("nonce should be an integer");
-        }
-        return spk_run2(ss, bets, opgas, ramgas, funs, vars, state, Math.max(delay, run_object.delay),
-            nonce + run_object.nonce, amount + run_object.amount, i + 1, callback);
-    });
-}
-
-function spk_run3(ss, bet, opgas, ramgas, funs, vars, state, callback) {
-    console.log("spk run 3 ss is ");
-    console.log(JSON.stringify(ss));
-    //{"code":[2,0,0,0,32,175,20,235,211,57,38,228,113,95,134,170,11,54,51,95,61,134,20,89,119,227,76,113,166,247,85,51,203,81,88,170,5],"prove":[-6,-6],"meta":[-6,-6]} //prove should only have one -6
-    var script_sig = ss.code;
-    if (!(chalang_none_of(script_sig))) {
-        throw("error: return op in the script sig");
-    }
-    console.log("spk run3");
-    console.log(JSON.stringify(ss.prove));
-    prove_facts(ss.prove, function (f) {
-        var c = string_to_array(atob(bet[1]));
-        var code = f.concat(c);
-        var data = chalang_object.data_maker(opgas, ramgas, vars, funs, script_sig, code, state);
-        var data2 = chalang_object.run5(script_sig, data);
-        var data3 = chalang_object.run5(code, data2);
-        //console.log("just ran contract, stack returned as ");
-        //console.log(JSON.stringify(data3.stack));
-        //console.log("bet was ");
-        //console.log(JSON.stringify(bet));
-        var amount = data3.stack[0] | 0;//This should be a signed integer, but for some reason the integer is being stuck into a 32 byte unsigned value, so -2000 becomes 4294965296
-        var nonce = data3.stack[1];
-        var delay = data3.stack[2];
-        var cgran = 10000; //constants.erl
-        console.log(amount);
-        if ((amount > cgran) || (amount < -cgran)) {
-            throw("you can't spend money you don't have in the channel.");
-        }
-        //var a3 = Math.floor(amount * bet.amount / cgran);
-        var a3 = Math.floor(amount * bet[2] / cgran);
-        return callback({"amount": a3, "nonce": nonce, "delay": delay, "opgas": data3.opgas});
-    });
-}
-
-function spk_force_update(spk0, ssold0, ssnew0, fun_limit, var_limit, callback) {
-    var spk = JSON.parse(JSON.stringify(spk0));
-    var ssold = JSON.parse(JSON.stringify(ssold0));
-    if (ssold[0] === -6) {
-        ssold = ssold.slice(1);
-    }
-    var ssnew = JSON.parse(JSON.stringify(ssnew0));
-    console.log("force update");
-    console.log(JSON.stringify(ssold));
-    console.log(JSON.stringify(ssnew));//double -6
-    var height = headers_object.top()[1];
-    var ret;
-    spk_run("fast", ssold, spk, height, 0, fun_limit, var_limit, function (ran1) {
-        var nonceOld = ran1.nonce;
-        spk_run("fast", ssnew, spk, height, 0, fun_limit, var_limit, function (ran2) {
-            var nonceNew = ran2.nonce;
-            if (!(nonceNew < nonceOld)) {
-                spk_force_update2(spk[3], ssnew, height, function (updated) {
-                    spk[3] = updated.new_bets;
-                    spk[7] += updated.amount;
-                    spk[8] += updated.nonce;
-                    console.log("force udpate final ss is ");
-                    console.log(JSON.stringify(updated.newss));//failing to remove the ss.
-                    console.log("force udpate final spk is ");
-                    console.log(JSON.stringify(spk));//succeeds to remove the bet.
-                    console.log("updated is ");
-                    console.log(JSON.stringify(updated));
-                    return callback({"spk": spk, "ss": updated.newss});
-                });
-            } else {
-                console.log(JSON.stringify([nonceNew, nonceOld]));
-                console.log(JSON.stringify([ssnew, ssold]));
-                console.log("spk force update had nothing to do.");
-                return callback(false);
-            }
-        });
-    });
-}
-
-function chalang_none_of(c) {
-    console.log("none of");
-    var n;
-    for (var i = 0; i < c.length; i++) {
-        if (c[i] == ops.finish) {
-            return false;
-        } else if (c[i] == ops.int_op) {
-            i += 4
-        } else if (c[i] == ops.binary_op) {
-            n = array_to_int(c.slice(i + 1, i + 5));
-            i += (4 + n);
-        }
-    }
-    return true;
-}
-
-function spk_force_update2(bets, ss, height, callback) {
-    var amount = 0;
-    var nonce = 0;
-    var new_bets = JSON.parse(JSON.stringify(bets));
-    var newss = JSON.parse(JSON.stringify(ss));
-    var fun_limit = 1000;//config
-    var var_limit = 10000;
-    var bet_gas_limit = 100000;//same as bet_unlock2
-    var cgran = 10000; //constants.erl
-    console.log("spk force update 2 compare bets and ss");
-    console.log(JSON.stringify(ss));//no -6 to start
-    console.log(JSON.stringify(bets));//starts with -6
-    spk_force_update22(bets, ss, height, amount, nonce, new_bets, newss, fun_limit, var_limit, bet_gas_limit, bets.length - 1, callback);
-}
-
-function spk_force_update22(bets, ss, height, amount, nonce, new_bets, newss, fun_limit, var_limit, bet_gas_limit, i, callback) {
-    //console.log("spke force update 22");
-    if (i < 1) {
-        return callback({"new_bets": new_bets, "newss": newss, "amount": amount, "nonce": nonce});
-    }
-    var b = chalang_none_of(ss[i - 1].code);//ss.code
-    if (!(b)) {
-        throw("you can't put return op into the ss");
-    }
-    var state = chalang_object.new_state(height, 0);
-    prove_facts(ss[i - 1].prove, function (f) { //PROBLEM HERE
-        //var code = f.concat(bets[i].code);
-        var code = f.concat(string_to_array(atob(bets[i][1])));
-        console.log("spk force update 22. code is ");
-        console.log(JSON.stringify(code));
-        var data = chalang_object.data_maker(bet_gas_limit, bet_gas_limit, var_limit, fun_limit, ss[i - 1].code, code, state);
-        var data2 = chalang_object.run5(ss[i - 1].code, data);
-        var data3 = chalang_object.run5(code, data2);
-        var s = data3.stack;
-        var cgran = 10000; //constants.erl
-        console.log("ran code stack is ");
-        console.log(JSON.stringify(s));
-        if (!(s[2] > 0)) { //if the delay is long, then don't close the trade.
-            console.log("short delay, close the trade.");
-            if (s[0] > cgran) {
-                throw("you can't spend money that you don't have");
-            }
-            console.log("update amount");
-            console.log(JSON.stringify([s[0], bets[i][2], cgran]));
-            amount += Math.floor(s[0] * bets[i][2] / cgran);
-            nonce += s[1];
-            new_bets = new_bets.slice(0, i).concat(new_bets.slice(i + 1, new_bets.length));
-            newss = newss.slice(0, i - 1).concat(newss.slice(i, newss.length));
-        } else {
-            console.log("long delay, do not close the trade.");
-        }
-        return spk_force_update22(bets, ss, height, amount, nonce, new_bets, newss, fun_limit, var_limit, bet_gas_limit, i - 1, callback);
-    });
-}
-
-function tree_number_to_value(t) {
-    if (t < 101) {
-        return t;
-    } else {
-        var top = 101;
-        var bottom = 100;
-        var x = tree_number_det_power(10000, top, bottom, t);
-        return Math.floor(x / 100);
-    }
-}
-
-function tree_number_det_power(base, top, bottom, t) {
-    if (t == 1) {
-        return Math.floor((base * top) / bottom);
-    }
-    var r = Math.floor(t % 2);
-    if (r == 1) {
-        var base2 = Math.floor((base * top) / bottom);
-        return tree_number_det_power(base2, top, bottom, t - 1);
-    } else if (r == 0) {
-        var top2 = Math.floor((top * top) / bottom);
-        return tree_number_det_power(base, top2, bottom,
-            Math.floor(t / 2));
-    }
-}
-
-function ss_to_internal(ess) {
-    var ss = [];
-    for (var i = 1; i < ess.length; i++) {
-        if (JSON.stringify(ess[i][2]) === JSON.stringify([-6, -6])) {
-            ess[i][2] = [-6];
-            ess[i][3] = [-6];
-        }
-        ss = ss.concat([new_ss(string_to_array(atob(ess[i][1])), ess[i][2], ess[i][3])]);
-    }
-
-    console.log("ss to internal ss is ");
-    console.log(JSON.stringify(ss));
-    return ss;
-}
-
-function channel_feeder_they_simplify(from, themspk, cd, callback) {
-    cd0 = channels_object.read(from);
-    //true = cd0.live; //verify this is true
-    //true = cd.live; //verify this is true
-    var spkme = cd0.me;
-    var ssme = cd0.ssme;
-    //console.log("ssme is ");
-    //console.log(JSON.stringify(ssme));
-    //verify that they signed themspk
-    var newspk = themspk[1];
-    //console.log("spkme is ");
-    var newspk2 = cd[1];
-    if (!(JSON.stringify(newspk) == JSON.stringify(newspk2))) {
-        console.log(JSON.stringify(newspk));
-        console.log(JSON.stringify(newspk2));
-        throw("spks they gave us do not match");
-    }
-    var ss = ss_to_internal(cd[3]);
-    var ss4 = ss_to_internal(cd[4]);//this one looks weird
-    merkle.request_proof("governance", 14, function (tree_fun_limit) {
-        var fun_limit = tree_number_to_value(tree_fun_limit[2]);
-        merkle.request_proof("governance", 15, function (tree_var_limit) {
-            var var_limit = tree_number_to_value(tree_var_limit[2]);
-            spk_force_update(spkme, ssme, ss4, fun_limit, var_limit, function (b2) {
-                var cid = cd[7];
-                var expiration = cd[7];
-                console.log("are we able to force update?");
-                console.log(JSON.stringify([b2, {"spk": newspk, "ss": ss}]));
-                if (JSON.stringify(b2) == JSON.stringify({"spk": newspk, "ss": ss})) {
-                    var ret = keys.sign(newspk);
-                    var newcd = channels_object.new_cd(newspk, themspk, ss, ss, expiration, cid);
-                    channels_object.write(from, newcd);
-                    ss4_text = document.createElement("h8");
-                    ss4_text.innerHTML = JSON.stringify(ss4);
-                    document.body.append(ss4_text);
-                    //append ss4 to the document somewhere.
-                    return callback(ret);
-                } else {
-                    is_improvement(spkme, ssme, newspk, ss, fun_limit, var_limit, function (b3) {//maybe ss should be ss4?
-                        if (b3) {
-                            //If they give free stuff, then accept.
-                            ret = keys.sign(newspk);
-                            var newcd = channels_object.new_cd(newspk, themspk, ss, ss, expiration, cid);
-                            channels_object.write(from, newcd);
-                            return callback(ret);
-                        } else {
-                            //console.log("channel feeder they simplify had nothing to do");
-                            //return callback(false);
-                            //this part is only used for lightning.
-                            channel_feeder_simplify_helper(from, ss4, function (sh) {
-                                if (sh.ss == undefined) {
-                                    throw "error, should be defined.";
-                                }
-                                var ss5 = sh.ss;
-                                var ret = sh.spk;
-                                var spk = themspk[1];
-                                var spk2 = ret[1];
-                                if (!(JSON.stringify(spk) == JSON.stringify(spk2))) {
-                                    console.log(JSON.stringify(spk));
-                                    console.log(JSON.stringify(spk2));//still has the bet
-                                    console.log("spks do not match");
-                                } else {
-                                    var data = channels_object.new_cd(spk, themspk, ss5, ss5, expiration, cid);
-                                    channels_object.write(from, data);
-                                    return callback(ret);
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-        });
-    });
-}
-
-function channel_feeder_simplify_helper(from, ss, callback) {
-    var cd = channels_object.read(from);
-    var spk = cd.me;
-    var bet_unlock_object = spk_bet_unlock(spk, ss, function (bet_unlock_object) {
-
-        var ret = keys.sign(bet_unlock_object.spk);
-        return callback({ss: bet_unlock_object.newss, spk: ret});
-    });
-}
-
-function is_improvement(old_spk, old_ss, new_spk, new_ss, fun_limit, var_limit, callback) {
-    //get height
-    //check that space gas and time limit are below or equal to what is in the config file.
-    var height = headers_object.top()[1];
-    if (new_spk[4] > 100000) {//space gas
-        console.log("this contract uses too much space.");
-        return callback(false);
-    }
-    if (new_spk[5] > 100000) {//time gas
-        console.log("this contract uses too much time");
-        return callback(false);
-    }
-    spk_run("fast", new_ss, new_spk, height, 0, fun_limit, var_limit, function (run2) {
-        var nonce2 = run2.nonce;
-        var delay2 = run2.delay;
-        spk_run("fast", old_ss, old_spk, height, 0, fun_limit, var_limit, function (run1) {
-            var nonce1 = run1.nonce;
-            var delay1 = run1.delay;
-            if (((nonce1 == nonce2) && (delay1 == 0)) && (delay2 == 0)) {
-
-            } else if (!(nonce2 > nonce1)) {
-                console.log(JSON.stringify([new_ss, old_ss]));
-                console.log(JSON.stringify([nonce2, nonce1]));
-                console.log(JSON.stringify([delay2, delay1]));
-                console.log("the new spk can't produce a lower nonce than the old.");
-                return callback(false);
-            }
-            var old_bets = old_spk[3];
-            var old_amount = old_spk[7];
-            old_spk[3] = new_spk[3];
-            old_spk[5] = new_spk[5];//time gas tg;
-            old_spk[4] = new_spk[4];//space gassg;
-            old_spk[7] = new_spk[7];
-            old_spk[8] = new_spk[8];
-            if (!(JSON.stringify(old_spk) == JSON.stringify(new_spk))) {
-                console.log("spk was changed in unexpected ways");
-                console.log(JSON.stringify(old_spk));
-                console.log(JSON.stringify(new_spk));
-                return callback(false);
-            }
-            var cid = new_spk[6];
-            var ret = false;
-            merkle.request_proof("channels", cid, function (channel) {
-                //variable_public_get(["proof", btoa("channels"), cid, btoa(array_to_string(top_hash))], function(proof) {
-                //var channel = merkle.verify(cid, proof);
-                var acc1 = channel[2]
-                var acc2 = channel[3]
-                var profit;
-                if (keys.pub() == acc1) {
-                    profit = new_spk[7] - old_amount;
-                } else {
-                    profit = old_amount - new_spk[7];
-                }
-                var bets2 = new_spk[3];
-                if ((JSON.stringify(old_bets) == JSON.stringify(bets2)) && (profit > 0)) {
-                    //if they give us money for no reason, then accept.
-                    console.log("the server sent us money.");
-                    return callback(true);
-                }
-                var many_new_bets = new_spk[3].length - old_bets.length;
-                if ((!(profit < 0)) && //costs nothing
-                    (many_new_bets > 0)) { //increases number of bets
-                    //if we have the same or greater amount of money, and they make a bet that possibly gives us more money, then accept it.
-                    //var t = bets2.slice(1);
-                    var t = [-6].concat(bets2.slice(1 + many_new_bets));
-                    if (!(JSON.stringify(t) == JSON.stringify(old_bets))) {
-                        console.log("t is ");
-                        console.log(JSON.stringify(t));
-                        console.log("old bets");
-                        console.log(JSON.stringify(old_bets));
-                        console.log("update improperly formatted");
-                        return callback(false);
-                    }
-                    for (var i = 1; i < many_new_bets + 1; i++) {
-                        var new_bet = bets2[i];
-                        var betAmount = new_bet[2];
-                        var potentialGain;
-                        if (keys.pub() == acc1) {
-                            potentialGain = -betAmount;
-                        } else if (keys.pub() == acc2) {
-                            potentialGain = betAmount;
-                        } else {
-                            console.log("error, this spk isn't for your pubkey");
-                            return callback(false);
-                        }
-                        if (!(potentialGain > 0)) {
-                            console.log(potentialGain);
-                            console.log(betAmount);
-                            console.log(JSON.stringify(new_bet));
-                            console.log(JSON.stringify(bets2));
-                            console.log("error, this could make us lose money.");
-                            return callback(false);
-                        }
-                    }
-                    var obligations1 = spk_obligations(1, bets2);
-                    var obligations2 = spk_obligations(2, bets2);
-                    var channelbal1 = channel[4];
-                    var channelbal2 = channel[5];
-                    if (obligations1 > channelbal1) {
-                        console.log("acc1 doesn't have enough money in the channel to make that bet");
-                        return callback(false);
-                    }
-                    if (obligations2 > channelbal2) {
-                        console.log("acc2 doesn't have enough money in the channel to make that bet");
-                        return callback(false);
-                    }
-                    console.log("successfully updated channel. They made a contract which costs nothing, and might give us money.");
-                    return callback(true);
-                }
-                console.log("this contract that the server offers might cost us something, so we refuse.");
-                return callback(false);
-            });
-        });
-    });
-}
-
-function spk_obligations(n, bets) {
-    if (n == 1) {
-        return spk_obligations1(bets);
-    } else if (n == 2) {
-        return spk_obligations2(bets);
-    }
-}
-
-function spk_obligations1(bets) {
-    var c = 0;
-    for (i = 1; i < bets.length; i++) {
-        var b = bets[i][2];
-        if (b > 0) {
-            c += b;
-        }
-    }
-    return c;
-}
-
-function spk_obligations2(bets) {
-    var c = 0;
-    for (i = 1; i < bets.length; i++) {
-        var b = bets[i][2];
-        if (b < 0) {
-            c -= b;
-        }
-    }
-    return c;
-}
-
-function api_decrypt_msgs(ms) {//list ms starts with -6
-    console.log("msgs to decrypt");
-    console.log(JSON.stringify(ms));
-    for (var i = 1; i < ms.length; i++) {
-        var emsg = ms[i];
-        console.log("about to decrypt this ");
-        console.log(JSON.stringify(emsg));
-        var dec = keys.decrypt(emsg);
-        console.log("decrypted this ");
-        console.log(JSON.stringify(dec));
-        var secret = dec[1];
-        var code = dec[2];
-        var amount = dec[3];
-        secrets_object.add(code, secret, amount);
-    }
-    return true;
-}
-
-function pull_channel_state(publicKey, callback) {
-    variable_public_get(["pubkey"], function (server_pubkey) {
-        variable_public_get(["spk", publicKey], function (spk_return) {
-            var cd = spk_return[1];
-            var them_spk = spk_return[2];
-            console.log(JSON.stringify(them_spk));
-
-            var spk = them_spk[1];
-            var ss = ss_to_internal(cd[4]);
-            var expiration = cd[7];
-            var cid = spk[6];
-            var NewCD = new_cd(spk, them_spk, ss, ss, expiration, cid);
-
-            console.log(JSON.stringify(them_spk));
-            console.log(JSON.stringify(NewCD));
-
-            channel_feeder_they_simplify(server_pubkey, them_spk, cd, function (ret) {
-                if (!(ret == false)) {
-                    setTimeout(function () {
-                            variable_public_get(["channel_sync", keys.pub(), ret], function (foo) {
-                            });
-                    }, 0);
-                    setTimeout(function () {
-                        api_decrypt_msgs(cd[5]);
-                        api_bet_unlock(server_pubkey, function (x) {
-                            var cd2 = channels_object.read(server_pubkey);
-                            var ret2 = keys.sign(cd2.me);
-                            setTimeout(function () {
-                                variable_public_get(["channel_sync", publicKey, ret2], function (foo) {
-                                    i = 0;
-                                });
-                            }, 2000);
-
-                            return callback();
-                        });
-                    }, 2000);
-                } else {
-                    console.log("channel feeder they simplify failed.");
-                }
-            });
-        });
-    });
-}
-
-function new_cd(me, them, ssme, ssthem, expiration, cid) {
-    return {"me": me, "them": them, "ssme": ssme, "ssthem": ssthem, "cid":cid, "expiration": expiration};
-}
-
-function api_bet_unlock(server_pubkey, callback) {
-    //The javascript version can be much simpler than the erlang version, because each secret is only for one smart contract for us. We don't have to search for other contracts that use it.
-
-    channel_feeder_bets_unlock(server_pubkey, function (secrets_junk) {
-        secrets = secrets_junk.secrets;
-        // spk = secrets_junk.spk;
-        teach_secrets(secrets, 0, function () {
-            variable_public_get(["spk", keys.pub()], function (spk_data) {
-                console.log("should sart with -6");
-                console.log(JSON.stringify(spk_data));
-                var them_spk = spk_data[2];
-                var x = channel_feeder_update_to_me(them_spk, server_pubkey);
-                callback(x);
-            });
-        });
-    });
-}
-
-function channel_feeder_bets_unlock(server_id, callback) {
-    var cd = channels_object.read(server_id);
-
-    console.log("channel feeder bets unlock ");
-    console.log(JSON.stringify(cd));
-
-    spk_bet_unlock(cd.me, cd.ssme, function (unlock_object) {
-        console.log("spk object bets are ");
-        console.log(JSON.stringify(unlock_object.spk[3]));
-        cd.me = unlock_object.spk;//should be empty like newss
-        cd.ssme = unlock_object.newss;
-        cd.ssthem = unlock_object.ssthem;
-        channels_object.write(server_id, cd);
-        return callback({
-            "secrets": unlock_object.secrets,//incorrectly storing -6 in prove
-            "spk": unlock_object.spk
-        });
-    });
-    /*
-    {ok, CD0} = channel_manager:read(ID),
-    true = CD0#cd.live,
-    SPKME = CD0#cd.me,
-    SSOld = CD0#cd.ssme,
-    {NewSS, SPK, Secrets, SSThem} = spk:bet_unlock(SPKME, SSOld),
-    NewCD = CD0#cd{me = SPK, ssme = NewSS, ssthem = SSThem},
-    channel_manager:write(ID, NewCD),
-    Out = {Secrets, SPK},
-    */
-
-}
-
-function teach_secrets(secrets, i, callback) {
-    //secrets is a dictionary code -> [secret, amount]
-    // send ["secret", Secret, Key]
-    //talker:talk({learn_secret, ID, Secret, Code}, IP, Port),
-    if (!(i < secrets.length)) {
-        return callback();
-    }
-    console.log(JSON.stringify(secrets[i]));//incorrectly storing -6 in prove.
-    var msg = ["learn_secret", keys.pub(), channels_object.ss_to_external(secrets[i][1]), secrets[i][2]];
-    console.log(JSON.stringify(msg));
-    variable_public_get(msg, function () {
-        return teach_secrets(secrets, i + 1, callback);
-    });
-}
-
-function channel_feeder_update_to_me(sspk, from) {
-    var myid = keys.pub();
-    var spk = sspk[1];
-    var acc1 = spk[1];
-    var acc2 = spk[2];
-    if (!(((myid == acc1) && (from == acc2)) || ((myid == acc2) && (from == acc1)))) {
-        console.log(JSON.stringify(spk));
-        console.log(JSON.stringify(acc1));
-        console.log(JSON.stringify(acc2));
-        console.log(JSON.stringify(myid));
-        console.log(JSON.stringify(from));
-        console.log("channel_feeder_update_to_me has incorrect accounts in the spk.");
-        return false;
-    }
-    console.log("about to sign");
-    console.log(JSON.stringify(sspk));
-    sspk2 = keys.sign(sspk);
-    console.log("signed");
-    console.log(JSON.stringify(sspk2));
-    var b = verify_both(sspk2);
-    if (!(b)) {
-        console.log("they didn't sign the spk");
-        return false;
-    }
-    cd = channels_object.read(from);
-    if (!(JSON.stringify(cd.me) === JSON.stringify(sspk[1]))) {
-        console.log(JSON.stringify(cd.me));//bet should start with -6.//bet should be removed.
-        console.log(JSON.stringify(sspk[1]));
-        console.log("can't update to me if they aren't the same.");
-        return false;
-    }
-    cd.them = sspk
-    cd.ssthem = cd.ssme
-    channels_object.write(from, cd);
-}
-
-function spk_bet_unlock(spk, ssold, callback) {
-    console.log("spk bet unlock spk is ");
-    console.log(JSON.stringify(spk));
-    console.log("spk bet unlock ssold is ");
-    console.log(JSON.stringify(ssold));//[{code:, prove:, meta:}]
-
-    var bets = spk[3];//starts with -6
-    var remaining = JSON.parse(JSON.stringify(bets));
-    var amount_change = 0;
-    var ssremaining = JSON.parse(JSON.stringify(ssold));
-    var secrets = [];
-    var dnonce = 0;
-    var ssthem = [];
-    var i = ssold.length;
-    var key, bet, f, ss, key_junk;
-
-    return bet_unlock2(callback);
-
-
-    function bet_unlock3(data, ss2, callback) {
-        console.log("bet_unlock3");
-        var s = data.stack;
-        var nonce2 = s[1];
-        var delay = s[2];
-        if (delay > 0) {
-            console.log("delay > 0. keep the bet");
-            console.log(delay);
-            return bet_unlock2(callback);
-        } else {
-            var cgran = 10000; //constants.erl
-            var contract_amount = s[0] | 0; // changes contract_amount format so negative number work.
-            if ((contract_amount > cgran) ||
-                (contract_amount < -cgran)) {
-                throw("you can't spend money you don't have in the channel.");
-            }
-            var a3 = Math.floor(contract_amount * bet[2] / cgran);
-            var key = bet[3];
-            remaining.splice(i + 1, 1);
-            ssremaining.splice(i, 1);
-            amount_change += a3;
-            secrets = ([["secret", ss2, key]]).concat(secrets);
-            dnonce += nonce2;
-            ssthem = ([ss2]).concat(ssthem);
-            return bet_unlock2(callback);
-        }
-    }
-
-    function bet_unlock2(callback) {
-        i--;
-        if (i < 0) {
-            //spk.bets = remaining;
-            spk[3] = remaining;
-            //spk.amount += amount_change;
-            spk[7] += amount_change;
-            spk[8] += dnonce;
-            console.log("bet unlock 2");
-            console.log(JSON.stringify(remaining));
-            console.log(JSON.stringify(ssremaining));
-            if (!(remaining.length === ssremaining.length + 1)) {
-                throw("bet unlock 2 lengths don't match");
-            }
-            var x = {
-                "newss": ssremaining,
-                "spk": spk,
-                "secrets": secrets,
-                "ssthem": ssthem
-            };
-            return callback(x);
-        }
-        //for (i = ssold.length - 1; i > -1; i--) {
-        ss = ssold[i];
-        bet = bets[i + 1];
-        key = bet[3];
-        key_junk = secrets_object.read(key);
-        if (key_junk == undefined) {
-            console.log("secrets object");
-            console.log(JSON.stringify(secrets_object));
-            console.log("key");
-            console.log(key);
-            console.log("we don't have a secret to unlock this contract");
-            //ssremaining = ([ss]).concat(ssremaining);//doing nothing preservse the info.
-            ssthem = ([ss]).concat(ssthem);
-            //remaining = // doing nothing means preserving the info.
-            return bet_unlock2(callback);
-        } else {
-            var ss2 = ss_to_internal([-6, key_junk[0]])[0];
-            var amount = key_junk[1];
-            var height = headers_object.top()[1];
-            var state = chalang_object.new_state(height, 0);
-            var fun_limit = 400;
-            var var_limit = 10000;
-            console.log("ss2");
-            console.log(JSON.stringify(key_junk));
-            console.log(key_junk[0]);
-            console.log(JSON.stringify(ss2));
-            var script_sig = ss2.code;
-            if (!(chalang_none_of(script_sig))) {
-                throw("error: return op in the script sig");
-            }
-            prove_facts(ss.prove, function (f) {
-                var c = string_to_array(atob(bet[1]));
-                var code = f.concat(c);
-                var opgas = 100000;//should be 100 000. made it smaller to stop polluting the console.
-                var data = chalang_object.data_maker(opgas, opgas, var_limit, fun_limit, ss2.code, code, state);
-                var data2 = chalang_object.run5(script_sig, data);
-                var data3 = chalang_object.run5(code, data2);
-                console.log("data3");
-                console.log(JSON.stringify(data3));
-                if (data3.stack == undefined) {
-                    throw("working here");
-                } else {
-                    bet_unlock3(data3, ss2, callback)
-                }
-            });
-        }
-    }
-}
-
-function new_cd(me, them, ssme, ssthem, expiration, cid) {
-    return {"me": me, "them": them, "ssme": ssme, "ssthem": ssthem, "cid":cid, "expiration": expiration};
-}
-
-module.exports = {pull_channel_state, spk_run};
-
-
-},{}],15:[function(require,module,exports){
+},{"crypto":241}],15:[function(require,module,exports){
 'use strict';
 
 var KEYWORDS = [
@@ -74547,4 +72934,4 @@ function extend() {
     return target
 }
 
-},{}]},{},[12]);
+},{}]},{},[13]);
