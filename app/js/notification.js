@@ -156,21 +156,23 @@ function initFee(timeValue) {
 
 function initBet() {
     setTitle("Confirm Bet");
+	document.getElementById('make-bet-container').classList.remove('hidden');
 
-    document.getElementById('make-bet-container').classList.remove('hidden');
+	const amount = parseFloat(getParameterByName('amount'));
+	const side = getParameterByName('side');
+	const oid = getParameterByName('oid');
+	const price = parseFloat(getParameterByName('price'));
 
 	const amountText = document.getElementById('bet-amount');
 	const oddsText = document.getElementById('bet-price');
-
-	const amount = parseFloat(getParameterByName('amount'));
-	amountText.value = amount;
-    oddsText.value = parseFloat(getParameterByName('price'));
-	const side = getParameterByName('side');
-	const oid = getParameterByName('oid');
-
-	document.getElementById("bet-side").innerText = capitalize(side);
-
+	const sideText = document.getElementById("bet-side");
 	const betButton = document.getElementById('create-bet-button');
+	const cancelButton = document.getElementById('cancel-bet-button');
+
+	amountText.value = amount;
+    oddsText.value = price;
+	sideText.innerText = capitalize(side);
+
 	betButton.onclick = function() {
 	    const amount = parseFloat(amountText.value);
 	    const odds = parseFloat(oddsText.value) * 100;
@@ -186,11 +188,11 @@ function initBet() {
         }
     };
 
-    document.getElementById('cancel-bet-button').onclick = function() {
+	cancelButton.onclick = function() {
         notificationManager.closePopup();
     };
 
-    showMaxBalance(amount);
+    showMaxBalance(amount, price);
 }
 
 function capitalize(text) {
@@ -266,8 +268,8 @@ function makeChannelCallback2(tx, amount, bal2, acc1, acc2, delay, expiration, p
                     } else {
 	                    const account = accounts[0];
 	                    const keys = ec.keyFromPrivate(account.privateKey, "hex");
-	                    const stx = signTx(keys, tx);
-	                    const sspk = signTx(keys, spk);
+	                    const stx = cryptoUtility.signTx(keys, tx);
+	                    const sspk = cryptoUtility.signTx(keys, spk);
 
 	                    try {
                             network.send(["new_channel", stx, sspk, expiration],
@@ -438,7 +440,7 @@ function makeBet(amount, price, type, oid, callback) {
                                 if (channelFound) {
 	                                const spk = marketTrade(channel, amount_final, price_final, sc, server_pubkey, oid_final);
 	                                const keys = ec.keyFromPrivate(account.privateKey, "hex");
-	                                const sspk = signTx(keys, spk);
+	                                const sspk = cryptoUtility.signTx(keys, spk);
 
 	                                const trie_key = channel.me[6];
 
@@ -624,7 +626,7 @@ function cancelTrade(n, server_pubkey) {
                         storage.getAccounts(password, function (error, accounts) {
 	                        const account = accounts[0];
 	                        const keys = ec.keyFromPrivate(account.privateKey, "hex");
-	                        const sspk2 = signTx(keys, spk2);
+	                        const sspk2 = cryptoUtility.signTx(keys, spk2);
 	                        const pubPoint = keys.getPublic("hex");
 	                        const pubKey = btoa(formatUtility.fromHex(pubPoint));
 	                        const msg = ["cancel_trade", pubKey, n, sspk2];
@@ -710,7 +712,8 @@ function removeNth(n, a) {
 	return b.concat(c);
 }
 
-function showMaxBalance(amount) {
+function showMaxBalance(amount, price) {
+	const priceFinal = Math.floor(100 * parseFloat(price, 10));
 	network.send(["pubkey"], function(error, serverPubkey) {
 		storage.getTopHeader(function (error, topHeader) {
 			if (topHeader !== 0) {
@@ -732,7 +735,7 @@ function showMaxBalance(amount) {
 								}
 
 								if (channelFound) {
-									const spk = marketTrade(channel, amount, price_final, sc, serverPubkey, oid_final);
+									const spk = marketTrade(channel, amount, priceFinal, sc, serverPubkey, oid_final);
 									const keys = ec.keyFromPrivate(account.privateKey, "hex");
 									const sspk = cryptoUtility.signTx(keys, spk);
 
