@@ -2001,10 +2001,10 @@ function binToRs(x) {
 	  (vr) is the signed big-endian encoding of the value "r", of minimal length;
 	  (vs) is the signed big-endian encoding of the value "s", of minimal length.
 	*/
-	var h = formatUtility.toHex(x);
+	var h = toHex(x);
 	var a2 = x.charCodeAt(3);
-	var r = h.slice(8, 8+(a2*2));
-	var s = h.slice(12+(a2*2));
+	var r = h.slice(8, 8 + (a2 * 2));
+	var s = h.slice(12 + (a2 * 2));
 	return {"r": r, "s": s};
 }
 
