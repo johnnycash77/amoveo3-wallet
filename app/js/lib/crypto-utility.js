@@ -337,3 +337,4 @@ exports.hash = hash;
 exports.signTx = signTx;
 exports.encrypt = encrypt;
 exports.decrypt = decrypt;
+exports.serialize = serialize;

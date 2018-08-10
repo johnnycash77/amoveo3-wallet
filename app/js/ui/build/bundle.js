@@ -1752,6 +1752,7 @@ exports.hash = hash;
 exports.signTx = signTx;
 exports.encrypt = encrypt;
 exports.decrypt = decrypt;
+exports.serialize = serialize;
 
 },{"../ui/sjcl.js":25,"./format-utility.js":9}],7:[function(require,module,exports){
 (function (global){
@@ -2011,6 +2012,23 @@ function serializeHeader(x) {
         intToArray(period, 2));
 }
 
+function binToRs(x) {
+	/*
+	  0x30 b1 0x02 b2 (vr) 0x02 b3 (vs)
+	  where:
+	  b1 is a single byte value, equal to the length, in bytes, of the remaining list of bytes (from the first 0x02 to the end of the encoding);
+	  b2 is a single byte value, equal to the length, in bytes, of (vr);
+	  b3 is a single byte value, equal to the length, in bytes, of (vs);
+	  (vr) is the signed big-endian encoding of the value "r", of minimal length;
+	  (vs) is the signed big-endian encoding of the value "s", of minimal length.
+	*/
+	var h = formatUtility.toHex(x);
+	var a2 = x.charCodeAt(3);
+	var r = h.slice(8, 8+(a2*2));
+	var s = h.slice(12+(a2*2));
+	return {"r": r, "s": s};
+}
+
 exports.stringToArray = stringToArray;
 exports.intToArray = intToArray;
 exports.arrayToString = arrayToString;
@@ -2022,6 +2040,7 @@ exports.sciToInt = sciToInt;
 exports.fromHex = fromHex;
 exports.toHex = toHex;
 exports.serializeHeader = serializeHeader;
+exports.binToRs = binToRs;
 
 },{"./BigInt.js":5}],10:[function(require,module,exports){
 var network = require('../controller/network-controller.js');

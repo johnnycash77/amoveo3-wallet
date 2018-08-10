@@ -338,27 +338,10 @@ function saveChannel(channel, callback) {
 }
 
 function verify(data, sig0, key) {
-	var sig = bin2rs(atob(sig0));
-	var d2 = serialize(data);
-	var h = hash(d2);
+	var sig = formatUtility.binToRs(atob(sig0));
+	var d2 = cryptoUtility.serialize(data);
+	var h = cryptoUtility.hash(d2);
 	return key.verify(h, sig, "hex");
-}
-
-function bin2rs(x) {
-	/*
-	  0x30 b1 0x02 b2 (vr) 0x02 b3 (vs)
-	  where:
-	  b1 is a single byte value, equal to the length, in bytes, of the remaining list of bytes (from the first 0x02 to the end of the encoding);
-	  b2 is a single byte value, equal to the length, in bytes, of (vr);
-	  b3 is a single byte value, equal to the length, in bytes, of (vs);
-	  (vr) is the signed big-endian encoding of the value "r", of minimal length;
-	  (vs) is the signed big-endian encoding of the value "s", of minimal length.
-	*/
-	var h = formatUtility.toHex(x);
-	var a2 = x.charCodeAt(3);
-	var r = h.slice(8, 8+(a2*2));
-	var s = h.slice(12+(a2*2));
-	return {"r": r, "s": s};
 }
 
 function verify1(tx) {
@@ -510,6 +493,11 @@ function marketContract(direction, expires, maxprice, server_pubkey, period, amo
 
 	console.log("market oid is ");
 	console.log(oid);
+	var g = a.concat(formatUtility.intToArray(bet_height, 4)).concat(a2).concat(formatUtility.intToArray(expires, 4))
+	.concat(b).concat(formatUtility.intToArray(maxprice, 4)).concat(c).concat(formatUtility.stringToArray(atob(oid)))
+	.concat(d).concat(formatUtility.intToArray(period, 4)).concat(e).concat(formatUtility.stringToArray(atob(server_pubkey)))
+	.concat(f);
+
 	var g = a.concat(formatUtility.intToArray(bet_height, 4)).concat(a2).concat(formatUtility.intToArray(expires, 4))
 	.concat(b).concat(formatUtility.intToArray(maxprice, 4)).concat(c).concat(formatUtility.stringToArray(atob(oid)))
 	.concat(d).concat(formatUtility.intToArray(period, 4)).concat(e).concat(formatUtility.stringToArray(atob(server_pubkey)))
