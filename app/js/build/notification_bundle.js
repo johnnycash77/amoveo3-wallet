@@ -3003,8 +3003,8 @@ function marketContract(direction, expires, maxprice, server_pubkey, period, amo
 	console.log("market oid is ");
 	console.log(oid);
 	var g = a.concat(formatUtility.intToArray(bet_height, 4)).concat(a2).concat(formatUtility.intToArray(expires, 4))
-	.concat(b).concat(formatUtility.intToArray(maxprice, 4)).concat(c).concat(formatUtility.intToArray(atob(oid)))
-	.concat(d).concat(formatUtility.intToArray(period, 4)).concat(e).concat(formatUtility.intToArray(atob(server_pubkey)))
+	.concat(b).concat(formatUtility.intToArray(maxprice, 4)).concat(c).concat(formatUtility.stringToArray(atob(oid)))
+	.concat(d).concat(formatUtility.intToArray(period, 4)).concat(e).concat(formatUtility.stringToArray(atob(server_pubkey)))
 	.concat(f);
 	console.log("compiled contract");
 	console.log(JSON.stringify(g));
