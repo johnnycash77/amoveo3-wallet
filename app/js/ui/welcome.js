@@ -46,7 +46,8 @@ function initWelcomeImportAccount(password) {
         var file = (importFile.files)[0];
         var reader = new FileReader();
         reader.onload = function(e) {
-            var keys = ec.keyFromPrivate(reader.result, "hex");
+	        var contents = reader.result.replace(/^\s+|\s+$/g, '');
+            var keys = ec.keyFromPrivate(contents, "hex");
             var pubPoint = keys.getPublic("hex");
             var pubKey = btoa(formatUtility.fromHex(pubPoint));
             var privKey = keys.getPrivate("hex");
@@ -67,7 +68,7 @@ function initWelcomeImportAccount(password) {
             });
         };
 
-        if (file.type !== "text/plain" || file.size !== 64) {
+        if (file.type !== "text/plain" || !(file.size === 64 || file.size === 65)) {
             console.log("Invalid account data");
             showWelcomeError("Invalid file format");
         } else {

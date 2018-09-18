@@ -248,8 +248,9 @@ function initImportAccount(password, accounts) {
         var file = (importFile.files)[0];
         var reader = new FileReader();
         reader.onload = function (e) {
+            var contents = reader.result.replace(/^\s+|\s+$/g, '');
             var ec = new elliptic.ec('secp256k1');
-            var keys = ec.keyFromPrivate(reader.result, "hex");
+            var keys = ec.keyFromPrivate(contents, "hex");
             var pubPoint = keys.getPublic("hex");
             var pubKey = btoa(formatUtility.fromHex(pubPoint));
             var privKey = keys.getPrivate("hex");
@@ -281,7 +282,7 @@ function initImportAccount(password, accounts) {
             }
         };
 
-        if (file.type !== "text/plain" || file.size !== 64) {
+        if (file.type !== "text/plain" || !(file.size === 64 || file.size === 65)) {
             console.log("Invalid account data");
             showImportError("Invalid file format");
         } else {
