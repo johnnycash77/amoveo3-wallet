@@ -116,7 +116,7 @@ function reloadWeb() {
 var config = {
     defaultFee: 0.00151168,
     decimalMultiplier: 100000000,
-    defaultNodeUrl: 'http://168.62.52.179',
+    defaultNodeUrl: 'http://104.211.36.138',
     defaultNodePort: '8080',
     configStreamName: 'publicConfigStore',
     channelStreamName: 'ChannelStore',

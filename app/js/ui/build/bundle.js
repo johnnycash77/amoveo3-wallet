@@ -2,7 +2,7 @@
 var config = {
     defaultFee: 0.00151168,
     decimalMultiplier: 100000000,
-    defaultNodeUrl: 'http://168.62.52.179',
+    defaultNodeUrl: 'http://104.211.36.138',
     defaultNodePort: '8080',
     configStreamName: 'publicConfigStore',
     channelStreamName: 'ChannelStore',
@@ -2469,6 +2469,14 @@ function removeAllChildren(id) {
     }
 }
 
+function hideBackButton() {
+	hide(ids.navbar.backButton);
+}
+
+function showBackButton() {
+	show(ids.navbar.backButton);
+}
+
 function hideNavbarButtons() {
     hide(ids.navbar.settingsButton);
     hide(ids.navbar.refreshButton);
@@ -2603,6 +2611,8 @@ exports.setText = setText;
 exports.setValue = setValue;
 exports.removeAllChildren = removeAllChildren;
 exports.hideNavbarButtons = hideNavbarButtons;
+exports.hideBackButton = hideBackButton;
+exports.showBackButton = showBackButton;
 },{}],15:[function(require,module,exports){
 var views = require('../lib/views.js');
 var settingsController = require('./settings.js');
@@ -2615,7 +2625,7 @@ var refreshId = "";
 function initAccountsPage(account) {
     reset();
 
-    views.invisible(views.ids.navbar.backButton);
+    views.hideBackButton();
 
     views.setText(views.ids.title, "Amoveo3 Wallet");
 
@@ -3690,13 +3700,7 @@ function initSettingsContainer(account) {
 
     views.setText(views.ids.title, "Settings");
 
-    initBackButton(function (e) {
-        views.invisible(views.ids.navbar.backButton);
-        views.show(views.ids.accountContainer);
-        views.hide(views.ids.settingsContainer);
-        views.hide(views.ids.accountSwitchContainer);
-        resetTitle();
-    });
+    initBackButton();
 
     initExportAccount(account);
 
@@ -3709,10 +3713,16 @@ function resetTitle() {
     views.setText(views.ids.title, "Amoveo3 Wallet");
 }
 
-function initBackButton(callback) {
-    views.visible(views.ids.navbar.backButton);
+function initBackButton() {
+    views.showBackButton();
     var backButton = views.find(views.ids.navbar.backButton);
-    backButton.onclick = callback;
+    backButton.onclick = function (e) {
+	    views.hideBackButton();
+	    views.show(views.ids.accountContainer);
+	    views.hide(views.ids.settingsContainer);
+	    views.hide(views.ids.accountSwitchContainer);
+	    resetTitle();
+    };
 }
 
 function initExportAccount(account) {

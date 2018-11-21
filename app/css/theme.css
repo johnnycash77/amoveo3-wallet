@@ -51,12 +51,12 @@ a {
 }
 
 .tab p {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 400;
 }
 
 .tab.active {
-    background: #3c763d;
+    background: #42c0fb;
     color: white;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.12), 0 2px 4px 0 rgba(0, 0, 0, 0.42);
     margin-top: 1px;

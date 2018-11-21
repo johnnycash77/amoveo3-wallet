@@ -12,13 +12,7 @@ function initSettingsContainer(account) {
 
     views.setText(views.ids.title, "Settings");
 
-    initBackButton(function (e) {
-        views.invisible(views.ids.navbar.backButton);
-        views.show(views.ids.accountContainer);
-        views.hide(views.ids.settingsContainer);
-        views.hide(views.ids.accountSwitchContainer);
-        resetTitle();
-    });
+    initBackButton();
 
     initExportAccount(account);
 
@@ -31,10 +25,16 @@ function resetTitle() {
     views.setText(views.ids.title, "Amoveo3 Wallet");
 }
 
-function initBackButton(callback) {
-    views.visible(views.ids.navbar.backButton);
+function initBackButton() {
+    views.showBackButton();
     var backButton = views.find(views.ids.navbar.backButton);
-    backButton.onclick = callback;
+    backButton.onclick = function (e) {
+	    views.hideBackButton();
+	    views.show(views.ids.accountContainer);
+	    views.hide(views.ids.settingsContainer);
+	    views.hide(views.ids.accountSwitchContainer);
+	    resetTitle();
+    };
 }
 
 function initExportAccount(account) {

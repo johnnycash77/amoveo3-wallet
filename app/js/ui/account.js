@@ -9,7 +9,7 @@ var refreshId = "";
 function initAccountsPage(account) {
     reset();
 
-    views.invisible(views.ids.navbar.backButton);
+    views.hideBackButton();
 
     views.setText(views.ids.title, "Amoveo3 Wallet");
 

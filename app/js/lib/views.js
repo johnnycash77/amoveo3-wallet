@@ -33,6 +33,14 @@ function removeAllChildren(id) {
     }
 }
 
+function hideBackButton() {
+	hide(ids.navbar.backButton);
+}
+
+function showBackButton() {
+	show(ids.navbar.backButton);
+}
+
 function hideNavbarButtons() {
     hide(ids.navbar.settingsButton);
     hide(ids.navbar.refreshButton);
@@ -167,3 +175,5 @@ exports.setText = setText;
 exports.setValue = setValue;
 exports.removeAllChildren = removeAllChildren;
 exports.hideNavbarButtons = hideNavbarButtons;
+exports.hideBackButton = hideBackButton;
+exports.showBackButton = showBackButton;

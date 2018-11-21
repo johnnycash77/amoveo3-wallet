@@ -1,6 +1,6 @@
 {
   "name": "Amoveo Wallet",
-  "version": "1.0.31",
+  "version": "1.0.35",
   "manifest_version": 2,
   "description": "Amoveo Wallet",
   "icons": {
@@ -28,7 +28,7 @@
     "clipboardWrite",
     "http://localhost:8080/",
     "http://159.65.120.84:8080/",
-    "https://*.infura.io/"
+    "http://168.62.52.179:8080/"
   ],
   "background": {
     "scripts": ["js/build/background_bundle.js"],
@@ -40,7 +40,6 @@
   },
   "externally_connectable": {
     "matches": [
-      "*://www.foo.com/*",
       "*://*.amoveobook.com/*"
     ]
   }
