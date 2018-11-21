@@ -488,7 +488,7 @@ function sumBets(bets) {
 
 function marketContract(direction, expires, maxprice, server_pubkey, period, amount, oid, bet_height) {
 	var a;
-	var a2 = formatUtility.stringToArray((atob("AAAAAAJ4AA=="));
+	var a2 = formatUtility.stringToArray(atob("AAAAAAJ4AA=="));
 	var b = formatUtility.stringToArray(atob("AAAAAAN4AA=="));
 	var c = formatUtility.stringToArray(atob("AAAAAAR4AgAAACA="));
 	var d = formatUtility.stringToArray(atob("AAAAAAV4AA=="));

@@ -60,6 +60,7 @@ function initUnlocked(password) {
 
                         accountController.init(account);
                         setSelectedAccount(account);
+	                    initUnlocked(password);
                     });
                 });
             });
@@ -76,6 +77,7 @@ function initAddAccountButton(password) {
                 storage.setAccounts(password, accounts, function() {
                     accountController.init(account);
                     setSelectedAccount(account);
+	                initUnlocked(password);
                 });
             });
         });
@@ -219,6 +221,7 @@ function makeRow(password, account, index, callback) {
                                 storage.setAccounts(password, accounts, function() {
                                     accountController.init(account);
                                     setSelectedAccount(account);
+	                                initUnlocked(password);
                                 });
                             }
                         }
@@ -274,10 +277,9 @@ function initImportAccount(password, accounts) {
                 accounts.unshift(account);
                 storage.setAccounts(password, accounts, function () {
                     console.log("Account imported");
-
                     accountController.init(account);
-
                     setSelectedAccount(account);
+	                initUnlocked(password);
                 });
             }
         };
