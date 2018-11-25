@@ -3180,6 +3180,8 @@ function init(password) {
     } else {
         initUnlocked(password);
     }
+
+    setVersion();
 }
 
 function initUnlocked(password) {
@@ -3440,6 +3442,11 @@ function showImportError(message) {
     var error = views.find(views.ids.settings.importError);
     error.innerHTML = message;
     views.show(views.ids.settings.importError);
+}
+
+function setVersion() {
+	var manifestData = chrome.runtime.getManifest();
+	document.getElementById("version").innerHTML = manifestData.version;
 }
 
 init();

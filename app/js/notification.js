@@ -764,55 +764,99 @@ function removeNth(n, a) {
 }
 
 function showMaxBalance(amount, price) {
-	network.send(["pubkey"], function(error, serverPubkey) {
-		storage.getTopHeader(function (error, topHeader) {
-			if (topHeader !== 0) {
-				passwordController.getPassword(function (password) {
-					if (!password) {
-						showBetError("Your wallet is locked.  Please unlock your wallet and try again.")
-					} else {
-						storage.getAccounts(password, function (error, accounts) {
-							var account = accounts[0];
-							storage.getChannels(function (error, channels) {
-								var channelFound = false;
-								var channel;
-								for (var i = 0; i < channels.length; i++) {
-									channel = channels[i];
-									if (channel.me[1] === account.publicKey && channel.serverPubKey === serverPubkey) {
-										channelFound = true;
-										break;
-									}
-								}
+	network.send(["market_data", oid], function (error, l) {
+		var price_final = Math.floor(100 * parseFloat(price, 10));
+		var type_final;
+		var ttv = type;
+		if ((ttv == "true") ||
+			(ttv == 1) ||
+			(ttv == "yes") ||
+			(ttv == "si") ||
+			(ttv == "cierto") ||
+			(ttv == "lon") ||
+			(ttv == "真正") ||
+			(ttv == "既不是")) {
+			type_final = 1;
+		} else if ((ttv == "false") ||
+			(ttv == 0) ||
+			(ttv == 2) ||
+			(ttv == "falso") ||
+			(ttv == "no") ||
+			(ttv == "lon ala") ||
+			(ttv == "也不是") ||
+			(ttv == "假")) {
+			type_final = 2;
+		}
 
-								if (channelFound) {
-									var spk = marketTrade(channel, amount, price, sc, serverPubkey, oid_final);
-									var keys = ec.keyFromPrivate(account.privateKey, "hex");
-									var sspk = cryptoUtility.signTx(keys, spk);
+		var amount_final = Math.floor(parseFloat(amount, 10) * DECIMALS);
+		var oid_final = oid;
+		var expires = l[1];
+		var server_pubkey = l[2];
+		var period = l[3];
 
-									var trie_key = channel.me[6];
-
-									merkle.requestProof(topHeader, "channels", trie_key, function (error, val) {
-										var spk = channel.them[1];
-										var amount = spk[7];
-										var betAmount = sumBets(spk[3]);
-										var mybalance = ((val[4] - amount - betAmount));
-
-										var userBalance = document.getElementById("bet-user-balance");
-										userBalance.classList.remove("invisible");
-										userBalance.innerHTML = "Max bet: " + mybalance + " VEO";
-
-										if (amount > userBalance) {
-											showBetError("Your maximum possible bet is " + mybalance + "VEO");
+		network.send(["pubkey"], function (error, serverPubkey) {
+			storage.getTopHeader(function (error, topHeader) {
+				if (topHeader !== 0) {
+					passwordController.getPassword(function (password) {
+						if (!password) {
+							showBetError("Your wallet is locked.  Please unlock your wallet and try again.")
+						} else {
+							storage.getAccounts(password, function (error, accounts) {
+								var account = accounts[0];
+								storage.getChannels(function (error, channels) {
+									var channelFound = false;
+									var channel;
+									for (var i = 0; i < channels.length; i++) {
+										channel = channels[i];
+										if (channel.me[1] === account.publicKey && channel.serverPubKey === serverPubkey) {
+											channelFound = true;
+											break;
 										}
-									});
-								} else {
-									showBetError("No channel found.  You must first open a channel in order to make bets.")
-								}
+									}
+
+									var sc;
+									console.log("SCALAR ");
+									console.log(JSON.stringify(l));
+									if (l[4][0] == "binary") {
+										sc = marketContract(type_final, expires, price_final, server_pubkey, period, amount_final, oid_final, topHeader[1]);
+									} else {
+										var lower_limit = l[4][1];
+										var upper_limit = l[4][2];
+										// sanity-check, verify 10 == l[4][3];
+										//all scalar markets currently use 10 binary oracles to measure values.
+										sc = scalarMarketContract(type_final, expires, price_final, server_pubkey, period, amount_final, oid_final, topHeader[1], lower_limit, upper_limit, 10);
+									}
+
+									if (channelFound) {
+										var spk = marketTrade(channel, amount, price, sc, serverPubkey, oid_final);
+										var keys = ec.keyFromPrivate(account.privateKey, "hex");
+										var sspk = cryptoUtility.signTx(keys, spk);
+
+										var trie_key = channel.me[6];
+
+										merkle.requestProof(topHeader, "channels", trie_key, function (error, val) {
+											var spk = channel.them[1];
+											var amount = spk[7];
+											var betAmount = sumBets(spk[3]);
+											var mybalance = ((val[4] - amount - betAmount));
+
+											var userBalance = document.getElementById("bet-user-balance");
+											userBalance.classList.remove("invisible");
+											userBalance.innerHTML = "Max bet: " + mybalance + " VEO";
+
+											if (amount > userBalance) {
+												showBetError("Your maximum possible bet is " + mybalance + "VEO");
+											}
+										});
+									} else {
+										showBetError("No channel found.  You must first open a channel in order to make bets.")
+									}
+								});
 							});
-						});
-					}
-				});
-			}
+						}
+					});
+				}
+			});
 		});
 	});
 }
