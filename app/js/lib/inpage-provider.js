@@ -16,6 +16,15 @@ AmoveoInpageProvider.prototype.send = function (opts) {
     this.port.postMessage(opts);
 }
 
+AmoveoInpageProvider.prototype.sign = function (opts, callback) {
+    this.port.postMessage(opts);
+	this.port.onMessage.addListener(function(data) {
+	    if (data.type === "sign") {
+		    callback(null, data);
+	    }
+	});
+}
+
 AmoveoInpageProvider.prototype.isConnected = function () {
   return true
 }

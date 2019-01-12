@@ -35,6 +35,8 @@ function resetPasswordTimer() {
     }, 30 * 60 * 1000);
 }
 
+
+
 chrome.extension.onMessage.addListener(
     function onSync(request, sender, sendResponse) {
         if (request.msg === "sync") {
@@ -52,6 +54,8 @@ chrome.extension.onMessage.addListener(
             resetPasswordTimer();
         } else if (request.msg === "setState") {
             sendMessageToPage(request.data)
+        } else if (request.type === "sign") {
+            sendMessageToPage(request.signed)
         }
     }
 );

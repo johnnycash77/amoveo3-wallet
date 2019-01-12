@@ -36,6 +36,8 @@ function resetPasswordTimer() {
     }, 30 * 60 * 1000);
 }
 
+
+
 chrome.extension.onMessage.addListener(
     function onSync(request, sender, sendResponse) {
         if (request.msg === "sync") {
@@ -52,6 +54,8 @@ chrome.extension.onMessage.addListener(
             chrome.extension.sendMessage({ msg: "getPassword", data: password });
             resetPasswordTimer();
         } else if (request.msg === "setState") {
+            sendMessageToPage(request.data)
+        } else if (request.type === "sign") {
             sendMessageToPage(request.data)
         }
     }
@@ -113,20 +117,27 @@ function reloadWeb() {
 };
 
 },{"./controller/blocks-controller":3,"./lib/notification-manager":9,"./lib/storage":10}],2:[function(require,module,exports){
-var config = {
+const isTestnet = false;
+
+const config = {
+    isTestnet: isTestnet,
     defaultFee: 0.00151168,
     decimalMultiplier: 100000000,
-    defaultNodeUrl: 'http://104.211.36.138',
-    defaultNodePort: '8080',
+    defaultNodeUrl: isTestnet ? 'http://127.0.0.1' : 'http://40.117.196.55',
+    defaultNodePort: isTestnet ? '8070' : '8080',
     configStreamName: 'publicConfigStore',
     channelStreamName: 'ChannelStore',
-    retargetFrequency: 2000,
-    forks: {two: 9000, four: 26900, seven:28135},
-    initialDifficulty: 8844,
+    retargetFrequency: isTestnet ? 12 : 2000,
+    forks: isTestnet ? {two: 0, four: 12, seven:40} : {two: 9000, four: 26900, seven:28135},
+    checkPointHeader: ["header", 38671, "CoyxdfjlUzd/cujJRS1iTksmE5l7C3lsyn+2FY0kxmU=", "+CwT4ZGvYE10i5Tdocj1j+ojSNowEDp+Jq+uw3zdO20=", "MrN5jt9v0X91Kix3HInDP25dNrTXOt+ux3d2yY64QMk=", 212163079, 13698, 3, "AAAAAAAAAAAAhv86dgAAAAAV79tiAAAAAAAWxwAAZjc=", 402432639143042350000, 5982],
+    checkPointEwah: 2177732187806707,
+    initialDifficulty: isTestnet ? 2500 : 8844,
+    headersBatch: 5000,
     appTitle: "Amoveo3 Wallet",
 }
 
 module.exports = config;
+
 },{}],3:[function(require,module,exports){
 var storage = require('../lib/storage.js');
 var network = require('./network-controller.js');
@@ -149,8 +160,8 @@ class BlocksController {
         this.accumulatingDifficulty = 0;
         this.topDifficulty = 0;
         this.syncing = false;
-	    this.checkPointHeader = ["header", 28001,"f3PfnlxML/UPF9T5ixy1+Q539NyOVfFG07x4pf3zw6Q=","4A7MYFe5u7OG22QGUvIFguzZWYWndkZARGdImbhbEjM=","huIlyyrALPoafVluEL/ZYtZ8BXHUJEPxcXCLid5CSnU=",141617794,14053,3,"AAAAAAAAAAAA6ZeG6UQ+dPE+8iEbHoY92if6pIMAAlI=",193346798808507350000,5982];
-	    this.checkPointEwah = 1865656952131054;
+	    this.checkPointHeader = config.checkPointHeader;
+	    this.checkPointEwah = config.checkPointEwah;
     }
 
     getHeight(callback) {
@@ -184,7 +195,7 @@ class BlocksController {
         var instance = this;
 
 	    storage.getTopHeader(function(error, header) {
-		    if (header === 0 || header[1] < 28101 || header[1] === 28136) {
+		    if (!config.isTestnet && (header === 0 || header[1] < 28101 || header[1] === 28136)) {
 			    instance.writeHeader(instance.checkPointHeader, instance.checkPointEwah);
 			    instance.doSync(callback);
 		    } else {
@@ -202,7 +213,11 @@ class BlocksController {
     doSync(callback) {
 	    var instance = this;
 	    instance.getHeight(function(height) {
-		    network.send(["headers", 5001, height], function(error, headers) {
+		    network.send(["headers", config.headersBatch + 1, height], function(error, headers) {
+			    if (!Array.isArray(headers)) {
+				    headers = JSON.parse(headers)
+			    }
+
 			    if (error) {
 				    console.error(error);
 				    callback(instance.topHeader);
@@ -296,13 +311,14 @@ class BlocksController {
 
     checkPow(header) {
         var height = header[1];
-        if (height < 1 || height === this.checkPointHeader[1]) {
-            return true;
+        if (height < 1) {
+            return [true, 1];
         } else {
+        	console.log(height);
             var prevHash = formatUtility.stringToArray(atob(header[2]));
             var pow = this.calculateDifficulty(header, prevHash);
             var diff0 = pow[0];
-            var ewah = pow[1];
+	        var ewah = pow[1];
             var diff = header[6];
             if (diff === diff0) {
                 var nonce = atob(header[8]);
@@ -311,7 +327,7 @@ class BlocksController {
                 var s1 = formatUtility.serializeHeader(data);
                 var h1 = cryptoUtility.hash(cryptoUtility.hash(s1));
                 var foo, h2, I;
-                if (height > 8999) {
+                if (height > config.forks.two - 1) {
                     var nonce2 = nonce.slice(-23),
                         foo = h1.concat(formatUtility.stringToArray(nonce2));
                     h2 = cryptoUtility.hash(foo);
@@ -332,7 +348,7 @@ class BlocksController {
 
     calculateDifficulty(nextHeader, hash) {
         var header = this.getHeader(hash);
-        if (header === undefined) {
+        if (!header) {
             console.log("Received an orphan header: " + hash);
             return "unknown parent";
         } else {

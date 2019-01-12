@@ -43,6 +43,8 @@ function initSigning() {
 	div.setAttribute('data-message', getParameterByName('message'));
 	var message = div.getAttribute('data-message');
 
+	alert(message);
+
 	var messageInput = document.getElementById('sign-message');
 	messageInput.innerHTML = message;
 
