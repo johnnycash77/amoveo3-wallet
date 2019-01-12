@@ -56,6 +56,6 @@ function get_port() {
 }
 
 function get_ip() {
-   return "104.211.36.138";
+   return "13.72.69.243";
     // return "159.65.120.84";
 }

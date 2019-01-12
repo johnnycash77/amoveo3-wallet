@@ -1,10 +1,9 @@
-var headers_db = {};
-var top_header;
-var top_height = 0;
+const config = require('./../../config');
 
 function Api(host, timeout, headers) {
     this.host = host || 'http://159.65.120.84:8080';
-    this.timeout = timeout || 0;
+    this.timeout = timeout || 1;
+    this.network = config.isTestnet ? "testnet" : "mainnet";
     this.headers = headers || {};
 }
 

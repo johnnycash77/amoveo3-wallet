@@ -31,6 +31,51 @@ if (getParameterByName('type') === "channel") {
 	initBet();
 } else if (getParameterByName('type') === "cancel") {
 	initCancel();
+} else if (getParameterByName('type') === "sign") {
+	initSigning();
+}
+
+function initSigning() {
+	document.getElementById('signing-container').classList.remove('hidden');
+
+	//xss safety
+	var div = document.createElement('div');
+	div.setAttribute('data-message', getParameterByName('message'));
+	var message = div.getAttribute('data-message');
+
+	var messageInput = document.getElementById('sign-message');
+	messageInput.innerHTML = message;
+
+	document.getElementById('sign-button').onclick = function() {
+		passwordController.getPassword(function(password) {
+			if (!password) {
+				showSignedError("Your wallet is locked.  Please unlock your wallet and try again.")
+			} else {
+				storage.getAccounts(password, function (error, accounts) {
+					if (accounts.length === 0) {
+						showSignedError("Please open the wallet and create account");
+					} else {
+						var account = accounts[0];
+						var keys = ec.keyFromPrivate(account.privateKey, "hex");
+						var signed = keys.sign(message);
+
+						chrome.extension.sendMessage({ type: "sign", signed: signed});
+						notificationManager.closePopup();
+					}
+				});
+			}
+		});
+	};
+
+	document.getElementById('cancel-sign-button').onclick = function() {
+		notificationManager.closePopup();
+	};
+}
+
+function showSignedError(message) {
+	var error = document.getElementById("sign-error-text");
+	error.classList.remove("invisible");
+	error.innerHTML = message;
 }
 
 function setTitle(title) {

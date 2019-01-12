@@ -19,8 +19,8 @@ class BlocksController {
         this.accumulatingDifficulty = 0;
         this.topDifficulty = 0;
         this.syncing = false;
-	    this.checkPointHeader = ["header", 28001,"f3PfnlxML/UPF9T5ixy1+Q539NyOVfFG07x4pf3zw6Q=","4A7MYFe5u7OG22QGUvIFguzZWYWndkZARGdImbhbEjM=","huIlyyrALPoafVluEL/ZYtZ8BXHUJEPxcXCLid5CSnU=",141617794,14053,3,"AAAAAAAAAAAA6ZeG6UQ+dPE+8iEbHoY92if6pIMAAlI=",193346798808507350000,5982];
-	    this.checkPointEwah = 1865656952131054;
+	    this.checkPointHeader = config.checkPointHeader;
+	    this.checkPointEwah = config.checkPointEwah;
     }
 
     getHeight(callback) {
@@ -54,7 +54,7 @@ class BlocksController {
         var instance = this;
 
 	    storage.getTopHeader(function(error, header) {
-		    if (header === 0 || header[1] < 28101 || header[1] === 28136) {
+		    if (!config.isTestnet && (header === 0 || header[1] < 28101 || header[1] === 28136)) {
 			    instance.writeHeader(instance.checkPointHeader, instance.checkPointEwah);
 			    instance.doSync(callback);
 		    } else {
@@ -72,7 +72,11 @@ class BlocksController {
     doSync(callback) {
 	    var instance = this;
 	    instance.getHeight(function(height) {
-		    network.send(["headers", 5001, height], function(error, headers) {
+		    network.send(["headers", config.headersBatch + 1, height], function(error, headers) {
+			    if (!Array.isArray(headers)) {
+				    headers = JSON.parse(headers)
+			    }
+
 			    if (error) {
 				    console.error(error);
 				    callback(instance.topHeader);
@@ -166,13 +170,14 @@ class BlocksController {
 
     checkPow(header) {
         var height = header[1];
-        if (height < 1 || height === this.checkPointHeader[1]) {
-            return true;
+        if (height < 1) {
+            return [true, 1];
         } else {
+        	console.log(height);
             var prevHash = formatUtility.stringToArray(atob(header[2]));
             var pow = this.calculateDifficulty(header, prevHash);
             var diff0 = pow[0];
-            var ewah = pow[1];
+	        var ewah = pow[1];
             var diff = header[6];
             if (diff === diff0) {
                 var nonce = atob(header[8]);
@@ -181,7 +186,7 @@ class BlocksController {
                 var s1 = formatUtility.serializeHeader(data);
                 var h1 = cryptoUtility.hash(cryptoUtility.hash(s1));
                 var foo, h2, I;
-                if (height > 8999) {
+                if (height > config.forks.two - 1) {
                     var nonce2 = nonce.slice(-23),
                         foo = h1.concat(formatUtility.stringToArray(nonce2));
                     h2 = cryptoUtility.hash(foo);
@@ -202,7 +207,7 @@ class BlocksController {
 
     calculateDifficulty(nextHeader, hash) {
         var header = this.getHeader(hash);
-        if (header === undefined) {
+        if (!header) {
             console.log("Received an orphan header: " + hash);
             return "unknown parent";
         } else {
