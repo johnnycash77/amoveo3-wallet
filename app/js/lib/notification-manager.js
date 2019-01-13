@@ -29,15 +29,25 @@ class NotificationManager {
 
         var query = ""
         if (opts) {
-            query += this.addValueIfExists("type", opts.type)
-                + this.addValueIfExists("ip", opts.ip)
-                + this.addValueIfExists("side", opts.side) +
-                + this.addValueIfExists("price", opts.price) +
-                + this.addValueIfExists("oid", opts.oid) +
-                + this.addValueIfExists("amount", opts.amount) +
-                + this.addValueIfExists("index", opts.index) +
-                + this.addValueIfExists("message", opts.message)
+          const type = this.addValueIfExists("type", opts.type)
+          const ip = this.addValueIfExists("ip", opts.ip)
+          const side = this.addValueIfExists("side", opts.side)
+          const price = this.addValueIfExists("price", opts.price)
+          const oid = this.addValueIfExists("oid", opts.oid)
+          const amount = this.addValueIfExists("amount", opts.amount)
+          const index = this.addValueIfExists("index", opts.index)
+          const message = this.addValueIfExists("message", opts.message)
+
+          query += type
+              + ip
+              + side
+              + price
+              + oid
+              + amount
+              + index
+              + message
         }
+
         // create new notification popup
         extension.windows.create({
           url: 'notification.html?' + query,
