@@ -55,7 +55,7 @@ chrome.extension.onMessage.addListener(
         } else if (request.msg === "setState") {
             sendMessageToPage(request.data)
         } else if (request.type === "sign") {
-            sendMessageToPage(request.signed)
+		    sendMessageToPage(request)
         }
     }
 );

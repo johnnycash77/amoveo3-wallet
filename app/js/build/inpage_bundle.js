@@ -234,6 +234,7 @@ function triggerReset () {
 module.exports = AmoveoInpageProvider;
 
 const extId = "hfojlfflnlmfjhddgodpmophmhpimahi";
+// const extId = "dihkmjjoakaiagmoflhachmoolamfimp";
 
 function AmoveoInpageProvider(connectionStream) {
     this.port = chrome.runtime.connect(extId);
@@ -253,7 +254,11 @@ AmoveoInpageProvider.prototype.sign = function (opts, callback) {
     this.port.postMessage(opts);
 	this.port.onMessage.addListener(function(data) {
 	    if (data.type === "sign") {
-		    callback(null, data);
+	    	if (data.error) {
+			    callback(data.error, null);
+		    } else {
+			    callback(null, data.signed.s);
+		    }
 	    }
 	});
 }

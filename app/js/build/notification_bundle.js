@@ -2301,9 +2301,14 @@ class NotificationManager {
 
         var query = ""
         if (opts) {
-            query += "type=" + opts.type + "&" + "ip=" + opts.ip + "&" + "side=" +
-                opts.side + "&" + "price=" + opts.price + "&" + "oid=" + opts.oid + "&" + "amount=" + opts.amount +
-                "&" + "index=" + opts.index;
+            query += this.addValueIfExists("type", opts.type)
+                + this.addValueIfExists("ip", opts.ip)
+                + this.addValueIfExists("side", opts.side) +
+                + this.addValueIfExists("price", opts.price) +
+                + this.addValueIfExists("oid", opts.oid) +
+                + this.addValueIfExists("amount", opts.amount) +
+                + this.addValueIfExists("index", opts.index) +
+                + this.addValueIfExists("message", opts.message)
         }
         // create new notification popup
         extension.windows.create({
@@ -2314,6 +2319,10 @@ class NotificationManager {
         })
 
     })
+  }
+
+  addValueIfExists(name, value) {
+    return value ? name + "=" + value + "&" : ""
   }
 
   /**
@@ -2333,7 +2342,6 @@ class NotificationManager {
    * Checks all open MetaMask windows, and returns the first one it finds that is a notification window (i.e. has the
    * type 'popup')
    *
-   * @private
    * @param {Function} cb A node style callback that to whcih the found notification window will be passed.
    *
    */
@@ -2532,8 +2540,35 @@ const DECIMALS = 100000000
 
 var ec = new elliptic.ec('secp256k1');
 
+let notificationType = parseParam('type')
+
+if (notificationType === "channel") {
+	initChannel();
+} else if (notificationType === "market") {
+	initBet();
+} else if (notificationType === "cancel") {
+	initCancel();
+} else if (notificationType === "sign") {
+	initSigning();
+}
+
+window.onunload = function(e) {
+	chrome.extension.sendMessage({ type: notificationType, error: "Rejected by user"});
+}
+
+function parseParam(name) {
+	const param = getParameterByName(name);
+
+	//xss safety
+	const div = document.createElement('div');
+	div.setAttribute('data-message', param);
+	const safeParam = div.getAttribute('data-message');
+	return safeParam;
+}
+
 function getParameterByName(name, url) {
 	if (!url) url = window.location.href;
+
 	name = name.replace(/[\[\]]/g, "\\$&");
 	var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
 		results = regex.exec(url);
@@ -2543,25 +2578,10 @@ function getParameterByName(name, url) {
 	return decodeURIComponent(results[2]);
 }
 
-if (getParameterByName('type') === "channel") {
-	initChannel();
-} else if (getParameterByName('type') === "market") {
-	initBet();
-} else if (getParameterByName('type') === "cancel") {
-	initCancel();
-} else if (getParameterByName('type') === "sign") {
-	initSigning();
-}
-
 function initSigning() {
 	document.getElementById('signing-container').classList.remove('hidden');
 
-	//xss safety
-	var div = document.createElement('div');
-	div.setAttribute('data-message', getParameterByName('message'));
-	var message = div.getAttribute('data-message');
-
-	alert(message);
+	const message = parseParam('message');
 
 	var messageInput = document.getElementById('sign-message');
 	messageInput.innerHTML = message;
@@ -2588,6 +2608,7 @@ function initSigning() {
 	};
 
 	document.getElementById('cancel-sign-button').onclick = function() {
+		chrome.extension.sendMessage({ type: "sign", error: "Rejected by user"});
 		notificationManager.closePopup();
 	};
 }
@@ -2606,9 +2627,7 @@ function initChannel() {
 	setTitle("New Channel");
 
 	//xss safety
-	var div = document.createElement('div');
-	div.setAttribute('data-ip', getParameterByName('ip'));
-	var ip = div.getAttribute('data-ip');
+	var ip = parseParam('ip');
 	div.setAttribute('data-duration', getParameterByName('duration'));
 	var duration = div.getAttribute('data-duration');
 	div.setAttribute('data-locked', getParameterByName('locked'));

@@ -29,9 +29,14 @@ class NotificationManager {
 
         var query = ""
         if (opts) {
-            query += "type=" + opts.type + "&" + "ip=" + opts.ip + "&" + "side=" +
-                opts.side + "&" + "price=" + opts.price + "&" + "oid=" + opts.oid + "&" + "amount=" + opts.amount +
-                "&" + "index=" + opts.index;
+            query += this.addValueIfExists("type", opts.type)
+                + this.addValueIfExists("ip", opts.ip)
+                + this.addValueIfExists("side", opts.side) +
+                + this.addValueIfExists("price", opts.price) +
+                + this.addValueIfExists("oid", opts.oid) +
+                + this.addValueIfExists("amount", opts.amount) +
+                + this.addValueIfExists("index", opts.index) +
+                + this.addValueIfExists("message", opts.message)
         }
         // create new notification popup
         extension.windows.create({
@@ -42,6 +47,10 @@ class NotificationManager {
         })
 
     })
+  }
+
+  addValueIfExists(name, value) {
+    return value ? name + "=" + value + "&" : ""
   }
 
   /**
@@ -61,7 +70,6 @@ class NotificationManager {
    * Checks all open MetaMask windows, and returns the first one it finds that is a notification window (i.e. has the
    * type 'popup')
    *
-   * @private
    * @param {Function} cb A node style callback that to whcih the found notification window will be passed.
    *
    */

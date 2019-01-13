@@ -91,3 +91,23 @@ p {
 .short {
     max-width: 100px;
 }
+
+#signing-container {
+    margin-top: 32px;
+    text-align: center;
+}
+
+#signing-container label {
+    margin-bottom: 32px;
+    text-align: center;
+}
+
+#signing-container textarea {
+    margin-bottom: 64px;
+    height: 180px;
+    width: 280px;
+}
+
+#sign-button-container {
+    margin: 4px 80px !important;
+}

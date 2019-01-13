@@ -14,8 +14,35 @@ const DECIMALS = 100000000
 
 var ec = new elliptic.ec('secp256k1');
 
+let notificationType = parseParam('type')
+
+if (notificationType === "channel") {
+	initChannel();
+} else if (notificationType === "market") {
+	initBet();
+} else if (notificationType === "cancel") {
+	initCancel();
+} else if (notificationType === "sign") {
+	initSigning();
+}
+
+window.onunload = function(e) {
+	chrome.extension.sendMessage({ type: notificationType, error: "Rejected by user"});
+}
+
+function parseParam(name) {
+	const param = getParameterByName(name);
+
+	//xss safety
+	const div = document.createElement('div');
+	div.setAttribute('data-message', param);
+	const safeParam = div.getAttribute('data-message');
+	return safeParam;
+}
+
 function getParameterByName(name, url) {
 	if (!url) url = window.location.href;
+
 	name = name.replace(/[\[\]]/g, "\\$&");
 	var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
 		results = regex.exec(url);
@@ -25,25 +52,10 @@ function getParameterByName(name, url) {
 	return decodeURIComponent(results[2]);
 }
 
-if (getParameterByName('type') === "channel") {
-	initChannel();
-} else if (getParameterByName('type') === "market") {
-	initBet();
-} else if (getParameterByName('type') === "cancel") {
-	initCancel();
-} else if (getParameterByName('type') === "sign") {
-	initSigning();
-}
-
 function initSigning() {
 	document.getElementById('signing-container').classList.remove('hidden');
 
-	//xss safety
-	var div = document.createElement('div');
-	div.setAttribute('data-message', getParameterByName('message'));
-	var message = div.getAttribute('data-message');
-
-	alert(message);
+	const message = parseParam('message');
 
 	var messageInput = document.getElementById('sign-message');
 	messageInput.innerHTML = message;
@@ -70,6 +82,7 @@ function initSigning() {
 	};
 
 	document.getElementById('cancel-sign-button').onclick = function() {
+		chrome.extension.sendMessage({ type: "sign", error: "Rejected by user"});
 		notificationManager.closePopup();
 	};
 }
@@ -88,15 +101,10 @@ function initChannel() {
 	setTitle("New Channel");
 
 	//xss safety
-	var div = document.createElement('div');
-	div.setAttribute('data-ip', getParameterByName('ip'));
-	var ip = div.getAttribute('data-ip');
-	div.setAttribute('data-duration', getParameterByName('duration'));
-	var duration = div.getAttribute('data-duration');
-	div.setAttribute('data-locked', getParameterByName('locked'));
-	var locked = div.getAttribute('data-locked');
-	div.setAttribute('data-delay', getParameterByName('delay'));
-	var delay = div.getAttribute('data-delay');
+	var ip = parseParam('ip');
+	var duration = parseParam('duration');
+	var locked = parseParam('locked');
+	var delay = parseParam('delay');
 
 	var ipInput = document.getElementById('channel-ip-address');
 	ipInput.innerHTML = ip;
