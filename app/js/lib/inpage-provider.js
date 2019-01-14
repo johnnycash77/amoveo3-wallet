@@ -20,7 +20,11 @@ AmoveoInpageProvider.prototype.sign = function (opts, callback) {
     this.port.postMessage(opts);
 	this.port.onMessage.addListener(function(data) {
 	    if (data.type === "sign") {
-		    callback(null, data);
+	    	if (data.error) {
+			    callback(data.error, null);
+		    } else {
+			    callback(null, data.signed.s);
+		    }
 	    }
 	});
 }
