@@ -12,8 +12,17 @@ AmoveoInpageProvider.prototype.subscribe = function(callback) {
     });
 }
 
-AmoveoInpageProvider.prototype.send = function (opts) {
-    this.port.postMessage(opts);
+AmoveoInpageProvider.prototype.send = function (opts, callback) {
+	this.port.postMessage(opts);
+	this.port.onMessage.addListener(function(data) {
+		if (data.type === opts.type) {
+			if (data.error) {
+				callback(data.error, null);
+			} else {
+				callback(null, data);
+			}
+		}
+	});
 }
 
 AmoveoInpageProvider.prototype.sign = function (opts, callback) {
