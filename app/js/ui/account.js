@@ -81,22 +81,6 @@ function addListeners(account) {
     settingsButton.onclick = function(e) {
         settingsController.init(account);
     };
-
-    // var refreshButton = views.find(views.ids.navbar.refreshButton);
-    // views.show(views.ids.navbar.refreshButton);
-    // refreshButton.onclick = function(e) {
-    //     startRefreshing();
-    //
-    //     chrome.extension.sendMessage({ msg: "sync" });
-    //
-    //     chrome.extension.onMessage.addListener(
-    //         function(request, sender, sendResponse){
-    //             if(request.msg === "stopSync") {
-    //                 stopRefreshing();
-    //             }
-    //         }
-    //     );
-    // };
 }
 
 

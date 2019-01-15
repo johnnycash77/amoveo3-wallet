@@ -58,30 +58,30 @@ exports.send = send;
 function getPassword(callback) {
     chrome.extension.onMessage.addListener(
         function listener(request, sender, sendResponse) {
-            if (request.msg === "getPassword") {
+            if (request.type === "getPassword") {
                 chrome.runtime.onMessage.removeListener(listener);
                 callback(request.data);
             }
         }
     );
-    chrome.extension.sendMessage({ msg: "getPassword" });
+    chrome.extension.sendMessage({ type: "getPassword" });
 }
 
 function unlock(password, callback) {
-    chrome.extension.sendMessage({ msg: "password", data: password });
+    chrome.extension.sendMessage({ type: "password", data: password });
     callback();
 }
 
 function setState(state, callback) {
     chrome.extension.onMessage.addListener(
         function listener(request, sender, sendResponse) {
-            if (request.msg === "setState") {
+            if (request.type === "setState") {
                 chrome.runtime.onMessage.removeListener(listener);
                 callback(request.data);
             }
         }
     );
-    chrome.extension.sendMessage({ msg: "setState", data: state });
+    chrome.extension.sendMessage({ type: "setState", data: state });
 }
 
 exports.unlock = unlock;
@@ -2548,6 +2548,8 @@ const elliptic = require('./lib/elliptic.min.js');
 const fee = 152050;
 const DECIMALS = 100000000
 
+let messageSent = false;
+
 var ec = new elliptic.ec('secp256k1');
 
 let notificationType = parseParam('type')
@@ -2563,7 +2565,9 @@ if (notificationType === "channel") {
 }
 
 window.onunload = function(e) {
-	chrome.extension.sendMessage({ type: notificationType, error: "Rejected by user"});
+	if (!messageSent) {
+		chrome.extension.sendMessage({type: notificationType, error: "Rejected by user"});
+	}
 }
 
 function parseParam(name) {
@@ -2609,8 +2613,7 @@ function initSigning() {
 						var keys = ec.keyFromPrivate(account.privateKey, "hex");
 						var signed = keys.sign(message);
 
-						chrome.extension.sendMessage({ type: "sign", signed: signed});
-						notificationManager.closePopup();
+						sendMessageAndClose({ type: notificationType, signed: signed});
 					}
 				});
 			}
@@ -2618,8 +2621,7 @@ function initSigning() {
 	};
 
 	document.getElementById('cancel-sign-button').onclick = function() {
-		chrome.extension.sendMessage({ type: "sign", error: "Rejected by user"});
-		notificationManager.closePopup();
+		sendMessageAndClose({ type: notificationType, error: "Rejected by user"});
 	};
 }
 
@@ -2654,7 +2656,7 @@ function initChannel() {
 	document.getElementById('new-channel-container').classList.remove('hidden');
 
 	document.getElementById('cancel-channel-button').onclick = function() {
-		notificationManager.closePopup();
+		sendMessageAndClose({ type: notificationType, error: "Rejected by user"});
 	};
 
 	document.getElementById('channel-advanced-button').onclick = function() {
@@ -2769,9 +2771,17 @@ function initBet() {
 
 		if (amount > 0 && odds > 0) {
 			makeBet(amount, odds, side, oid, function() {
-				reloadWeb();
-
-				notificationManager.closePopup();
+				sendMessageAndClose(
+					{
+						type: notificationType,
+						bet: {
+							amount: amount,
+							odds: odds,
+							side: side,
+							oid: oid,
+						}
+					}
+				);
 			});
 		} else {
 			showBetError("Values must not be 0.")
@@ -2779,7 +2789,7 @@ function initBet() {
 	};
 
 	document.getElementById('cancel-bet-button').onclick = function() {
-		notificationManager.closePopup();
+		sendMessageAndClose({ type: notificationType, error: "Rejected by user"});
 	}
 
 	showMaxBalance(amount, price);
@@ -2914,9 +2924,7 @@ function channels3(x, expiration, pubkey, spk, tx_original) {
 	console.log(JSON.stringify(channel));
 
 	saveChannel(channel, function() {
-		reloadWeb();
-
-		notificationManager.closePopup();
+		sendMessageAndClose({ type: notificationType, channel: channel});
 	});
 }
 
@@ -3239,7 +3247,7 @@ function initCancel() {
 	}
 
 	document.getElementById('cancel-cancel-button').onclick = function() {
-		notificationManager.closePopup();
+		sendMessageAndClose({ type: notificationType, error: "Rejected by user"});
 	}
 }
 
@@ -3341,9 +3349,7 @@ function cancelTradeResponse(sspk2, sspk, server_pubkey, n) {
 		}
 
 		storage.setChannels(channels, function() {
-			reloadWeb();
-
-			notificationManager.closePopup();
+			sendMessageAndClose({ type: notificationType, message: "Trade cancelled"});
 		})
 	})
 }
@@ -3478,6 +3484,13 @@ function getUserBalance() {
 		}
 	});
 }
+
+function sendMessageAndClose(message) {
+	chrome.extension.sendMessage(message);
+	messageSent = true;
+	notificationManager.closePopup();
+}
+
 },{"./controller/network-controller":2,"./controller/password-controller":3,"./controller/user-controller":4,"./lib/crypto-utility":6,"./lib/elliptic.min.js":7,"./lib/format-utility":8,"./lib/merkle-proofs":9,"./lib/notification-manager.js":11,"./lib/storage":12}],14:[function(require,module,exports){
 "use strict";var sjcl={cipher:{},hash:{},keyexchange:{},mode:{},misc:{},codec:{},exception:{corrupt:function(a){this.toString=function(){return"CORRUPT: "+this.message};this.message=a},invalid:function(a){this.toString=function(){return"INVALID: "+this.message};this.message=a},bug:function(a){this.toString=function(){return"BUG: "+this.message};this.message=a},notReady:function(a){this.toString=function(){return"NOT READY: "+this.message};this.message=a}}};
 sjcl.cipher.aes=function(a){this.s[0][0][0]||this.O();var b,c,d,e,f=this.s[0][4],g=this.s[1];b=a.length;var h=1;if(4!==b&&6!==b&&8!==b)throw new sjcl.exception.invalid("invalid aes key size");this.b=[d=a.slice(0),e=[]];for(a=b;a<4*b+28;a++){c=d[a-1];if(0===a%b||8===b&&4===a%b)c=f[c>>>24]<<24^f[c>>16&255]<<16^f[c>>8&255]<<8^f[c&255],0===a%b&&(c=c<<8^c>>>24^h<<24,h=h<<1^283*(h>>7));d[a]=d[a-b]^c}for(b=0;a;b++,a--)c=d[b&3?a:a-4],e[b]=4>=a||4>b?c:g[0][f[c>>>24]]^g[1][f[c>>16&255]]^g[2][f[c>>8&255]]^g[3][f[c&

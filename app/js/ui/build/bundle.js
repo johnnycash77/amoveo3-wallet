@@ -58,30 +58,30 @@ exports.send = send;
 function getPassword(callback) {
     chrome.extension.onMessage.addListener(
         function listener(request, sender, sendResponse) {
-            if (request.msg === "getPassword") {
+            if (request.type === "getPassword") {
                 chrome.runtime.onMessage.removeListener(listener);
                 callback(request.data);
             }
         }
     );
-    chrome.extension.sendMessage({ msg: "getPassword" });
+    chrome.extension.sendMessage({ type: "getPassword" });
 }
 
 function unlock(password, callback) {
-    chrome.extension.sendMessage({ msg: "password", data: password });
+    chrome.extension.sendMessage({ type: "password", data: password });
     callback();
 }
 
 function setState(state, callback) {
     chrome.extension.onMessage.addListener(
         function listener(request, sender, sendResponse) {
-            if (request.msg === "setState") {
+            if (request.type === "setState") {
                 chrome.runtime.onMessage.removeListener(listener);
                 callback(request.data);
             }
         }
     );
-    chrome.extension.sendMessage({ msg: "setState", data: state });
+    chrome.extension.sendMessage({ type: "setState", data: state });
 }
 
 exports.unlock = unlock;
@@ -2704,22 +2704,6 @@ function addListeners(account) {
     settingsButton.onclick = function(e) {
         settingsController.init(account);
     };
-
-    // var refreshButton = views.find(views.ids.navbar.refreshButton);
-    // views.show(views.ids.navbar.refreshButton);
-    // refreshButton.onclick = function(e) {
-    //     startRefreshing();
-    //
-    //     chrome.extension.sendMessage({ msg: "sync" });
-    //
-    //     chrome.extension.onMessage.addListener(
-    //         function(request, sender, sendResponse){
-    //             if(request.msg === "stopSync") {
-    //                 stopRefreshing();
-    //             }
-    //         }
-    //     );
-    // };
 }
 
 
@@ -3794,7 +3778,7 @@ function initResync() {
         storage.setTopHeader(0, function () {
             storage.setHeaders({}, function () {
                 views.setText(views.ids.latestBlock, "Latest Block: 0");
-                chrome.extension.sendMessage({ msg: "resync"});
+                chrome.extension.sendMessage({ type: "resync"});
             });
         });
     };

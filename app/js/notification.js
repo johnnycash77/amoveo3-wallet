@@ -12,6 +12,8 @@ const elliptic = require('./lib/elliptic.min.js');
 const fee = 152050;
 const DECIMALS = 100000000
 
+let messageSent = false;
+
 var ec = new elliptic.ec('secp256k1');
 
 let notificationType = parseParam('type')
@@ -27,7 +29,9 @@ if (notificationType === "channel") {
 }
 
 window.onunload = function(e) {
-	chrome.extension.sendMessage({ type: notificationType, error: "Rejected by user"});
+	if (!messageSent) {
+		chrome.extension.sendMessage({type: notificationType, error: "Rejected by user"});
+	}
 }
 
 function parseParam(name) {
@@ -73,8 +77,7 @@ function initSigning() {
 						var keys = ec.keyFromPrivate(account.privateKey, "hex");
 						var signed = keys.sign(message);
 
-						chrome.extension.sendMessage({ type: "sign", signed: signed});
-						notificationManager.closePopup();
+						sendMessageAndClose({ type: notificationType, signed: signed});
 					}
 				});
 			}
@@ -82,8 +85,7 @@ function initSigning() {
 	};
 
 	document.getElementById('cancel-sign-button').onclick = function() {
-		chrome.extension.sendMessage({ type: "sign", error: "Rejected by user"});
-		notificationManager.closePopup();
+		sendMessageAndClose({ type: notificationType, error: "Rejected by user"});
 	};
 }
 
@@ -118,7 +120,7 @@ function initChannel() {
 	document.getElementById('new-channel-container').classList.remove('hidden');
 
 	document.getElementById('cancel-channel-button').onclick = function() {
-		notificationManager.closePopup();
+		sendMessageAndClose({ type: notificationType, error: "Rejected by user"});
 	};
 
 	document.getElementById('channel-advanced-button').onclick = function() {
@@ -233,9 +235,17 @@ function initBet() {
 
 		if (amount > 0 && odds > 0) {
 			makeBet(amount, odds, side, oid, function() {
-				reloadWeb();
-
-				notificationManager.closePopup();
+				sendMessageAndClose(
+					{
+						type: notificationType,
+						bet: {
+							amount: amount,
+							odds: odds,
+							side: side,
+							oid: oid,
+						}
+					}
+				);
 			});
 		} else {
 			showBetError("Values must not be 0.")
@@ -243,7 +253,7 @@ function initBet() {
 	};
 
 	document.getElementById('cancel-bet-button').onclick = function() {
-		notificationManager.closePopup();
+		sendMessageAndClose({ type: notificationType, error: "Rejected by user"});
 	}
 
 	showMaxBalance(amount, price);
@@ -378,9 +388,7 @@ function channels3(x, expiration, pubkey, spk, tx_original) {
 	console.log(JSON.stringify(channel));
 
 	saveChannel(channel, function() {
-		reloadWeb();
-
-		notificationManager.closePopup();
+		sendMessageAndClose({ type: notificationType, channel: channel});
 	});
 }
 
@@ -703,7 +711,7 @@ function initCancel() {
 	}
 
 	document.getElementById('cancel-cancel-button').onclick = function() {
-		notificationManager.closePopup();
+		sendMessageAndClose({ type: notificationType, error: "Rejected by user"});
 	}
 }
 
@@ -805,9 +813,7 @@ function cancelTradeResponse(sspk2, sspk, server_pubkey, n) {
 		}
 
 		storage.setChannels(channels, function() {
-			reloadWeb();
-
-			notificationManager.closePopup();
+			sendMessageAndClose({ type: notificationType, message: "Trade cancelled"});
 		})
 	})
 }
@@ -941,4 +947,10 @@ function getUserBalance() {
 			showChannelError("Wallet not synced. Please open the wallet and let it sync.")
 		}
 	});
+}
+
+function sendMessageAndClose(message) {
+	chrome.extension.sendMessage(message);
+	messageSent = true;
+	notificationManager.closePopup();
 }

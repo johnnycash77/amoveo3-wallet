@@ -90,7 +90,7 @@ function initResync() {
         storage.setTopHeader(0, function () {
             storage.setHeaders({}, function () {
                 views.setText(views.ids.latestBlock, "Latest Block: 0");
-                chrome.extension.sendMessage({ msg: "resync"});
+                chrome.extension.sendMessage({ type: "resync"});
             });
         });
     };

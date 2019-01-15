@@ -40,23 +40,21 @@ function resetPasswordTimer() {
 
 chrome.extension.onMessage.addListener(
     function onSync(request, sender, sendResponse) {
-        if (request.msg === "sync") {
+        if (request.type === "sync") {
             sync(function() {
-                chrome.extension.sendMessage({ msg: "stopSync" });
+                chrome.extension.sendMessage({ type: "stopSync" });
                 // chrome.extension.onMessage.removeListener(onSync);
             });
-        } if (request.msg === "resync") {
+        } if (request.type === "resync") {
             blocksController.reset();
-        } else if (request.msg === "password") {
+        } else if (request.type === "password") {
             password = request.data;
             resetPasswordTimer();
-        } else if (request.msg === "getPassword") {
-            chrome.extension.sendMessage({ msg: "getPassword", data: password });
+        } else if (request.type === "getPassword") {
+            chrome.extension.sendMessage({ type: "getPassword", data: password });
             resetPasswordTimer();
-        } else if (request.msg === "setState") {
-            sendMessageToPage(request.data)
-        } else if (request.type === "sign") {
-		    sendMessageToPage(request)
+        } else if (request.type === "setState" || request.type === "sign" || request.type === "channel") {
+            sendMessageToPage(request)
         }
     }
 );
@@ -73,8 +71,8 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
     openPort = port;
 
     openPort.onMessage.addListener(function(data) {
-        if (data.opts) {
-            notificationManager.showPopup(data.opts);
+        if (data) {
+            notificationManager.showPopup(data);
         }
     });
 
