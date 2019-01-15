@@ -43,6 +43,11 @@ p {
     text-align: center;
 }
 
+#cancel-button-container {
+    width: 180px;
+    margin: auto;
+}
+
 #bet-side {
     font-size: 18px;
     text-transform: uppercase;

@@ -53,7 +53,8 @@ chrome.extension.onMessage.addListener(
         } else if (request.type === "getPassword") {
             chrome.extension.sendMessage({ type: "getPassword", data: password });
             resetPasswordTimer();
-        } else if (request.type === "setState" || request.type === "sign" || request.type === "channel") {
+        } else if (request.type === "setState" || request.type === "sign" || request.type === "channel"
+            || request.type === "cancel" || request.type === "market" ) {
             sendMessageToPage(request)
         }
     }
