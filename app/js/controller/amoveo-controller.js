@@ -63,6 +63,7 @@ module.exports = class AmoveoController extends EventEmitter {
                     selectedAddress: "",
                     channels: [],
                     isLocked: true,
+                    test: "1"
                 })
             } else {
                 if (accounts.length > 0) {

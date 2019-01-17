@@ -3,7 +3,9 @@ module.exports = setupDappAutoReload
 function setupDappAutoReload (amoveo3, port) {
   let reloadInProgress = false
   let lastTimeUsed
-  let lastSeenNetwork
+  let lastSeenNetwork;
+  let lastSeenAccount;
+  let lastSeenLocked;
 
   global.amoveo3 = new Proxy(amoveo3, {
     get: (_amoveo3, key) => {
@@ -15,29 +17,44 @@ function setupDappAutoReload (amoveo3, port) {
     },
   })
 
-  port.onMessage.addListener(function(state) {
-    if (reloadInProgress) {
-      return
-    }
+  port.onMessage.addListener(function(request) {
+    if (request.type === "setState") {
+        const state = request.data;
 
-    const currentNetwork = state.network
+	    if (reloadInProgress) {
+		    return
+	    }
 
-    if (!lastSeenNetwork) {
-      lastSeenNetwork = currentNetwork
-      return
-    }
+	    const currentNetwork = state.network
+	    const currentAccount = state.selectedAddress
+	    const isLocked = state.isLocked
 
-    if (!lastTimeUsed || currentNetwork === lastSeenNetwork) {
-      return
-    }
+	    if (!lastSeenNetwork) {
+		    lastSeenNetwork = currentNetwork;
+	    }
+	    if (!lastSeenAccount) {
+		    lastSeenAccount = currentAccount;
+	    }
+	    if (!lastSeenLocked) {
+		    lastSeenLocked = isLocked;
+	    }
 
-    reloadInProgress = true
-    const timeSinceUse = Date.now() - lastTimeUsed
-    // if amoveo3 was recently used then delay the reloading of the page
-    if (timeSinceUse > 500) {
-      triggerReset()
-    } else {
-      setTimeout(triggerReset, 500)
+	    const shouldReload = lastSeenNetwork !== currentNetwork || lastSeenAccount !== currentAccount || lastSeenLocked !== isLocked;
+
+	    lastSeenNetwork = currentNetwork;
+	    lastSeenAccount = currentAccount;
+	    lastSeenLocked = isLocked;
+
+	    if (shouldReload) {
+		    reloadInProgress = true
+		    const timeSinceUse = Date.now() - lastTimeUsed
+		    // if amoveo3 was recently used then delay the reloading of the page
+		    if (timeSinceUse > 500) {
+			    triggerReset()
+		    } else {
+			    setTimeout(triggerReset, 500)
+		    }
+	    }
     }
   })
 }

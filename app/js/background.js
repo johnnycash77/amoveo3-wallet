@@ -4,12 +4,10 @@ const NotificationManager = require('./lib/notification-manager')
 const notificationManager = new NotificationManager()
 
 const blocksController = new BlocksController({});
-var syncId;
-var passwordId;
-
-var openPort;
-
-var password = "";
+let syncId;
+let passwordId;
+let openPort;
+let password = "";
 
 sync();
 
@@ -55,6 +53,8 @@ chrome.extension.onMessage.addListener(
         } else if (request.type === "setState" || request.type === "sign" || request.type === "channel"
             || request.type === "cancel" || request.type === "market" ) {
             sendMessageToPage(request)
+        } else if (request.type === "reload") {
+		    sendMessageToPage(request)
         }
     }
 );
@@ -79,24 +79,33 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
     storage.getAccounts(password, function (error, accounts) {
         if (error) {
             sendMessageToPage({
-                selectedAddress: "",
-                channels: [],
-                isLocked: true
+                type: "setState",
+                data: {
+	                selectedAddress: "",
+	                channels: [],
+	                isLocked: true,
+                }
             });
         } else {
             if (accounts.length > 0) {
                 storage.getChannels(function (error, channels) {
                     sendMessageToPage({
-                        selectedAddress: accounts[0].publicKey,
-                        channels: channels,
-                        isLocked: false
+	                    type: "setState",
+	                    data: {
+		                    selectedAddress: accounts[0].publicKey,
+		                    channels: channels,
+		                    isLocked: false
+	                    }
                     })
                 })
             } else {
                 sendMessageToPage({
-                    selectedAddress: "",
-                    channels: [],
-                    isLocked: false
+	                type: "setState",
+	                data: {
+		                selectedAddress: "",
+		                channels: [],
+		                isLocked: false
+	                }
                 })
             }
         }
@@ -107,7 +116,7 @@ function reloadWeb() {
     chrome.tabs.query({}, function (tabs) {
         for (var i = 0; i < tabs.length; i++) {
             var tab = tabs[i];
-            if (tab.url.indexOf("localhost:8000") !== -1 || tab.url.indexOf("amoveobook") !== -1) {
+            if (tab.url.indexOf("localhost") !== -1 || tab.url.indexOf("amoveobook") !== -1) {
                 chrome.tabs.reload(tab.id);
             }
         }

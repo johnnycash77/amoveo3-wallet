@@ -46,10 +46,13 @@ log.debug('Amoveo Wallet - injected amoveo3')
 setupDappAutoReload(amoveo3, inpageProvider.port);
 
 // set web3 defaultAccount
-inpageProvider.subscribe(function(state) {
-  amoveo3.setCoinbase(state.selectedAddress);
-  amoveo3.setChannels(state.channels);
-  amoveo3.setLocked(state.isLocked);
+inpageProvider.subscribe(function(request) {
+  if (request.type === "setState") {
+	  const state = request.data;
+	  amoveo3.setCoinbase(state.selectedAddress);
+	  amoveo3.setChannels(state.channels);
+	  amoveo3.setLocked(state.isLocked);
+  }
 })
 
 //inpageProvider.channelsStore.subscribe(function (state) {

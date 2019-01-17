@@ -1,5 +1,5 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-const isTestnet = false;
+const isTestnet = true;
 
 const config = {
     isTestnet: isTestnet,
@@ -70,10 +70,13 @@ log.debug('Amoveo Wallet - injected amoveo3')
 setupDappAutoReload(amoveo3, inpageProvider.port);
 
 // set web3 defaultAccount
-inpageProvider.subscribe(function(state) {
-  amoveo3.setCoinbase(state.selectedAddress);
-  amoveo3.setChannels(state.channels);
-  amoveo3.setLocked(state.isLocked);
+inpageProvider.subscribe(function(request) {
+  if (request.type === "setState") {
+	  const state = request.data;
+	  amoveo3.setCoinbase(state.selectedAddress);
+	  amoveo3.setChannels(state.channels);
+	  amoveo3.setLocked(state.isLocked);
+  }
 })
 
 //inpageProvider.channelsStore.subscribe(function (state) {
@@ -173,7 +176,9 @@ module.exports = setupDappAutoReload
 function setupDappAutoReload (amoveo3, port) {
   let reloadInProgress = false
   let lastTimeUsed
-  let lastSeenNetwork
+  let lastSeenNetwork;
+  let lastSeenAccount;
+  let lastSeenLocked;
 
   global.amoveo3 = new Proxy(amoveo3, {
     get: (_amoveo3, key) => {
@@ -185,29 +190,44 @@ function setupDappAutoReload (amoveo3, port) {
     },
   })
 
-  port.onMessage.addListener(function(state) {
-    if (reloadInProgress) {
-      return
-    }
+  port.onMessage.addListener(function(request) {
+    if (request.type === "setState") {
+        const state = request.data;
 
-    const currentNetwork = state.network
+	    if (reloadInProgress) {
+		    return
+	    }
 
-    if (!lastSeenNetwork) {
-      lastSeenNetwork = currentNetwork
-      return
-    }
+	    const currentNetwork = state.network
+	    const currentAccount = state.selectedAddress
+	    const isLocked = state.isLocked
 
-    if (!lastTimeUsed || currentNetwork === lastSeenNetwork) {
-      return
-    }
+	    if (!lastSeenNetwork) {
+		    lastSeenNetwork = currentNetwork;
+	    }
+	    if (!lastSeenAccount) {
+		    lastSeenAccount = currentAccount;
+	    }
+	    if (!lastSeenLocked) {
+		    lastSeenLocked = isLocked;
+	    }
 
-    reloadInProgress = true
-    const timeSinceUse = Date.now() - lastTimeUsed
-    // if amoveo3 was recently used then delay the reloading of the page
-    if (timeSinceUse > 500) {
-      triggerReset()
-    } else {
-      setTimeout(triggerReset, 500)
+	    const shouldReload = lastSeenNetwork !== currentNetwork || lastSeenAccount !== currentAccount || lastSeenLocked !== isLocked;
+
+	    lastSeenNetwork = currentNetwork;
+	    lastSeenAccount = currentAccount;
+	    lastSeenLocked = isLocked;
+
+	    if (shouldReload) {
+		    reloadInProgress = true
+		    const timeSinceUse = Date.now() - lastTimeUsed
+		    // if amoveo3 was recently used then delay the reloading of the page
+		    if (timeSinceUse > 500) {
+			    triggerReset()
+		    } else {
+			    setTimeout(triggerReset, 500)
+		    }
+	    }
     }
   })
 }
@@ -219,8 +239,8 @@ function triggerReset () {
 },{}],6:[function(require,module,exports){
 module.exports = AmoveoInpageProvider;
 
-// const extId = "hfojlfflnlmfjhddgodpmophmhpimahi";
-const extId = "dihkmjjoakaiagmoflhachmoolamfimp";
+const extId = "hfojlfflnlmfjhddgodpmophmhpimahi";
+// const extId = "dihkmjjoakaiagmoflhachmoolamfimp";
 
 function AmoveoInpageProvider(connectionStream) {
     this.port = chrome.runtime.connect(extId);
