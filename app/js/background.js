@@ -43,7 +43,12 @@ chrome.extension.onMessage.addListener(
                 // chrome.extension.onMessage.removeListener(onSync);
             });
         } if (request.type === "resync") {
-            blocksController.reset();
+            blocksController.clearCache(function() {
+	            sync(function() {
+		            chrome.extension.sendMessage({ type: "stopSync" });
+		            // chrome.extension.onMessage.removeListener(onSync);
+	            });
+            });
         } else if (request.type === "password") {
             password = request.data;
             resetPasswordTimer();

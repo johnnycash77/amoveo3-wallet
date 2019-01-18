@@ -47,14 +47,12 @@ function refresh(account, callback) {
         updateBlockNumber(height);
         updateSyncing(height);
 
-        if (height > 25000) {
-            userController.getBalance(account, header, function (error, result) {
-                views.setText(views.ids.account.balance, result);
-                if (callback) {
-                    callback();
-                }
-            });
-        }
+        userController.getBalance(account, header, function (error, result) {
+            views.setText(views.ids.account.balance, result);
+            if (callback) {
+                callback();
+            }
+        });
     });
 }
 

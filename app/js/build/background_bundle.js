@@ -44,7 +44,12 @@ chrome.extension.onMessage.addListener(
                 // chrome.extension.onMessage.removeListener(onSync);
             });
         } if (request.type === "resync") {
-            blocksController.reset();
+            blocksController.clearCache(function() {
+	            sync(function() {
+		            chrome.extension.sendMessage({ type: "stopSync" });
+		            // chrome.extension.onMessage.removeListener(onSync);
+	            });
+            });
         } else if (request.type === "password") {
             password = request.data;
             resetPasswordTimer();
@@ -127,6 +132,9 @@ function reloadWeb() {
 },{"./controller/blocks-controller":3,"./lib/notification-manager":9,"./lib/storage":10}],2:[function(require,module,exports){
 const isTestnet = true;
 
+const testnetCheckpoint = ["header", 50,"avmTCvhW62I5b1ZKW/k+hN5VkDTRBUfNOML1IbDeBEM=","HtCW+xejEr+hVx9EU/YWqjkToHfB65LznX/7kYY1qYc=","/nky29gffL519fIShxYtlGYrSl/VvYYSw0Qk2F/+Q4k=",283297347,4861,0,"AAAAAAAAAAAAoAC51HYeqD+RjyH1Ew1tdebVT3/BD6g=",1006239072,746]
+const mainnetCheckpoint = ["header", 38671, "CoyxdfjlUzd/cujJRS1iTksmE5l7C3lsyn+2FY0kxmU=", "+CwT4ZGvYE10i5Tdocj1j+ojSNowEDp+Jq+uw3zdO20=", "MrN5jt9v0X91Kix3HInDP25dNrTXOt+ux3d2yY64QMk=", 212163079, 13698, 3, "AAAAAAAAAAAAhv86dgAAAAAV79tiAAAAAAAWxwAAZjc=", 402432639143042350000, 5982]
+
 const config = {
     isTestnet: isTestnet,
     defaultFee: 0.00151168,
@@ -137,8 +145,8 @@ const config = {
     channelStreamName: 'ChannelStore',
     retargetFrequency: isTestnet ? 12 : 2000,
     forks: isTestnet ? {two: 0, four: 12, seven:40} : {two: 9000, four: 26900, seven:28135},
-    checkPointHeader: ["header", 38671, "CoyxdfjlUzd/cujJRS1iTksmE5l7C3lsyn+2FY0kxmU=", "+CwT4ZGvYE10i5Tdocj1j+ojSNowEDp+Jq+uw3zdO20=", "MrN5jt9v0X91Kix3HInDP25dNrTXOt+ux3d2yY64QMk=", 212163079, 13698, 3, "AAAAAAAAAAAAhv86dgAAAAAV79tiAAAAAAAWxwAAZjc=", 402432639143042350000, 5982],
-    checkPointEwah: 2177732187806707,
+    checkPointHeader: isTestnet ? testnetCheckpoint : mainnetCheckpoint,
+    checkPointEwah: isTestnet ? 713104: 2177732187806707,
     initialDifficulty: isTestnet ? 2500 : 8844,
     headersBatch: 5000,
     appTitle: "Amoveo3 Wallet",
@@ -172,6 +180,18 @@ class BlocksController {
 	    this.checkPointEwah = config.checkPointEwah;
     }
 
+    clearCache(callback) {
+	    this.reset();
+
+	    storage.setHeaders({}, function() {
+		    storage.setTopHeader(0, function() {
+		    	if (callback) {
+				    callback();
+			    }
+		    })
+	    })
+    }
+
     getHeight(callback) {
         if (this.topHeader === 0) {
             storage.getTopHeader(function (error, header) {
@@ -203,7 +223,7 @@ class BlocksController {
         var instance = this;
 
 	    storage.getTopHeader(function(error, header) {
-		    if (!config.isTestnet && (header === 0 || header[1] < 28101 || header[1] === 28136)) {
+	    	if (!header || header === 0 || header[1] < instance.checkPointHeader[1]) {
 			    instance.writeHeader(instance.checkPointHeader, instance.checkPointEwah);
 			    instance.doSync(callback);
 		    } else {
@@ -221,7 +241,7 @@ class BlocksController {
     doSync(callback) {
 	    var instance = this;
 	    instance.getHeight(function(height) {
-		    network.send(["headers", config.headersBatch + 1, height], function(error, headers) {
+		    network.send(["headers", config.headersBatch, height + 1], function(error, headers) {
 			    if (!Array.isArray(headers)) {
 				    headers = JSON.parse(headers)
 			    }
@@ -231,6 +251,8 @@ class BlocksController {
 				    callback(instance.topHeader);
 			    } else if (!Array.isArray(headers)) {
 				    console.error("Unexpected response");
+				    callback(instance.topHeader);
+			    } else if (headers.length < 2) {
 				    callback(instance.topHeader);
 			    } else if (headers && headers.length > 1 && headers[1] < instance.topHeader[1]) {
 				    console.error("Duplicate headers response: " + headers[1]);
@@ -349,7 +371,7 @@ class BlocksController {
                 return [I > diff, ewah];
             } else {
                 console.error("bad diff: " + diff + ", " + diff0);
-                return [false, ewah];
+                return [false, 0];
             }
         }
     }
@@ -2611,6 +2633,7 @@ class NotificationManager {
 module.exports = NotificationManager
 },{"extensionizer":74}],10:[function(require,module,exports){
 var cryptoUtility = require('./crypto-utility.js')
+var config = require('../config')
 
 function setStorage(values, callback) {
     chrome.storage.local.set(values, callback);
@@ -2681,27 +2704,51 @@ function clearAccounts(callback) {
 }
 
 function getTopHeader(callback) {
-    getStorage({topHeader: 0}, function(result) {
-        callback(null, result.topHeader);
-    })
+	if (config.isTestnet) {
+		getStorage({testnetTopHeader: 0}, function (result) {
+			callback(null, result.testnetTopHeader);
+		})
+	} else {
+		getStorage({topHeader: 0}, function (result) {
+			callback(null, result.topHeader);
+		})
+	}
 }
 
 function getHeaders(callback) {
-    getStorage({headers: {}}, function(result) {
-        callback(null, result.headers);
-    })
+    if (config.isTestnet) {
+	    getStorage({testnetHeaders: {}}, function(result) {
+		    callback(null, result.testnetHeaders);
+	    })
+    } else {
+	    getStorage({headers: {}}, function(result) {
+		    callback(null, result.headers);
+	    })
+    }
 }
 
 function setTopHeader(topHeader, callback) {
-    setStorage({topHeader: topHeader}, function() {
-        callback();
-    })
+	if (config.isTestnet) {
+		setStorage({testnetTopHeader: topHeader}, function() {
+			callback();
+		})
+	} else {
+		setStorage({topHeader: topHeader}, function () {
+			callback();
+		})
+	}
 }
 
 function setHeaders(headersDb, callback) {
-    setStorage({headers: headersDb}, function() {
-        callback();
-    })
+	if (config.isTestnet) {
+		setStorage({testnetHeaders:headersDb}, function() {
+			callback();
+		})
+	} else {
+		setStorage({headers: headersDb}, function () {
+			callback();
+		})
+	}
 }
 
 function getConnectionInfo(callback) {
@@ -2745,7 +2792,7 @@ exports.setConnectionInfo = setConnectionInfo;
 exports.hasPasswordBeenSet = hasPasswordBeenSet;
 exports.setPasswordBeenSet = setPasswordBeenSet;
 
-},{"./crypto-utility.js":6}],11:[function(require,module,exports){
+},{"../config":2,"./crypto-utility.js":6}],11:[function(require,module,exports){
 "use strict";var sjcl={cipher:{},hash:{},keyexchange:{},mode:{},misc:{},codec:{},exception:{corrupt:function(a){this.toString=function(){return"CORRUPT: "+this.message};this.message=a},invalid:function(a){this.toString=function(){return"INVALID: "+this.message};this.message=a},bug:function(a){this.toString=function(){return"BUG: "+this.message};this.message=a},notReady:function(a){this.toString=function(){return"NOT READY: "+this.message};this.message=a}}};
 sjcl.cipher.aes=function(a){this.s[0][0][0]||this.O();var b,c,d,e,f=this.s[0][4],g=this.s[1];b=a.length;var h=1;if(4!==b&&6!==b&&8!==b)throw new sjcl.exception.invalid("invalid aes key size");this.b=[d=a.slice(0),e=[]];for(a=b;a<4*b+28;a++){c=d[a-1];if(0===a%b||8===b&&4===a%b)c=f[c>>>24]<<24^f[c>>16&255]<<16^f[c>>8&255]<<8^f[c&255],0===a%b&&(c=c<<8^c>>>24^h<<24,h=h<<1^283*(h>>7));d[a]=d[a-b]^c}for(b=0;a;b++,a--)c=d[b&3?a:a-4],e[b]=4>=a||4>b?c:g[0][f[c>>>24]]^g[1][f[c>>16&255]]^g[2][f[c>>8&255]]^g[3][f[c&
 255]]};

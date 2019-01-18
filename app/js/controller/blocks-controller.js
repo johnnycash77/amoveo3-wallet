@@ -23,6 +23,18 @@ class BlocksController {
 	    this.checkPointEwah = config.checkPointEwah;
     }
 
+    clearCache(callback) {
+	    this.reset();
+
+	    storage.setHeaders({}, function() {
+		    storage.setTopHeader(0, function() {
+		    	if (callback) {
+				    callback();
+			    }
+		    })
+	    })
+    }
+
     getHeight(callback) {
         if (this.topHeader === 0) {
             storage.getTopHeader(function (error, header) {
@@ -54,7 +66,7 @@ class BlocksController {
         var instance = this;
 
 	    storage.getTopHeader(function(error, header) {
-		    if (!config.isTestnet && (header === 0 || header[1] < 28101 || header[1] === 28136)) {
+	    	if (!header || header === 0 || header[1] < instance.checkPointHeader[1]) {
 			    instance.writeHeader(instance.checkPointHeader, instance.checkPointEwah);
 			    instance.doSync(callback);
 		    } else {
@@ -72,7 +84,7 @@ class BlocksController {
     doSync(callback) {
 	    var instance = this;
 	    instance.getHeight(function(height) {
-		    network.send(["headers", config.headersBatch + 1, height], function(error, headers) {
+		    network.send(["headers", config.headersBatch, height + 1], function(error, headers) {
 			    if (!Array.isArray(headers)) {
 				    headers = JSON.parse(headers)
 			    }
@@ -82,6 +94,8 @@ class BlocksController {
 				    callback(instance.topHeader);
 			    } else if (!Array.isArray(headers)) {
 				    console.error("Unexpected response");
+				    callback(instance.topHeader);
+			    } else if (headers.length < 2) {
 				    callback(instance.topHeader);
 			    } else if (headers && headers.length > 1 && headers[1] < instance.topHeader[1]) {
 				    console.error("Duplicate headers response: " + headers[1]);
@@ -200,7 +214,7 @@ class BlocksController {
                 return [I > diff, ewah];
             } else {
                 console.error("bad diff: " + diff + ", " + diff0);
-                return [false, ewah];
+                return [false, 0];
             }
         }
     }

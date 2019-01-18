@@ -1,4 +1,5 @@
 var cryptoUtility = require('./crypto-utility.js')
+var config = require('../config')
 
 function setStorage(values, callback) {
     chrome.storage.local.set(values, callback);
@@ -69,27 +70,51 @@ function clearAccounts(callback) {
 }
 
 function getTopHeader(callback) {
-    getStorage({topHeader: 0}, function(result) {
-        callback(null, result.topHeader);
-    })
+	if (config.isTestnet) {
+		getStorage({testnetTopHeader: 0}, function (result) {
+			callback(null, result.testnetTopHeader);
+		})
+	} else {
+		getStorage({topHeader: 0}, function (result) {
+			callback(null, result.topHeader);
+		})
+	}
 }
 
 function getHeaders(callback) {
-    getStorage({headers: {}}, function(result) {
-        callback(null, result.headers);
-    })
+    if (config.isTestnet) {
+	    getStorage({testnetHeaders: {}}, function(result) {
+		    callback(null, result.testnetHeaders);
+	    })
+    } else {
+	    getStorage({headers: {}}, function(result) {
+		    callback(null, result.headers);
+	    })
+    }
 }
 
 function setTopHeader(topHeader, callback) {
-    setStorage({topHeader: topHeader}, function() {
-        callback();
-    })
+	if (config.isTestnet) {
+		setStorage({testnetTopHeader: topHeader}, function() {
+			callback();
+		})
+	} else {
+		setStorage({topHeader: topHeader}, function () {
+			callback();
+		})
+	}
 }
 
 function setHeaders(headersDb, callback) {
-    setStorage({headers: headersDb}, function() {
-        callback();
-    })
+	if (config.isTestnet) {
+		setStorage({testnetHeaders:headersDb}, function() {
+			callback();
+		})
+	} else {
+		setStorage({headers: headersDb}, function () {
+			callback();
+		})
+	}
 }
 
 function getConnectionInfo(callback) {
