@@ -55,10 +55,12 @@ chrome.extension.onMessage.addListener(
         } else if (request.type === "getPassword") {
             chrome.extension.sendMessage({ type: "getPassword", data: password });
             resetPasswordTimer();
-        } else if (request.type === "setState" || request.type === "sign" || request.type === "channel"
-            || request.type === "cancel" || request.type === "market" ) {
+        } else if (request.type === "setState" || request.type === "sign" || request.type === "channel") {
             sendMessageToPage(request)
-        } else if (request.type === "reload") {
+        } else if (request.type === "market" || request.type === "cancel") {
+		    sendMessageToPage(request);
+		    sendCurrentState();
+	    } else if (request.type === "reload") {
 		    sendMessageToPage(request)
         }
     }
@@ -81,41 +83,45 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
         }
     });
 
-    storage.getAccounts(password, function (error, accounts) {
-        if (error) {
-            sendMessageToPage({
-                type: "setState",
-                data: {
-	                selectedAddress: "",
-	                channels: [],
-	                isLocked: true,
-                }
-            });
-        } else {
-            if (accounts.length > 0) {
-                storage.getChannels(function (error, channels) {
-                    sendMessageToPage({
-	                    type: "setState",
-	                    data: {
-		                    selectedAddress: accounts[0].publicKey,
-		                    channels: channels,
-		                    isLocked: false
-	                    }
-                    })
-                })
-            } else {
-                sendMessageToPage({
-	                type: "setState",
-	                data: {
-		                selectedAddress: "",
-		                channels: [],
-		                isLocked: false
-	                }
-                })
-            }
-        }
-    });
+	sendCurrentState();
 });
+
+function sendCurrentState() {
+	storage.getAccounts(password, function (error, accounts) {
+		if (error) {
+			sendMessageToPage({
+				type: "setState",
+				data: {
+					selectedAddress: "",
+					channels: [],
+					isLocked: true,
+				}
+			});
+		} else {
+			if (accounts.length > 0) {
+				storage.getChannels(function (error, channels) {
+					sendMessageToPage({
+						type: "setState",
+						data: {
+							selectedAddress: accounts[0].publicKey,
+							channels: channels,
+							isLocked: false
+						}
+					})
+				})
+			} else {
+				sendMessageToPage({
+					type: "setState",
+					data: {
+						selectedAddress: "",
+						channels: [],
+						isLocked: false
+					}
+				})
+			}
+		}
+	});
+}
 
 function reloadWeb() {
     chrome.tabs.query({}, function (tabs) {

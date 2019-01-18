@@ -57,9 +57,12 @@ chrome.extension.onMessage.addListener(
             chrome.extension.sendMessage({ type: "getPassword", data: password });
             resetPasswordTimer();
         } else if (request.type === "setState" || request.type === "sign" || request.type === "channel"
-            || request.type === "cancel" || request.type === "market" ) {
+            || request.type === "cancel") {
             sendMessageToPage(request)
-        } else if (request.type === "reload") {
+        } else if (request.type === "market") {
+		    sendMessageToPage(request);
+		    sendCurrentState();
+	    } else if (request.type === "reload") {
 		    sendMessageToPage(request)
         }
     }
@@ -82,41 +85,45 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
         }
     });
 
-    storage.getAccounts(password, function (error, accounts) {
-        if (error) {
-            sendMessageToPage({
-                type: "setState",
-                data: {
-	                selectedAddress: "",
-	                channels: [],
-	                isLocked: true,
-                }
-            });
-        } else {
-            if (accounts.length > 0) {
-                storage.getChannels(function (error, channels) {
-                    sendMessageToPage({
-	                    type: "setState",
-	                    data: {
-		                    selectedAddress: accounts[0].publicKey,
-		                    channels: channels,
-		                    isLocked: false
-	                    }
-                    })
-                })
-            } else {
-                sendMessageToPage({
-	                type: "setState",
-	                data: {
-		                selectedAddress: "",
-		                channels: [],
-		                isLocked: false
-	                }
-                })
-            }
-        }
-    });
+	sendCurrentState();
 });
+
+function sendCurrentState() {
+	storage.getAccounts(password, function (error, accounts) {
+		if (error) {
+			sendMessageToPage({
+				type: "setState",
+				data: {
+					selectedAddress: "",
+					channels: [],
+					isLocked: true,
+				}
+			});
+		} else {
+			if (accounts.length > 0) {
+				storage.getChannels(function (error, channels) {
+					sendMessageToPage({
+						type: "setState",
+						data: {
+							selectedAddress: accounts[0].publicKey,
+							channels: channels,
+							isLocked: false
+						}
+					})
+				})
+			} else {
+				sendMessageToPage({
+					type: "setState",
+					data: {
+						selectedAddress: "",
+						channels: [],
+						isLocked: false
+					}
+				})
+			}
+		}
+	});
+}
 
 function reloadWeb() {
     chrome.tabs.query({}, function (tabs) {
@@ -2535,14 +2542,14 @@ class NotificationManager {
 
         var query = ""
         if (opts) {
-          const type = this.addValueIfExists("type", opts.type)
-          const ip = this.addValueIfExists("ip", opts.ip)
-          const side = this.addValueIfExists("side", opts.side)
-          const price = this.addValueIfExists("price", opts.price)
-          const oid = this.addValueIfExists("oid", opts.oid)
-          const amount = this.addValueIfExists("amount", opts.amount)
-          const index = this.addValueIfExists("index", opts.index)
-          const message = this.addValueIfExists("message", opts.message)
+          const type = this.addValueIfExists(opts, "type", opts.type)
+          const ip = this.addValueIfExists(opts, "ip", opts.ip)
+          const side = this.addValueIfExists(opts, "side", opts.side)
+          const price = this.addValueIfExists(opts, "price", opts.price)
+          const oid = this.addValueIfExists(opts, "oid", opts.oid)
+          const amount = this.addValueIfExists(opts, "amount", opts.amount)
+          const index = this.addValueIfExists(opts, "index", opts.index)
+          const message = this.addValueIfExists(opts, "message", opts.message)
 
           query += type
               + ip
@@ -2565,8 +2572,8 @@ class NotificationManager {
     })
   }
 
-  addValueIfExists(name, value) {
-    return value ? name + "=" + value + "&" : ""
+  addValueIfExists(opts, name, value) {
+    return opts.hasOwnProperty(name) ? name + "=" + value + "&" : ""
   }
 
   /**
