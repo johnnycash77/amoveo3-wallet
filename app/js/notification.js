@@ -1,5 +1,5 @@
-var NotificationManager = require('./lib/notification-manager.js');
-var notificationManager = new NotificationManager();
+let NotificationManager = require('./lib/notification-manager.js');
+let notificationManager = new NotificationManager();
 const cryptoUtility = require('./lib/crypto-utility');
 const formatUtility = require('./lib/format-utility');
 const storage = require('./lib/storage');
@@ -14,7 +14,7 @@ const DECIMALS = 100000000
 
 let messageSent = false;
 
-var ec = new elliptic.ec('secp256k1');
+let ec = new elliptic.ec('secp256k1');
 
 let notificationType = parseParam('type')
 
@@ -48,7 +48,7 @@ function getParameterByName(name, url) {
 	if (!url) url = window.location.href;
 
 	name = name.replace(/[\[\]]/g, "\\$&");
-	var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+	let regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
 		results = regex.exec(url);
 	console.log(results);
 	if (!results) return null;
@@ -61,7 +61,7 @@ function initSigning() {
 
 	const message = parseParam('message');
 
-	var messageInput = document.getElementById('sign-message');
+	let messageInput = document.getElementById('sign-message');
 	messageInput.innerHTML = message;
 
 	document.getElementById('sign-button').onclick = function() {
@@ -73,9 +73,9 @@ function initSigning() {
 					if (accounts.length === 0) {
 						showSignedError("Please open the wallet and create account");
 					} else {
-						var account = accounts[0];
-						var keys = ec.keyFromPrivate(account.privateKey, "hex");
-						var signed = keys.sign(message);
+						let account = accounts[0];
+						let keys = ec.keyFromPrivate(account.privateKey, "hex");
+						let signed = keys.sign(message);
 
 						sendMessageAndClose({ type: notificationType, signed: signed});
 					}
@@ -90,7 +90,7 @@ function initSigning() {
 }
 
 function showSignedError(message) {
-	var error = document.getElementById("sign-error-text");
+	let error = document.getElementById("sign-error-text");
 	error.classList.remove("invisible");
 	error.innerHTML = message;
 }
@@ -103,18 +103,18 @@ function initChannel() {
 	setTitle("New Channel");
 
 	//xss safety
-	var ip = parseParam('ip');
-	var duration = parseParam('duration');
-	var locked = parseParam('locked');
-	var delay = parseParam('delay');
+	let ip = parseParam('ip');
+	let duration = parseParam('duration');
+	let locked = parseParam('locked');
+	let delay = parseParam('delay');
 
-	var ipInput = document.getElementById('channel-ip-address');
+	let ipInput = document.getElementById('channel-ip-address');
 	ipInput.innerHTML = ip;
-	var lockedInput = document.getElementById('new-channel-amount');
+	let lockedInput = document.getElementById('new-channel-amount');
 	lockedInput.innerHTML = locked;
-	var delayInput = document.getElementById('new-channel-delay');
+	let delayInput = document.getElementById('new-channel-delay');
 	delayInput.innerHTML = delay;
-	var lengthInput = document.getElementById('new-channel-length');
+	let lengthInput = document.getElementById('new-channel-length');
 	lengthInput.innerHTML = duration;
 
 	document.getElementById('new-channel-container').classList.remove('hidden');
@@ -130,11 +130,11 @@ function initChannel() {
 	network.send(["time_value"], function(error, timeValue) {
 		initFee(timeValue);
 
-		var channelButton = document.getElementById('create-channel-button');
+		let channelButton = document.getElementById('create-channel-button');
 		channelButton.onclick = function() {
-			var locked = safeFloat(lockedInput.value);
-			var delay = safeFloat(delayInput.value);
-			var length = safeFloat(lengthInput.value);
+			let locked = safeFloat(lockedInput.value);
+			let delay = safeFloat(delayInput.value);
+			let length = safeFloat(lengthInput.value);
 
 			if (locked === 0 || delay === 0 || length === 0) {
 				showChannelError("Fields may not be 0.")
@@ -148,7 +148,7 @@ function initChannel() {
 }
 
 function safeFloat(f) {
-	var val = parseFloat(f);
+	let val = parseFloat(f);
 	if (isNaN(val)) {
 		val = 0;
 	}
@@ -157,8 +157,8 @@ function safeFloat(f) {
 
 function reloadWeb() {
 	chrome.tabs.query({}, function (tabs) {
-		for (var i = 0; i < tabs.length; i++) {
-			var tab = tabs[i];
+		for (let i = 0; i < tabs.length; i++) {
+			let tab = tabs[i];
 			if (tab.url.indexOf("localhost:8000") !== -1 || tab.url.indexOf("amoveobook") !== -1) {
 				chrome.tabs.reload(tab.id);
 			}
@@ -167,39 +167,39 @@ function reloadWeb() {
 }
 
 function showChannelError(message) {
-	var error = document.getElementById("new-channel-error-text");
+	let error = document.getElementById("new-channel-error-text");
 	error.classList.remove("invisible");
 	error.innerHTML = message;
 }
 
 function showBetError(message) {
-	var error = document.getElementById("bet-error-text");
+	let error = document.getElementById("bet-error-text");
 	error.classList.remove("invisible");
 	error.innerHTML = message;
 }
 
 function initFee(timeValue) {
 	function updateFee() {
-		var timeValueFee = timeValue / 100000000;
-		var amount = parseFloat(document.getElementById('new-channel-amount').value);
+		let timeValueFee = timeValue / 100000000;
+		let amount = parseFloat(document.getElementById('new-channel-amount').value);
 		if (isNaN(amount)) {
 			amount = 0;
 		}
-		var length = parseFloat(document.getElementById('new-channel-length').value);
+		let length = parseFloat(document.getElementById('new-channel-length').value);
 		if (isNaN(length)) {
 			length = 0;
 		}
 
-		var rate = document.getElementById('total-rate');
-		var blocks = document.getElementById('fee-block-number');
-		var locked = document.getElementById('fee-amount-number');
-		var total = document.getElementById('total-fee');
-		var total2 = document.getElementById('total-fee2');
+		let rate = document.getElementById('total-rate');
+		let blocks = document.getElementById('fee-block-number');
+		let locked = document.getElementById('fee-amount-number');
+		let total = document.getElementById('total-fee');
+		let total2 = document.getElementById('total-fee2');
 
 		rate.innerHTML = timeValueFee;
 		blocks.innerHTML = length;
 		locked.innerHTML = amount;
-		var totalFee = 0.0015205 + timeValueFee * amount * length;
+		let totalFee = 0.0015205 + timeValueFee * amount * length;
 		total.innerHTML = totalFee + " " + "VEO";
 		total2.innerHTML = totalFee + " " + "VEO";
 	}
@@ -216,22 +216,22 @@ function initBet() {
 
 	document.getElementById('make-bet-container').classList.remove('hidden');
 
-	var amountText = document.getElementById('bet-amount');
-	var oddsText = document.getElementById('bet-price');
+	let amountText = document.getElementById('bet-amount');
+	let oddsText = document.getElementById('bet-price');
 
-	var price = getParameterByName('price');
-	var amount = parseFloat(getParameterByName('amount'));
+	let price = getParameterByName('price');
+	let amount = parseFloat(getParameterByName('amount'));
 	amountText.value = amount;
 	oddsText.value = parseFloat(price);
-	var side = getParameterByName('side');
-	var oid = getParameterByName('oid');
+	let side = getParameterByName('side');
+	let oid = getParameterByName('oid');
 
 	document.getElementById("bet-side").innerText = capitalize(side);
 
-	var betButton = document.getElementById('create-bet-button');
+	let betButton = document.getElementById('create-bet-button');
 	betButton.onclick = function() {
-		var amount = parseFloat(amountText.value);
-		var odds = parseFloat(oddsText.value) * 100;
+		let amount = parseFloat(amountText.value);
+		let odds = parseFloat(oddsText.value) * 100;
 
 		if (amount > 0 && odds > 0) {
 			makeBet(amount, odds, side, oid, function() {
@@ -255,8 +255,6 @@ function initBet() {
 	document.getElementById('cancel-bet-button').onclick = function() {
 		sendMessageAndClose({ type: notificationType, error: "Rejected by user"});
 	}
-
-	showMaxBalance(amount, price);
 }
 
 function capitalize(text) {
@@ -275,14 +273,14 @@ function makeChannel(amount, delay, length, timeValue) {
 							if (accounts.length === 0) {
 								showChannelError("Please open the wallet and create an account.")
 							} else {
-								var account = accounts[0];
+								let account = accounts[0];
 								amount = Math.floor(parseFloat(amount, 10) * DECIMALS) - fee;
 								delay = parseInt(delay, 10);
-								var expiration = parseInt(length, 10) + topHeader[1];
-								var bal2 = amount - 1;
+								let expiration = parseInt(length, 10) + topHeader[1];
+								let bal2 = amount - 1;
 
-								var acc1 = account.publicKey;
-								var acc2 = pubkey;
+								let acc1 = account.publicKey;
+								let acc2 = pubkey;
 
 								userController.getBalance(account, topHeader, function (error, balance) {
 									if ((amount / DECIMALS) > balance) {
@@ -307,21 +305,21 @@ function makeChannel(amount, delay, length, timeValue) {
 }
 
 function makeChannelCallback2(tx, amount, bal2, acc1, acc2, delay, expiration, pubkey, topHeader, timeValue) {
-	var amount0 = tx[5];
-	var bal20 = tx[6];
-	var fee0 = tx[3];
-	var acc10 = tx[1];
-	var acc20 = tx[2];
-	var cid = tx[8];
-	var delay0 = tx[7];
+	let amount0 = tx[5];
+	let bal20 = tx[6];
+	let fee0 = tx[3];
+	let acc10 = tx[1];
+	let acc20 = tx[2];
+	let cid = tx[8];
+	let delay0 = tx[7];
 	if ((delay !== delay0) || (amount !== amount0) || (bal2 !== bal20) || (fee !== fee0) ||
 		(acc1 !== acc10) || (acc2 !== acc20)) {
 		console.log(JSON.stringify([[delay, delay0], [amount, amount0], [bal2, bal20], [fee, fee0], [acc1, acc10], [acc2, acc20]]));
 		console.log("server edited the tx. aborting");
 	} else {
-		var lifespan = expiration - topHeader[1];
-		var spk_amount = Math.floor((timeValue * (delay + lifespan) * (amount + bal2) ) / DECIMALS);
-		var spk = ["spk", acc1, acc2, [-6], 0, 0, cid, spk_amount, 0, delay];
+		let lifespan = expiration - topHeader[1];
+		let spk_amount = Math.floor((timeValue * (delay + lifespan) * (amount + bal2) ) / DECIMALS);
+		let spk = ["spk", acc1, acc2, [-6], 0, 0, cid, spk_amount, 0, delay];
 		passwordController.getPassword(function(password) {
 			if (!password) {
 				showChannelError("Your wallet is locked.  Please unlock your wallet and try again.")
@@ -330,10 +328,10 @@ function makeChannelCallback2(tx, amount, bal2, acc1, acc2, delay, expiration, p
 					if (accounts.length === 0) {
 						showChannelError("Please open the wallet and create account");
 					} else {
-						var account = accounts[0];
-						var keys = ec.keyFromPrivate(account.privateKey, "hex");
-						var stx = cryptoUtility.signTx(keys, tx);
-						var sspk = cryptoUtility.signTx(keys, spk);
+						let account = accounts[0];
+						let keys = ec.keyFromPrivate(account.privateKey, "hex");
+						let stx = cryptoUtility.signTx(keys, tx);
+						let sspk = cryptoUtility.signTx(keys, spk);
 
 						try {
 							network.send(["new_channel", stx, sspk, expiration],
@@ -353,21 +351,21 @@ function makeChannelCallback2(tx, amount, bal2, acc1, acc2, delay, expiration, p
 }
 
 function channels3(x, expiration, pubkey, spk, tx_original) {
-	var sstx = x[1];
+	let sstx = x[1];
 
 	if (!sstx || sstx.lenght < 1) {
 		showChannelError("An error occurred.");
 		return;
 	}
 
-	var s2spk = x[2];
-	var tx = sstx[1];
+	let s2spk = x[2];
+	let tx = sstx[1];
 	if (JSON.stringify(tx) !== JSON.stringify(tx_original)) {
 		console.log(JSON.stringify(tx));
 		console.log(JSON.stringify(tx_original));
 		throw("the server illegally manipulated the tx");
 	}
-	var a = verifyBoth(sstx);
+	let a = verifyBoth(sstx);
 	if (!(a)) {
 		throw("bad signature on tx in channels 3");
 	}
@@ -378,11 +376,10 @@ function channels3(x, expiration, pubkey, spk, tx_original) {
 	if (JSON.stringify(spk) !== JSON.stringify(s2spk[1])) {
 		throw("the server illegally manipulated the spk");
 	}
-	var cid = tx[8];
-	var acc2 = tx[2];
+	let cid = tx[8];
+	let acc2 = tx[2];
 
-	var spk = s2spk[1];
-	var channel = newChannel(spk, s2spk, [], [], expiration, cid);
+	let channel = newChannel(s2spk[1], s2spk, [], [], expiration, cid);
 	channel["serverPubKey"] = pubkey;
 
 	console.log(JSON.stringify(channel));
@@ -402,9 +399,9 @@ function saveChannel(channel, callback) {
 }
 
 function verify(data, sig0, key) {
-	var sig = formatUtility.binToRs(atob(sig0));
-	var d2 = cryptoUtility.serialize(data);
-	var h = cryptoUtility.hash(d2);
+	let sig = formatUtility.binToRs(atob(sig0));
+	let d2 = cryptoUtility.serialize(data);
+	let h = cryptoUtility.hash(d2);
 	return key.verify(h, sig, "hex");
 }
 
@@ -432,10 +429,10 @@ function newSs(code, prove, meta) {
 }
 
 function makeBet(amount, price, type, oid, callback) {
-	network.send(["market_data", oid], function (error, l) {
-		var price_final = Math.floor(100 * parseFloat(price, 10));
-		var type_final;
-		var ttv = type;
+	network.send(["market_data", oid], function (error, marketData) {
+		let price_final = Math.floor(100 * parseFloat(price, 10));
+		let type_final;
+		let ttv = type;
 		if ((ttv == "true") ||
 			(ttv == 1) ||
 			(ttv == "yes") ||
@@ -456,11 +453,11 @@ function makeBet(amount, price, type, oid, callback) {
 			type_final = 2;
 		}
 
-		var amount_final = Math.floor(parseFloat(amount, 10) * DECIMALS);
-		var oid_final = oid;
-		var expires = l[1];
-		var server_pubkey = l[2];
-		var period = l[3];
+		let amount_final = Math.floor(parseFloat(amount, 10) * DECIMALS);
+		let oid_final = oid;
+		let expires = marketData[1];
+		let server_pubkey = marketData[2];
+		let period = marketData[3];
 
 		storage.getTopHeader(function(error, topHeader) {
 			if (topHeader !== 0) {
@@ -469,25 +466,24 @@ function makeBet(amount, price, type, oid, callback) {
 						showBetError("Your wallet is locked.  Please unlock your wallet and try again.")
 					} else {
 						storage.getAccounts(password, function(error, accounts) {
-							var account = accounts[0];
+							let account = accounts[0];
 
-							var sc;
-							console.log("SCALAR ");
-							console.log(JSON.stringify(l));
-							if (l[4][0] == "binary") {
+							let sc;
+							console.log(JSON.stringify(marketData));
+							if (marketData[4][0] === "binary") {
 								sc = marketContract(type_final, expires, price_final, server_pubkey, period, amount_final, oid_final, topHeader[1]);
 							} else {
-								var lower_limit = l[4][1];
-								var upper_limit = l[4][2];
+								let lower_limit = marketData[4][1];
+								let upper_limit = marketData[4][2];
 								// sanity-check, verify 10 == l[4][3];
 								//all scalar markets currently use 10 binary oracles to measure values.
 								sc = scalarMarketContract(type_final, expires, price_final, server_pubkey, period, amount_final, oid_final, topHeader[1], lower_limit, upper_limit, 10);
 							}
 
 							storage.getChannels(function (error, channels) {
-								var channelFound = false;
-								var channel;
-								for (var i = 0; i < channels.length; i++) {
+								let channelFound = false;
+								let channel;
+								for (let i = 0; i < channels.length; i++) {
 									channel = channels[i];
 									if (channel.me[1] === account.publicKey && channel.serverPubKey === server_pubkey) {
 										channelFound = true;
@@ -496,21 +492,21 @@ function makeBet(amount, price, type, oid, callback) {
 								}
 
 								if (channelFound) {
-									var spk = marketTrade(channel, amount_final, price_final, sc, server_pubkey, oid_final);
-									var keys = ec.keyFromPrivate(account.privateKey, "hex");
-									var sspk = cryptoUtility.signTx(keys, spk);
+									let spk = marketTrade(channel, amount_final, price_final, sc, server_pubkey, oid_final);
+									let keys = ec.keyFromPrivate(account.privateKey, "hex");
+									let sspk = cryptoUtility.signTx(keys, spk);
 
-									var trie_key = channel.me[6];
+									let trie_key = channel.me[6];
 
 									try {
 										merkle.requestProof(topHeader, "channels", trie_key, function(error, val) {
-											var spk = channel.them[1];
-											var expiration = channel.expiration;
-											var height = topHeader[1];
-											var amount = spk[7];
-											var betAmount = sumBets(spk[3]);
-											var mybalance = ((val[4] - amount - betAmount));
-											var serverbalance = ((val[5] + amount) / DECIMALS);
+											let spk = channel.them[1];
+											let expiration = channel.expiration;
+											let height = topHeader[1];
+											let amount = spk[7];
+											let betAmount = sumBets(spk[3]);
+											let mybalance = ((val[4] - amount - betAmount));
+											let serverbalance = ((val[5] + amount) / DECIMALS);
 
 											if (amount_final > mybalance) {
 												showBetError("You do not have enough VEO in this channel.")
@@ -542,21 +538,21 @@ function makeBet(amount, price, type, oid, callback) {
 }
 
 function sumBets(bets) {
-	var x = 0;
-	for (var i = 1; i < bets.length; i++) {
+	let x = 0;
+	for (let i = 1; i < bets.length; i++) {
 		x += bets[i][2];
 	}
 	return x;
 }
 
 function marketContract(direction, expires, maxprice, server_pubkey, period, amount, oid, bet_height) {
-	var a;
-	var a2 = formatUtility.stringToArray(atob("AAAAAAJ4AA=="));
-	var b = formatUtility.stringToArray(atob("AAAAAAN4AA=="));
-	var c = formatUtility.stringToArray(atob("AAAAAAR4AgAAACA="));
-	var d = formatUtility.stringToArray(atob("AAAAAAV4AA=="));
-	var e = formatUtility.stringToArray(atob("AAAAAAZ4AgAAAEE="));
-	var f;
+	let a;
+	let a2 = formatUtility.stringToArray(atob("AAAAAAJ4AA=="));
+	let b = formatUtility.stringToArray(atob("AAAAAAN4AA=="));
+	let c = formatUtility.stringToArray(atob("AAAAAAR4AgAAACA="));
+	let d = formatUtility.stringToArray(atob("AAAAAAV4AA=="));
+	let e = formatUtility.stringToArray(atob("AAAAAAZ4AgAAAEE="));
+	let f;
 	if (direction == 1) {
 		a = formatUtility.stringToArray(atob("AAAAJxAAAAAAAXgA"));
 		f = formatUtility.stringToArray(atob("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"));
@@ -571,38 +567,33 @@ function marketContract(direction, expires, maxprice, server_pubkey, period, amo
 
 	console.log("market oid is ");
 	console.log(oid);
-	var g = a.concat(formatUtility.intToArray(bet_height, 4)).concat(a2).concat(formatUtility.intToArray(expires, 4))
-	.concat(b).concat(formatUtility.intToArray(maxprice, 4)).concat(c).concat(formatUtility.stringToArray(atob(oid)))
-	.concat(d).concat(formatUtility.intToArray(period, 4)).concat(e).concat(formatUtility.stringToArray(atob(server_pubkey)))
-	.concat(f);
-
-	var g = a.concat(formatUtility.intToArray(bet_height, 4)).concat(a2).concat(formatUtility.intToArray(expires, 4))
+	let g = a.concat(formatUtility.intToArray(bet_height, 4)).concat(a2).concat(formatUtility.intToArray(expires, 4))
 	.concat(b).concat(formatUtility.intToArray(maxprice, 4)).concat(c).concat(formatUtility.stringToArray(atob(oid)))
 	.concat(d).concat(formatUtility.intToArray(period, 4)).concat(e).concat(formatUtility.stringToArray(atob(server_pubkey)))
 	.concat(f);
 	console.log("compiled contract");
 	console.log(JSON.stringify(g));
-	var contract =  btoa(formatUtility.arrayToString(g));
-	var codekey = ["market", 1, oid, expires, server_pubkey, period, oid]
-	var amount2 = Math.floor(amount * ((10000 + maxprice) / 10000));
+	let contract =  btoa(formatUtility.arrayToString(g));
+	let codekey = ["market", 1, oid, expires, server_pubkey, period, oid]
+	let amount2 = Math.floor(amount * ((10000 + maxprice) / 10000));
 	return ["bet", contract, amount2, codekey, [-7, direction, maxprice]];
 }
 
 function scalarMarketContract(direction, expires, maxprice, server_pubkey, period, amount, oid, bet_height, lower_limit, upper_limit, many) {
-	var a;
+	let a;
 	if (direction == 1) {
 		a = formatUtility.stringToArray(atob("AAAAJxAAAAAAAngA"));
 	} else if (direction == 2) {
 		a = formatUtility.stringToArray(atob("AAAAAAAAAAAAAngA"));
 	}
-	var b = formatUtility.stringToArray(atob("/wAAAAADeAA="));
-	var c = formatUtility.stringToArray(atob("AAAAAAR4AA=="));
-	var d = formatUtility.stringToArray(atob("AAAAAAV4AA=="));
-	var e = formatUtility.stringToArray(atob("AAAAAAZ4AA=="));
-	var f = formatUtility.stringToArray(atob("AAAAAAd4AgAAACA="));
-	var g = formatUtility.stringToArray(atob("AAAAAAF4AA=="));
-	var h = formatUtility.stringToArray(atob("AAAAAAh4AgAAAEE="));
-	var i;
+	let b = formatUtility.stringToArray(atob("/wAAAAADeAA="));
+	let c = formatUtility.stringToArray(atob("AAAAAAR4AA=="));
+	let d = formatUtility.stringToArray(atob("AAAAAAV4AA=="));
+	let e = formatUtility.stringToArray(atob("AAAAAAZ4AA=="));
+	let f = formatUtility.stringToArray(atob("AAAAAAd4AgAAACA="));
+	let g = formatUtility.stringToArray(atob("AAAAAAF4AA=="));
+	let h = formatUtility.stringToArray(atob("AAAAAAh4AgAAAEE="));
+	let i;
 	if (direction == 1) {
 		i = formatUtility.stringToArray(atob("AAAAAAl4AAAABAAAAAAACnhuHoQ6RhQUiB8URxSDFiAegxYAAAAABTpGFBRHDUiDFgAAAAABeR8WAAAAAByHFzKGOkYUFEcNSIMUAAAAACCHFAAAAAABhxYUAgAAAAMAAAAWhhiCFh8AAAAAATJwcUhvboQ6RhQUAAAAAABHFIMWAAAAAAM6RhQUFAAAAAABRxQUcHFISG9uhDpGFBQAAAAAAEcUgxYAAAAAADpGFBQUAAAAAAFHFBRwcUhIb26EOkYUFIhHFIMWAAAAAAI6RhQUAAAAAABHFBQAAAAAAUgYghZwcUhvbhaEOkYUFEcUgxYYAAAAAAI0MnBxSG8AAAAAyAAAAAALeBYAAAAAADpGFBQAAAAACHkVXhY1AAAAAABHFAAAAAABOkYUFBYAAAAAKIcVFwAAAAAJeSkAAAAAADpGAAAAAAt5DUcAAAAAC3kAAAAAATIAAAAAC3hIFBQAAAAABIcWAAAAAAKHAgAAAAIAABaGFgAAAAAChwIAAAACAAAWhhYAAAAAAXk6AAAAAAA6RgAAAAALeQ1HAAAAAAt5AAAAAAEyAAAAAAt4SBQUFBQYFQAAAAAFeTdQAAAAAAA6RgAAAAALeQ1HAAAAAAt5AAAAAAEyAAAAAAt4SBQUFwAAAAAMeBUAAAAADXgVAAAAAAd5AAAAAAAWMjZQAAAAAAA6RgAAAAALeQ1HAAAAAAt5AAAAAAEyAAAAAAt4SBQUHgAAAAAOeIQWAAAAAAACAAAAIH5AO9lhryo2Wc24OQNskdc37jR3aLL3CstCbDiPm66DcRUCAAAAIAW6FSxPQ1iOzWgIaCXkY2ECBvWfNSU9U0+qrwvQYRVzcUYAAAAAAAAAAAADAAAAJxAAAAAAB3kzRxUCAAAAIHuEuzGB+Hpzi6rWPnL6PnFwTmtUwr58lD3/DkJHlSXDcUYAAAAAAQAAAAABAAAAJxAAAAAAB3kzR4QWAgAAACCey4CW1RmzkjFa15hAYQeljmLEzepUmvHAMP0r0K1I2HEAAAAAAAIAAAAgvFpjV195FHNHgGuwlT8v+cSyhmGIB3mAIeTZLxhC5mxxAAAAAAR5AAAABAA0AAAAAAp5NRk2RjNHFBQAAAAAAEgAAAAACnk0AAAAAAN5AAAAAAR5MzUAAAAnEDQAAAAD/zUAAAAnEBk2RhYURxRIAAAAJxAWMwAAAAACeRYzAAAAAAAWAAAAAAMWSEgYAAAAAAZ5Xhk2RjNHFBQAAAAAAEgAAAAABnkyNBcWAAAAAAZ5AAAAAA55GTZGM0cUFAAAAAAASDIWAAAAAA15AAAAAAAWMgAAAAAHeTpGFBQAAAAADHk0AAAAJxA1AAAAJxAAAAAAB3kzAAAAJxAAAAAADHkzNAAAACcQNTJHFjMySEcUAAAAAAI6RhQUFAAAAAAohxUXAAAAAAl5KQAAAAAAOkYAAAAAC3kNRwAAAAALeQAAAAABMgAAAAALeEgUFAAAAAAEhxYAAAAAAocCAAAAAgAAFoYWAAAAAAKHAgAAAAIAABaGFgAAAAABeToAAAAAADpGAAAAAAt5DUcAAAAAC3kAAAAAATIAAAAAC3hIFBQUFBgVAAAAAAV5N1AAAAAAADpGAAAAAAt5DUcAAAAAC3kAAAAAATIAAAAAC3hIFBQXAAAAAA94Hh4AAAAAKIcVFwAAAAAJeSkAAAAAADpGAAAAAAt5DUcAAAAAC3kAAAAAATIAAAAAC3hIFBQAAAAABIcWAAAAAAKHAgAAAAIAABaGFgAAAAAChwIAAAACAAAWhhYAAAAAAXk6AAAAAAA6RgAAAAALeQ1HAAAAAAt5AAAAAAEyAAAAAAt4SBQUFBQYFQAAAAAFeTdQAAAAAAA6RgAAAAALeQ1HAAAAAAt5AAAAAAEyAAAAAAt4SBQUFwAAAAAQeBYfGRk2RhYURxRIHhk2RhRHFhRIHzMAAAAACHkAAAAAAjU3AAAAAAA6RgAAAAALeQ1HAAAAAAt5AAAAAAEyAAAAAAt4SBQUHzpQFxQUAAAAAA95AAAAABB5OlAXFBRSAAAAAAA6RgAAAAALeQ1HAAAAAAt5AAAAAAEyAAAAAAt4SBQUAAAAAAAAAA9CQAAAD0JAMgAAAAAARxQAAAAAAzpGFBQUAAAAACiHFRcAAAAACXkpAAAAAAA6RgAAAAALeQ1HAAAAAAt5AAAAAAEyAAAAAAt4SBQUAAAAAASHFgAAAAAChwIAAAACAAAWhhYAAAAAAocCAAAAAgAAFoYWAAAAAAF5OgAAAAAAOkYAAAAAC3kNRwAAAAALeQAAAAABMgAAAAALeEgUFBQUGBUAAAAABXk3UAAAAAAAOkYAAAAAC3kNRwAAAAALeQAAAAABMgAAAAALeEgUFBdeAAAAAAh5MzYAAAAAADpGAAAAAAt5DUcAAAAAC3kAAAAAATIAAAAAC3hIFBQUAAAAAAh5NQAAAAABMh4AAAAABnleMx8AAAAnEAAAAAAHeTNHFAAAAAAEOkYUFIQWAAAAAAACAAAAIH5AO9lhryo2Wc24OQNskdc37jR3aLL3CstCbDiPm66DcQIAAAAge4S7MYH4enOLqtY+cvo+cXBOa1TCvnyUPf8OQkeVJcNxRgAAAAAGeQAAAAAIeTIAAAAH0DIAAAAAAAAAACcQAAAAAAd5M0cAAAAACHkAAAAAAQAAACcQAAAAAAd5M0hHFEhISEhIAAAAJxA0AAAAAAd5AAAAJxAyNQs="));
 	} else if (direction == 2) {
@@ -614,7 +605,7 @@ function scalarMarketContract(direction, expires, maxprice, server_pubkey, perio
 	}
 	console.log("market oid is ");
 	console.log(oid);
-	var contract = a.concat(
+	let contract = a.concat(
 		formatUtility.intToArray(upper_limit, 4)).concat(
 		b).concat(
 		formatUtility.intToArray(lower_limit, 4)).concat(
@@ -632,21 +623,21 @@ function scalarMarketContract(direction, expires, maxprice, server_pubkey, perio
 		formatUtility.stringToArray(atob(server_pubkey))).concat(i);
 	console.log("compiled contract");
 	console.log(JSON.stringify(contract));
-	var contract2 =  btoa(formatUtility.arrayToString(contract));
-	var codekey = ["market", 2, oid, expires, server_pubkey, period, oid, lower_limit, upper_limit];
-	var amount2 = Math.floor(amount * ((10000 + maxprice) / 10000));
+	let contract2 =  btoa(formatUtility.arrayToString(contract));
+	let codekey = ["market", 2, oid, expires, server_pubkey, period, oid, lower_limit, upper_limit];
+	let amount2 = Math.floor(amount * ((10000 + maxprice) / 10000));
 	return ["bet", contract, amount2, codekey, [-7, direction, maxprice]]; //codekey is insttructions on how to re-create the contract, so we can do pattern matching when updating channels.
 }
 
 function marketTrade(channel, amount, price, bet, oid) { //oid unused
-	var market_spk = channel.me;
+	let market_spk = channel.me;
 	console.log("market trade spk before ");
 	console.log(JSON.stringify(market_spk));
-	var cid = market_spk[6];
-	var time_limit = 10000;//actually constants:time_limit div 10
-	var space_limit = 100000;
-	var cGran = 10000;
-	var a = Math.floor((amount * price) / cGran);
+	let cid = market_spk[6];
+	let time_limit = 10000;//actually constants:time_limit div 10
+	let space_limit = 100000;
+	let cGran = 10000;
+	let a = Math.floor((amount * price) / cGran);
 	market_spk[3][0] = bet;
 	market_spk[3] = ([-6]).concat(market_spk[3]);//add new bet to front
 	market_spk[8] = market_spk[8] + 1; //nonce
@@ -662,8 +653,8 @@ function make_bet3(sspk2, sspk, server_pubkey, oid_final, callback) {
 	if (!verifyBoth(sspk2)) {
 		throw("make bet3, badly signed sspk2");
 	}
-	var hspk2 = JSON.stringify(sspk2[1]);
-	var hspk = JSON.stringify(sspk[1]);
+	let hspk2 = JSON.stringify(sspk2[1]);
+	let hspk = JSON.stringify(sspk[1]);
 	if (hspk !== hspk2) {
 		console.log("error, we calculated the spk differently from the server. you calculated this: ");
 		console.log(JSON.stringify(sspk[1]));
@@ -672,12 +663,12 @@ function make_bet3(sspk2, sspk, server_pubkey, oid_final, callback) {
 	}
 
 	storage.getChannels(function(error, channels) {
-		for (var i = 0; i < channels.length; i++) {
-			var channel = channels[i];
+		for (let i = 0; i < channels.length; i++) {
+			let channel = channels[i];
 			if (channel.serverPubKey === server_pubkey) {
 				channel.me = sspk[1];
 				channel.them = sspk2;
-				var newss = newSs([0,0,0,0,4], [-6, ["oracles", oid_final]]);
+				let newss = newSs([0,0,0,0,4], [-6, ["oracles", oid_final]]);
 				channel.ssme = ([newss]).concat(channel.ssme);
 				channel.ssthem = ([newss]).concat(channel.ssthem);
 				break;
@@ -694,16 +685,16 @@ function initCancel() {
 
 	document.getElementById('cancel-container').classList.remove('hidden');
 
-	var index = parseInt(getParameterByName('index'));
-	var amount = parseInt(getParameterByName('amount'));
-	var price = parseFloat(getParameterByName('price'));
-	var side = getParameterByName('side');
+	let index = parseInt(getParameterByName('index'));
+	let amount = parseInt(getParameterByName('amount'));
+	let price = parseFloat(getParameterByName('price'));
+	let side = getParameterByName('side');
 
 	document.getElementById("cancel-bet-side").innerHTML = capitalize(side);
 	document.getElementById("cancel-bet-amount").innerHTML = amount;
 	document.getElementById("cancel-bet-price").innerHTML = price;
 
-	var cancelButton = document.getElementById("cancel-button");
+	let cancelButton = document.getElementById("cancel-button");
 	cancelButton.onclick = function() {
 		network.send(["pubkey"], function(error, pubkey) {
 			cancelTrade(index + 2, pubkey);
@@ -717,9 +708,9 @@ function initCancel() {
 
 function cancelTrade(n, server_pubkey) {
 	storage.getChannels(function(error, channels) {
-		var oldCD;
-		for (var i = 0; i < channels.length; i++) {
-			var channel = channels[i];
+		let oldCD;
+		for (let i = 0; i < channels.length; i++) {
+			let channel = channels[i];
 			if (channel.serverPubKey === server_pubkey) {
 				oldCD = channel;
 				break;
@@ -727,23 +718,23 @@ function cancelTrade(n, server_pubkey) {
 		}
 
 		if (oldCD) {
-			var spk = oldCD.me;
-			var ss = oldCD.ssme[n - 2];
+			let spk = oldCD.me;
+			let ss = oldCD.ssme[n - 2];
 
 			if (JSON.stringify(ss.code) === JSON.stringify([0,0,0,0,4])) {//this is what an unmatched trade looks like.
-				var spk2 = removeBet(n-1, spk);
+				let spk2 = removeBet(n-1, spk);
 				spk2[8] += 1000000;
 				passwordController.getPassword(function(password) {
 					if (!password) {
 						showCancelError("Your wallet is locked.  Please unlock your wallet and try again.")
 					} else {
 						storage.getAccounts(password, function (error, accounts) {
-							var account = accounts[0];
-							var keys = ec.keyFromPrivate(account.privateKey, "hex");
-							var sspk2 = cryptoUtility.signTx(keys, spk2);
-							var pubPoint = keys.getPublic("hex");
-							var pubKey = btoa(formatUtility.fromHex(pubPoint));
-							var msg = ["cancel_trade", pubKey, n, sspk2];
+							let account = accounts[0];
+							let keys = ec.keyFromPrivate(account.privateKey, "hex");
+							let sspk2 = cryptoUtility.signTx(keys, spk2);
+							let pubPoint = keys.getPublic("hex");
+							let pubKey = btoa(formatUtility.fromHex(pubPoint));
+							let msg = ["cancel_trade", pubKey, n, sspk2];
 							network.send(msg, function (error, x) {
 								return cancelTradeResponse(x, sspk2, server_pubkey, n - 2);
 							});
@@ -761,24 +752,24 @@ function cancelTrade(n, server_pubkey) {
 }
 
 function showCancelError(message) {
-	var error = document.getElementById("cancel-error-text");
+	let error = document.getElementById("cancel-error-text");
 	error.classList.remove("invisible");
 	error.innerHTML = message;
 }
 
 function removeBet(n, spk0) {
-	var spk = JSON.parse(JSON.stringify(spk0));
-	var bets = spk[3];
-	var bet = bets[n];
-	var bets2 = removeNth(n, bets);
-	var bet_meta = bet[4];
-	var a;
+	let spk = JSON.parse(JSON.stringify(spk0));
+	let bets = spk[3];
+	let bet = bets[n];
+	let bets2 = removeNth(n, bets);
+	let bet_meta = bet[4];
+	let a;
 	if (bet_meta == 0) {
 		a = 0;
 	} else {
-		var bet_amount = bet[2];
-		var cgran = 10000;
-		var price = bet_meta[2];
+		let bet_amount = bet[2];
+		let cgran = 10000;
+		let price = bet_meta[2];
 		a = Math.floor((bet_amount * price) / cgran);
 	}
 	spk[3] = bets2;
@@ -788,17 +779,17 @@ function removeBet(n, spk0) {
 
 function cancelTradeResponse(sspk2, sspk, server_pubkey, n) {
 	storage.getChannels(function(error, channels) {
-		for (var i = 0; i < channels.length; i++) {
-			var channel = channels[i];
+		for (let i = 0; i < channels.length; i++) {
+			let channel = channels[i];
 			if (channel.serverPubKey === server_pubkey) {
 				console.log("cancel trade2, fail to verify this: ");
 				console.log(JSON.stringify(sspk2));
-				var bool = verifyBoth(sspk2);
+				let bool = verifyBoth(sspk2);
 				if (!(bool)) {
 					throw("cancel trade badly signed");
 				}
-				var spk = sspk[1];
-				var spk2 = sspk2[1];
+				let spk = sspk[1];
+				let spk2 = sspk2[1];
 				if (JSON.stringify(spk) != JSON.stringify(spk2)) {
 					console.log("the server didn't calculate the same update as us");
 					console.log(spk);
@@ -819,105 +810,56 @@ function cancelTradeResponse(sspk2, sspk, server_pubkey, n) {
 }
 
 function removeNth(n, a) {
-	var b = a.slice(0, n);
-	var c = a.slice(n+1, a.length);
+	let b = a.slice(0, n);
+	let c = a.slice(n+1, a.length);
 	return b.concat(c);
 }
 
-function showMaxBalance(amount, price) {
-	network.send(["market_data", oid], function (error, l) {
-		var price_final = Math.floor(100 * parseFloat(price, 10));
-		var type_final;
-		var ttv = type;
-		if ((ttv == "true") ||
-			(ttv == 1) ||
-			(ttv == "yes") ||
-			(ttv == "si") ||
-			(ttv == "cierto") ||
-			(ttv == "lon") ||
-			(ttv == "真正") ||
-			(ttv == "既不是")) {
-			type_final = 1;
-		} else if ((ttv == "false") ||
-			(ttv == 0) ||
-			(ttv == 2) ||
-			(ttv == "falso") ||
-			(ttv == "no") ||
-			(ttv == "lon ala") ||
-			(ttv == "也不是") ||
-			(ttv == "假")) {
-			type_final = 2;
-		}
+function showMaxBalance() {
+	network.send(["pubkey"], function (error, serverPubkey) {
+		storage.getTopHeader(function (error, topHeader) {
+			if (topHeader !== 0) {
+				passwordController.getPassword(function (password) {
+					if (!password) {
+						showBetError("Your wallet is locked.  Please unlock your wallet and try again.")
+					} else {
+						storage.getAccounts(password, function (error, accounts) {
+							let account = accounts[0];
+							storage.getChannels(function (error, channels) {
+								let channelFound = false;
+								let channel;
+								for (let i = 0; i < channels.length; i++) {
+									channel = channels[i];
+									if (channel.me[1] === account.publicKey && channel.serverPubKey === serverPubkey) {
+										channelFound = true;
+										break;
+									}
+								}
 
-		var amount_final = Math.floor(parseFloat(amount, 10) * DECIMALS);
-		var oid_final = oid;
-		var expires = l[1];
-		var server_pubkey = l[2];
-		var period = l[3];
+								if (channelFound) {
+									let trie_key = channel.me[6];
+									merkle.requestProof(topHeader, "channels", trie_key, function (error, val) {
+										let spk = channel.them[1];
+										let amount = spk[7];
+										let betAmount = sumBets(spk[3]);
+										let mybalance = ((val[4] - amount - betAmount)) / DECIMALS
 
-		network.send(["pubkey"], function (error, serverPubkey) {
-			storage.getTopHeader(function (error, topHeader) {
-				if (topHeader !== 0) {
-					passwordController.getPassword(function (password) {
-						if (!password) {
-							showBetError("Your wallet is locked.  Please unlock your wallet and try again.")
-						} else {
-							storage.getAccounts(password, function (error, accounts) {
-								var account = accounts[0];
-								storage.getChannels(function (error, channels) {
-									var channelFound = false;
-									var channel;
-									for (var i = 0; i < channels.length; i++) {
-										channel = channels[i];
-										if (channel.me[1] === account.publicKey && channel.serverPubKey === serverPubkey) {
-											channelFound = true;
-											break;
+										let userBalance = document.getElementById("bet-user-balance");
+										userBalance.classList.remove("invisible");
+										userBalance.innerHTML = "Max bet: " + mybalance + " VEO";
+
+										if (amount > userBalance) {
+											showBetError("Your maximum possible bet is " + mybalance + "VEO");
 										}
-									}
-
-									var sc;
-									console.log("SCALAR ");
-									console.log(JSON.stringify(l));
-									if (l[4][0] == "binary") {
-										sc = marketContract(type_final, expires, price_final, server_pubkey, period, amount_final, oid_final, topHeader[1]);
-									} else {
-										var lower_limit = l[4][1];
-										var upper_limit = l[4][2];
-										// sanity-check, verify 10 == l[4][3];
-										//all scalar markets currently use 10 binary oracles to measure values.
-										sc = scalarMarketContract(type_final, expires, price_final, server_pubkey, period, amount_final, oid_final, topHeader[1], lower_limit, upper_limit, 10);
-									}
-
-									if (channelFound) {
-										var spk = marketTrade(channel, amount, price, sc, serverPubkey, oid_final);
-										var keys = ec.keyFromPrivate(account.privateKey, "hex");
-										var sspk = cryptoUtility.signTx(keys, spk);
-
-										var trie_key = channel.me[6];
-
-										merkle.requestProof(topHeader, "channels", trie_key, function (error, val) {
-											var spk = channel.them[1];
-											var amount = spk[7];
-											var betAmount = sumBets(spk[3]);
-											var mybalance = ((val[4] - amount - betAmount));
-
-											var userBalance = document.getElementById("bet-user-balance");
-											userBalance.classList.remove("invisible");
-											userBalance.innerHTML = "Max bet: " + mybalance + " VEO";
-
-											if (amount > userBalance) {
-												showBetError("Your maximum possible bet is " + mybalance + "VEO");
-											}
-										});
-									} else {
-										showBetError("No channel found.  You must first open a channel in order to make bets.")
-									}
-								});
+									});
+								} else {
+									showBetError("No channel found.  You must first open a channel in order to make bets.")
+								}
 							});
-						}
-					});
-				}
-			});
+						});
+					}
+				});
+			}
 		});
 	});
 }
@@ -933,9 +875,9 @@ function getUserBalance() {
 						if (accounts.length === 0) {
 							showChannelError("Please open the wallet and create an account.")
 						} else {
-							var account = accounts[0];
+							let account = accounts[0];
 							userController.getBalance(account, topHeader, function (error, balance) {
-								var userBalance = document.getElementById("channel-user-balance");
+								let userBalance = document.getElementById("channel-user-balance");
 								userBalance.classList.remove("invisible");
 								userBalance.innerHTML = "Max: " + balance + " VEO";
 							});

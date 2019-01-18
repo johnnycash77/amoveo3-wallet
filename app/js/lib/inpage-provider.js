@@ -7,35 +7,41 @@ function AmoveoInpageProvider(connectionStream) {
 }
 
 AmoveoInpageProvider.prototype.subscribe = function(callback) {
-    this.port.onMessage.addListener(function(data) {
-        callback(data);
-    });
+	if (callback) {
+		this.port.onMessage.addListener(function (data) {
+			callback(data);
+		});
+	}
 }
 
 AmoveoInpageProvider.prototype.send = function (opts, callback) {
 	this.port.postMessage(opts);
-	this.port.onMessage.addListener(function(data) {
-		if (data.type === opts.type) {
-			if (data.error) {
-				callback(data.error, null);
-			} else {
-				callback(null, data);
+	if (callback) {
+		this.port.onMessage.addListener(function (data) {
+			if (data.type === opts.type) {
+				if (data.error) {
+					callback(data.error, null);
+				} else {
+					callback(null, data);
+				}
 			}
-		}
-	});
+		});
+	}
 }
 
 AmoveoInpageProvider.prototype.sign = function (opts, callback) {
     this.port.postMessage(opts);
-	this.port.onMessage.addListener(function(data) {
-	    if (data.type === "sign") {
-	    	if (data.error) {
-			    callback(data.error, null);
-		    } else {
-			    callback(null, data.signed.s);
-		    }
-	    }
-	});
+	if (callback) {
+		this.port.onMessage.addListener(function (data) {
+			if (data.type === "sign") {
+				if (data.error) {
+					callback(data.error, null);
+				} else {
+					callback(null, data.signed.s);
+				}
+			}
+		});
+	}
 }
 
 AmoveoInpageProvider.prototype.isConnected = function () {
