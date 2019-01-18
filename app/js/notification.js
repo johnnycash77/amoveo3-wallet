@@ -9,6 +9,7 @@ const merkle = require('./lib/merkle-proofs');
 const network = require('./controller/network-controller');
 const elliptic = require('./lib/elliptic.min.js');
 
+const lightningFee = 20;
 const fee = 152050;
 const DECIMALS = 100000000
 
@@ -219,28 +220,28 @@ function initBet() {
 	let amountText = document.getElementById('bet-amount');
 	let oddsText = document.getElementById('bet-price');
 
-	let price = getParameterByName('price');
+	let price = parseFloat(getParameterByName('price'));
 	let amount = parseFloat(getParameterByName('amount'));
-	amountText.value = amount;
-	oddsText.value = parseFloat(price);
 	let side = getParameterByName('side');
 	let oid = getParameterByName('oid');
+
+	amountText.value = amount;
+	oddsText.value = price;
 
 	document.getElementById("bet-side").innerText = capitalize(side);
 
 	let betButton = document.getElementById('create-bet-button');
 	betButton.onclick = function() {
-		let amount = parseFloat(amountText.value);
-		let odds = parseFloat(oddsText.value) * 100;
+		price = price * 100;
 
-		if (amount > 0 && odds > 0) {
-			makeBet(amount, odds, side, oid, function() {
+		if (amount > 0 && price > 0) {
+			makeBet(amount, price, side, oid, function() {
 				sendMessageAndClose(
 					{
 						type: notificationType,
 						bet: {
 							amount: amount,
-							odds: odds,
+							odds: price,
 							side: side,
 							oid: oid,
 						}
@@ -492,6 +493,7 @@ function makeBet(amount, price, type, oid, callback) {
 								}
 
 								if (channelFound) {
+									let marketExpiration = sc[3][3]
 									let spk = marketTrade(channel, amount_final, price_final, sc, server_pubkey, oid_final);
 									let keys = ec.keyFromPrivate(account.privateKey, "hex");
 									let sspk = cryptoUtility.signTx(keys, spk);
@@ -508,11 +510,13 @@ function makeBet(amount, price, type, oid, callback) {
 											let mybalance = ((val[4] - amount - betAmount));
 											let serverbalance = ((val[5] + amount) / DECIMALS);
 
-											if (amount_final > mybalance) {
+											if (amount_final + lightningFee > mybalance) {
 												showBetError("You do not have enough VEO in this channel.")
+											} if (expiration < marketExpiration) {
+												showBetError("Your channel is expiring before this market closes. This market requires a channel that is open to block " + marketExpiration + ".");
 											} else {
 												try {
-													return network.send(["trade", account.publicKey, price_final, type_final, amount_final, oid_final, sspk, fee], function (error, x) {
+													return network.send(["trade", account.publicKey, price_final, type_final, amount_final, oid_final, sspk, lightningFee], function (error, x) {
 														make_bet3(x, sspk, server_pubkey, oid_final, callback);
 													});
 												} catch (e) {

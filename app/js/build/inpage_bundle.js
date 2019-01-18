@@ -258,32 +258,38 @@ AmoveoInpageProvider.prototype.subscribe = function(callback) {
 }
 
 AmoveoInpageProvider.prototype.send = function (opts, callback) {
-	this.port.postMessage(opts);
+	const port = this.port;
+	port.postMessage(opts);
 	if (callback) {
-		this.port.onMessage.addListener(function (data) {
+		function sendListener(data) {
 			if (data.type === opts.type) {
 				if (data.error) {
 					callback(data.error, null);
 				} else {
 					callback(null, data);
 				}
+				port.onMessage.removeListener(sendListener);
 			}
-		});
+		}
+		port.onMessage.addListener(sendListener);
 	}
 }
 
 AmoveoInpageProvider.prototype.sign = function (opts, callback) {
-    this.port.postMessage(opts);
+	const port = this.port;
+	port.postMessage(opts);
 	if (callback) {
-		this.port.onMessage.addListener(function (data) {
+		function signListener(data) {
 			if (data.type === "sign") {
 				if (data.error) {
 					callback(data.error, null);
 				} else {
 					callback(null, data.signed.s);
 				}
+				port.onMessage.removeListener(signListener);
 			}
-		});
+		}
+		port.onMessage.addListener(signListener);
 	}
 }
 
