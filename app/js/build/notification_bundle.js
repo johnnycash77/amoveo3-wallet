@@ -2750,15 +2750,26 @@ function initBet() {
 
 	let amountText = document.getElementById('bet-amount');
 	let oddsText = document.getElementById('bet-price');
+	let totalText = document.getElementById('bet-total');
 
 	let price = parseFloat(getParameterByName('price'));
 	let amount = parseFloat(getParameterByName('amount'));
 	let side = getParameterByName('side');
 	let oid = getParameterByName('oid');
 	let marketType = getParameterByName('marketType');
+	let upperBound = parseFloat(getParameterByName('upperBound'));
+	let lowerBound = parseFloat(getParameterByName('lowerBound'));
 
 	amountText.value = amount;
-	oddsText.value = price;
+
+	if (marketType === "scalar") {
+		oddsText.value = (upperBound - lowerBound) * price
+		document.getElementById("price-tooltip").innerHTML = "You are betting the price will be " + (side === "long" ? "higher" : "lower") + " than this value."
+	} else {
+		oddsText.value = price;
+	}
+
+	totalText.value = amount + (amount * price) + " VEO";
 
 	document.getElementById("bet-side").innerText = capitalize(side);
 
