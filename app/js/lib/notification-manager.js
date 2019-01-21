@@ -21,7 +21,7 @@ class NotificationManager {
 			if (opts) {
 				for (let property in opts) {
 					if (opts.hasOwnProperty(property)) {
-						query += property + "=" + opts[propt] + "&"
+						query += property + "=" + opts[property] + "&"
 					}
 				}
 			}
