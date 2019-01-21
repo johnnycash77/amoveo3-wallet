@@ -250,7 +250,7 @@ function initBet() {
 		oddsText.value = price;
 	}
 
-	totalText.value = amount + (amount * price) + " VEO";
+	totalText.value = roundOff(amount + (amount * price), 4) + " VEO";
 
 	document.getElementById("bet-side").innerText = capitalize(side);
 
@@ -278,6 +278,10 @@ function initBet() {
 	}, function() {
 		sendMessageAndClose({ type: notificationType, error: "Rejected by user"});
 	});
+}
+
+function roundOff(value, round) {
+	return (parseInt(value * (10 ** (round + 1))) - parseInt(value * (10 ** round)) * 10) > 4 ? (((parseFloat(parseInt((value + parseFloat(1 / (10 ** round))) * (10 ** round))))) / (10 ** round)) : (parseFloat(parseInt(value * (10 ** round))) / ( 10 ** round));
 }
 
 function capitalize(text) {
