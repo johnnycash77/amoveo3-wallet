@@ -65,7 +65,7 @@ function initSigning() {
 	let messageInput = document.getElementById('sign-message');
 	messageInput.innerHTML = message;
 
-	document.getElementById('sign-button').onclick = function() {
+	initButtons(function() {
 		passwordController.getPassword(function(password) {
 			if (!password) {
 				showSignedError("Your wallet is locked.  Please unlock your wallet and try again.")
@@ -83,11 +83,9 @@ function initSigning() {
 				});
 			}
 		});
-	};
-
-	document.getElementById('cancel-sign-button').onclick = function() {
+	}, function() {
 		sendMessageAndClose({ type: notificationType, error: "Rejected by user"});
-	};
+	});
 }
 
 function showSignedError(message) {
@@ -98,6 +96,22 @@ function showSignedError(message) {
 
 function setTitle(title) {
 	document.getElementById("notification-title").innerHTML = title;
+}
+
+function initButtons(confirmCallback, cancelCallback) {
+	const yes = document.getElementById('yes-button');
+	yes.onclick = function() {
+		if (confirmCallback) {
+			confirmCallback();
+		}
+	}
+
+	const no = document.getElementById('no-button');
+	no.onclick = function() {
+		if (cancelCallback) {
+			cancelCallback();
+		}
+	}
 }
 
 function initChannel() {
@@ -120,19 +134,17 @@ function initChannel() {
 
 	document.getElementById('new-channel-container').classList.remove('hidden');
 
-	document.getElementById('cancel-channel-button').onclick = function() {
-		sendMessageAndClose({ type: notificationType, error: "Rejected by user"});
-	};
-
 	document.getElementById('channel-advanced-button').onclick = function() {
 		document.getElementById('channel-advanced-container').classList.remove('hidden');
 	};
 
+	getUserBalance();
+
 	network.send(["time_value"], function(error, timeValue) {
 		initFee(timeValue);
 
-		let channelButton = document.getElementById('create-channel-button');
-		channelButton.onclick = function() {
+
+		initButtons(function() {
 			let locked = safeFloat(lockedInput.value);
 			let delay = safeFloat(delayInput.value);
 			let length = safeFloat(lengthInput.value);
@@ -142,10 +154,10 @@ function initChannel() {
 			} else {
 				makeChannel(locked, delay, length, timeValue);
 			}
-		}
+		}, function() {
+			sendMessageAndClose({ type: notificationType, error: "Rejected by user"});
+		});
 	});
-
-	getUserBalance();
 }
 
 function safeFloat(f) {
@@ -224,14 +236,14 @@ function initBet() {
 	let amount = parseFloat(getParameterByName('amount'));
 	let side = getParameterByName('side');
 	let oid = getParameterByName('oid');
+	let marketType = getParameterByName('marketType');
 
 	amountText.value = amount;
 	oddsText.value = price;
 
 	document.getElementById("bet-side").innerText = capitalize(side);
 
-	let betButton = document.getElementById('create-bet-button');
-	betButton.onclick = function() {
+	initButtons(function() {
 		price = price * 100;
 
 		if (amount > 0 && price > 0) {
@@ -241,6 +253,7 @@ function initBet() {
 						type: notificationType,
 						bet: {
 							amount: amount,
+							marketType: marketType,
 							odds: price,
 							side: side,
 							oid: oid,
@@ -251,11 +264,9 @@ function initBet() {
 		} else {
 			showBetError("Values must not be 0.")
 		}
-	};
-
-	document.getElementById('cancel-bet-button').onclick = function() {
+	}, function() {
 		sendMessageAndClose({ type: notificationType, error: "Rejected by user"});
-	}
+	});
 }
 
 function capitalize(text) {
@@ -435,6 +446,7 @@ function makeBet(amount, price, type, oid, callback) {
 		let type_final;
 		let ttv = type;
 		if ((ttv == "true") ||
+			(ttv == "long") ||
 			(ttv == 1) ||
 			(ttv == "yes") ||
 			(ttv == "si") ||
@@ -444,6 +456,7 @@ function makeBet(amount, price, type, oid, callback) {
 			(ttv == "既不是")) {
 			type_final = 1;
 		} else if ((ttv == "false") ||
+			(ttv == "short") ||
 			(ttv == 0) ||
 			(ttv == 2) ||
 			(ttv == "falso") ||
@@ -698,16 +711,13 @@ function initCancel() {
 	document.getElementById("cancel-bet-amount").innerHTML = amount;
 	document.getElementById("cancel-bet-price").innerHTML = price;
 
-	let cancelButton = document.getElementById("cancel-button");
-	cancelButton.onclick = function() {
+	initButtons(function() {
 		network.send(["pubkey"], function(error, pubkey) {
 			cancelTrade(index + 2, pubkey);
 		});
-	}
-
-	document.getElementById('cancel-cancel-button').onclick = function() {
+	}, function() {
 		sendMessageAndClose({ type: notificationType, error: "Rejected by user"});
-	}
+	});
 }
 
 function cancelTrade(n, server_pubkey) {

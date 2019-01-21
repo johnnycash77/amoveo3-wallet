@@ -22,17 +22,6 @@ p {
     padding-top: 4px;
 }
 
-#channel-button-container {
-    padding: 16px;
-    padding-top: 4px;
-}
-
-#channel-button-container .btn {
-    padding: 12px 24px;
-    font-size: 16px;
-    font-weight: 500;
-}
-
 #make-bet-container {
     padding: 32px;
     text-align: center;
@@ -41,11 +30,6 @@ p {
 #cancel-container {
     padding: 32px;
     text-align: center;
-}
-
-#cancel-button-container {
-    width: 180px;
-    margin: auto;
 }
 
 #bet-side {
@@ -113,6 +97,14 @@ p {
     width: 280px;
 }
 
-#sign-button-container {
-    margin: 4px 80px !important;
+#button-container {
+    width: 220px;
+    margin: auto;
+}
+
+#button-container button {
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 16px;
+    font-weight: 500;
 }

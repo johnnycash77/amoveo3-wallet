@@ -45,7 +45,7 @@ function initExportAccount(account) {
 }
 
 function showExportError() {
-    views.visible(views.ids.settings.exportError);
+    views.show(views.ids.settings.exportError);
 }
 
 function initConnection() {

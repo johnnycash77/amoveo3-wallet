@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
     <link rel="stylesheet" href="css/bootstrap.css">
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/settings.css">
     <link rel="stylesheet" href="css/theme.css">
   </head>
 
@@ -18,6 +19,9 @@
                 <div id="back-button" class="hidden">
                     <i class="fas fa-arrow-left fa-2x"></i>
                 </div>
+            </div>
+            <div class="left">
+                <div id="logo"></div>
             </div>
             <div class="left">
                 <p id="title">Amoveo3 Wallet</p>
@@ -120,59 +124,41 @@
                     <p>Latest Block: <span id="block-number"></span></p>
                 </div>
 
-                <div class="section-heading">
-                    <h4>Account</h4>
-                </div>
                 <div id="settings-list">
                     <div>
                         <div class="settings-row">
-                            <button class="btn btn-info" id="account-switch-button">Switch Accounts &nbsp;<i class="fas fa-user-circle"></i></button>
+                            <div id="account-switch-button">Switch Accounts &nbsp;<i class="fas fa-user-circle"></i></div>
                         </div>
 
                         <div class='settings-row'>
-                            <div>
-                                <button class="btn btn-primary" id="export-button">Export Private Key &nbsp;<i class="fas fa-download"></i></button>
-                            </div>
-                            <div>
-                                <p id="export-error-text" class="error invisible">Error exporting account</p>
+                            <div id="export-button">Export Private Key &nbsp;<i class="fas fa-download"></i>
                             </div>
                         </div>
 
                         <div class='settings-row'>
-                            <div>
-                                <button class="btn btn-success" id="import-account-button">Import Account &nbsp;<i class="fas fa-upload"></i></button>
+                            <div id="import-account-button">Import Account &nbsp;<i class="fas fa-upload"></i>
+                                <p>Import private key .txt file</p>
+                                <div id="import-error-text" class="error hidden"><p>Invalid account data</p></div>
                             </div>
                             <div class="hidden">
                                 <input type="file" id="import-account" />
                             </div>
+                        </div>
 
-                            <div>
-                                &nbsp;
-                            </div>
-
-                            <div>
-                                <p>Import private key .txt file</p>
-                                <p id="import-error-text" class="error hidden">Invalid account data</p>
+                        <div class='settings-row'>
+                            <div id="add-account-button">Add New Account &nbsp;<i class="fas fa-plus"></i>
                             </div>
                         </div>
 
                         <div class='settings-row'>
-                            <div>
-                                <button class="btn btn-warning" id="add-account-button">Add New Account &nbsp;<i class="fas fa-plus"></i></button>
+                            <div id="resync-button">Re-Sync Blocks &nbsp;<i class="fas fa-sync"></i>
                             </div>
                         </div>
-
-                        <div class='settings-row'>
-                            <div>
-                                <button class="btn btn-danger" id="resync-button">Re-Sync Blocks &nbsp;<i class="fas fa-sync"></i></button>
-                            </div>
-                        </div>
-
                     </div>
 
-                    <div class='spacer'>
+                    <div class='spacer' style="display: none">
                     </div>
-                    <div class='row'>
+                    <div class='row' style="display: none">
                         <div class="section-heading">
                             <h4>Connection Info</h4>
                         </div>
@@ -194,13 +180,10 @@
                             <p><span class="hidden error" id="node-error"></span></p>
                         </div>
                     </div>
+                </div>
 
-                    <div class='spacer'>
-                    </div>
-
-                    <div>
-                        <p>Version: <span id="version"></span></p>
-                    </div>
+                <div id="version-container">
+                    <p>Version: <span id="version"></span></p>
                 </div>
             </div>
         </div>

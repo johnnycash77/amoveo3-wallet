@@ -2280,122 +2280,77 @@ const width = 360
 
 class NotificationManager {
 
-  /**
-   * A collection of methods for controlling the showing and hiding of the notification popup.
-   *
-   * @typedef {Object} NotificationManager
-   *
-   */
+	showPopup(opts) {
+		this.getPopup((err, popup) => {
+			if (err) {
+				throw err
+			}
 
-  /**
-   * Either brings an existing MetaMask notification window into focus, or creates a new notification window. New
-   * notification windows are given a 'popup' type.
-   *
-   */
-  showPopup(opts) {
-    this._getPopup((err, popup) => {
-      if (err) throw err
+			// Bring focus to chrome popup
+			if (popup) {
+				// bring focus to existing chrome popup
+				this.closePopup();
+			}
 
-      // Bring focus to chrome popup
-      if (popup) {
-        // bring focus to existing chrome popup
-        this.closePopup();
-      }
+			let query = ""
+			if (opts) {
+				for (let property in opts) {
+					if (opts.hasOwnProperty(property)) {
+						query += property + "=" + opts[propt] + "&"
+					}
+				}
+			}
 
-        var query = ""
-        if (opts) {
-          const type = this.addValueIfExists(opts, "type", opts.type)
-          const ip = this.addValueIfExists(opts, "ip", opts.ip)
-          const side = this.addValueIfExists(opts, "side", opts.side)
-          const price = this.addValueIfExists(opts, "price", opts.price)
-          const oid = this.addValueIfExists(opts, "oid", opts.oid)
-          const amount = this.addValueIfExists(opts, "amount", opts.amount)
-          const index = this.addValueIfExists(opts, "index", opts.index)
-          const message = this.addValueIfExists(opts, "message", opts.message)
+			// create new notification popup
+			extension.windows.create({
+				url: 'notification.html?' + query,
+				type: 'popup',
+				width,
+				height,
+			})
 
-          query += type
-              + ip
-              + side
-              + price
-              + oid
-              + amount
-              + index
-              + message
-        }
+		})
+	}
 
-        // create new notification popup
-        extension.windows.create({
-          url: 'notification.html?' + query,
-          type: 'popup',
-          width,
-          height,
-        })
+	closePopup() {
+		// closes notification popup
+		this.getPopup((err, popup) => {
+			if (err) {
+				throw err
+			}
+			if (!popup) {
+				return
+			}
+			extension.windows.remove(popup.id, console.error)
+		})
+	}
 
-    })
-  }
+	getPopup(cb) {
+		this.getWindows((err, windows) => {
+			if (err) {
+				throw err
+			}
+			cb(null, this.getPopupIn(windows))
+		})
+	}
 
-  addValueIfExists(opts, name, value) {
-    return opts.hasOwnProperty(name) ? name + "=" + value + "&" : ""
-  }
+	getWindows(cb) {
+		// Ignore in test environment
+		if (!extension.windows) {
+			return cb()
+		}
 
-  /**
-   * Closes a MetaMask notification if it window exists.
-   *
-   */
-  closePopup () {
-    // closes notification popup
-    this._getPopup((err, popup) => {
-      if (err) throw err
-      if (!popup) return
-      extension.windows.remove(popup.id, console.error)
-    })
-  }
+		extension.windows.getAll({}, (windows) => {
+			cb(null, windows)
+		})
+	}
 
-  /**
-   * Checks all open MetaMask windows, and returns the first one it finds that is a notification window (i.e. has the
-   * type 'popup')
-   *
-   * @param {Function} cb A node style callback that to whcih the found notification window will be passed.
-   *
-   */
-  _getPopup (cb) {
-    this._getWindows((err, windows) => {
-      if (err) throw err
-      cb(null, this._getPopupIn(windows))
-    })
-  }
-
-  /**
-   * Returns all open MetaMask windows.
-   *
-   * @private
-   * @param {Function} cb A node style callback that to which the windows will be passed.
-   *
-   */
-  _getWindows (cb) {
-    // Ignore in test environment
-    if (!extension.windows) {
-      return cb()
-    }
-
-    extension.windows.getAll({}, (windows) => {
-      cb(null, windows)
-    })
-  }
-
-  /**
-   * Given an array of windows, returns the first that has a 'popup' type, or null if no such window exists.
-   *
-   * @private
-   * @param {array} windows An array of objects containing data about the open MetaMask extension windows.
-   *
-   */
-  _getPopupIn (windows) {
-    return windows ? windows.find((win) => {
-      // Returns notification popup
-      return (win && win.type === 'popup')
-    }) : null
-  }
+	getPopupIn(windows) {
+		return windows ? windows.find((win) => {
+			// Returns notification popup
+			return (win && win.type === 'popup')
+		}) : null
+	}
 
 }
 
@@ -2629,7 +2584,7 @@ function initSigning() {
 	let messageInput = document.getElementById('sign-message');
 	messageInput.innerHTML = message;
 
-	document.getElementById('sign-button').onclick = function() {
+	initButtons(function() {
 		passwordController.getPassword(function(password) {
 			if (!password) {
 				showSignedError("Your wallet is locked.  Please unlock your wallet and try again.")
@@ -2647,11 +2602,9 @@ function initSigning() {
 				});
 			}
 		});
-	};
-
-	document.getElementById('cancel-sign-button').onclick = function() {
+	}, function() {
 		sendMessageAndClose({ type: notificationType, error: "Rejected by user"});
-	};
+	});
 }
 
 function showSignedError(message) {
@@ -2662,6 +2615,22 @@ function showSignedError(message) {
 
 function setTitle(title) {
 	document.getElementById("notification-title").innerHTML = title;
+}
+
+function initButtons(confirmCallback, cancelCallback) {
+	const yes = document.getElementById('yes-button');
+	yes.onclick = function() {
+		if (confirmCallback) {
+			confirmCallback();
+		}
+	}
+
+	const no = document.getElementById('no-button');
+	no.onclick = function() {
+		if (cancelCallback) {
+			cancelCallback();
+		}
+	}
 }
 
 function initChannel() {
@@ -2684,19 +2653,17 @@ function initChannel() {
 
 	document.getElementById('new-channel-container').classList.remove('hidden');
 
-	document.getElementById('cancel-channel-button').onclick = function() {
-		sendMessageAndClose({ type: notificationType, error: "Rejected by user"});
-	};
-
 	document.getElementById('channel-advanced-button').onclick = function() {
 		document.getElementById('channel-advanced-container').classList.remove('hidden');
 	};
 
+	getUserBalance();
+
 	network.send(["time_value"], function(error, timeValue) {
 		initFee(timeValue);
 
-		let channelButton = document.getElementById('create-channel-button');
-		channelButton.onclick = function() {
+
+		initButtons(function() {
 			let locked = safeFloat(lockedInput.value);
 			let delay = safeFloat(delayInput.value);
 			let length = safeFloat(lengthInput.value);
@@ -2706,10 +2673,10 @@ function initChannel() {
 			} else {
 				makeChannel(locked, delay, length, timeValue);
 			}
-		}
+		}, function() {
+			sendMessageAndClose({ type: notificationType, error: "Rejected by user"});
+		});
 	});
-
-	getUserBalance();
 }
 
 function safeFloat(f) {
@@ -2788,14 +2755,14 @@ function initBet() {
 	let amount = parseFloat(getParameterByName('amount'));
 	let side = getParameterByName('side');
 	let oid = getParameterByName('oid');
+	let marketType = getParameterByName('marketType');
 
 	amountText.value = amount;
 	oddsText.value = price;
 
 	document.getElementById("bet-side").innerText = capitalize(side);
 
-	let betButton = document.getElementById('create-bet-button');
-	betButton.onclick = function() {
+	initButtons(function() {
 		price = price * 100;
 
 		if (amount > 0 && price > 0) {
@@ -2805,6 +2772,7 @@ function initBet() {
 						type: notificationType,
 						bet: {
 							amount: amount,
+							marketType: marketType,
 							odds: price,
 							side: side,
 							oid: oid,
@@ -2815,11 +2783,9 @@ function initBet() {
 		} else {
 			showBetError("Values must not be 0.")
 		}
-	};
-
-	document.getElementById('cancel-bet-button').onclick = function() {
+	}, function() {
 		sendMessageAndClose({ type: notificationType, error: "Rejected by user"});
-	}
+	});
 }
 
 function capitalize(text) {
@@ -2999,6 +2965,7 @@ function makeBet(amount, price, type, oid, callback) {
 		let type_final;
 		let ttv = type;
 		if ((ttv == "true") ||
+			(ttv == "long") ||
 			(ttv == 1) ||
 			(ttv == "yes") ||
 			(ttv == "si") ||
@@ -3008,6 +2975,7 @@ function makeBet(amount, price, type, oid, callback) {
 			(ttv == "既不是")) {
 			type_final = 1;
 		} else if ((ttv == "false") ||
+			(ttv == "short") ||
 			(ttv == 0) ||
 			(ttv == 2) ||
 			(ttv == "falso") ||
@@ -3262,16 +3230,13 @@ function initCancel() {
 	document.getElementById("cancel-bet-amount").innerHTML = amount;
 	document.getElementById("cancel-bet-price").innerHTML = price;
 
-	let cancelButton = document.getElementById("cancel-button");
-	cancelButton.onclick = function() {
+	initButtons(function() {
 		network.send(["pubkey"], function(error, pubkey) {
 			cancelTrade(index + 2, pubkey);
 		});
-	}
-
-	document.getElementById('cancel-cancel-button').onclick = function() {
+	}, function() {
 		sendMessageAndClose({ type: notificationType, error: "Rejected by user"});
-	}
+	});
 }
 
 function cancelTrade(n, server_pubkey) {

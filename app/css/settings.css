@@ -1,0 +1,43 @@
+#settings-container {
+
+}
+
+#settings-list {
+    margin: 16px -16px;
+    border-bottom: 1px solid black;
+}
+
+.settings-row {
+    min-height: 64px;
+}
+
+.settings-row > div {
+    background: transparent;
+    color: black;
+    cursor: pointer;
+    padding: 32px;
+    width: 100%;
+    font-weight: 500;
+    font-size: 18px;
+    border-top: 1px solid black;
+}
+
+.settings-row > div:hover {
+    background: rgba(66, 192, 251, 0.25);
+}
+
+#settings-button {
+    padding: 0px 16px 0px 16px;
+    margin-right: -16px;
+    cursor: pointer;
+}
+
+.settings-row div p {
+    font-size: 14px;
+    font-weight: 400;
+}
+
+#version-container {
+    margin-top: 16px;
+}
+
