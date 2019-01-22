@@ -52,6 +52,7 @@ inpageProvider.subscribe(function(request) {
 	  amoveo3.setCoinbase(state.selectedAddress);
 	  amoveo3.setChannels(state.channels);
 	  amoveo3.setLocked(state.isLocked);
+	  amoveo3.setNetwork(state.network);
   }
 })
 

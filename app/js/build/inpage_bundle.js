@@ -54,6 +54,7 @@ inpageProvider.subscribe(function(request) {
 	  amoveo3.setCoinbase(state.selectedAddress);
 	  amoveo3.setChannels(state.channels);
 	  amoveo3.setLocked(state.isLocked);
+	  amoveo3.setNetwork(state.network);
   }
 })
 
@@ -98,6 +99,9 @@ function Amoveo3(provider) {
     this.currentProvider = provider;
     this.api = new Api();
     this.channels = [];
+    this.network = "";
+    this.coinbase = "";
+    this.isLocked = true;
 }
 
 Amoveo3.prototype.setProvider = function (provider) {
@@ -121,7 +125,19 @@ Amoveo3.prototype.setLocked = function (locked) {
 };
 
 Amoveo3.prototype.isLocked = function() {
-    return this.isLocked;
+	return this.isLocked;
+};
+
+Amoveo3.prototype.setNetwork = function (network) {
+    this.network = network;
+};
+
+Amoveo3.prototype.getNetwork = function() {
+    return this.network;
+};
+
+Amoveo3.prototype.getSelectedAccount = function() {
+    return this.coinbase;
 };
 
 Amoveo3.prototype.getTopHeader = function(callback) {
@@ -218,6 +234,7 @@ function triggerReset () {
 module.exports = AmoveoInpageProvider;
 
 const extId = "hfojlfflnlmfjhddgodpmophmhpimahi";
+// const extId = "dihkmjjoakaiagmoflhachmoolamfimp";
 
 function AmoveoInpageProvider(connectionStream) {
     this.port = chrome.runtime.connect(extId);

@@ -85,39 +85,44 @@ chrome.runtime.onConnectExternal.addListener(function(port) {
 });
 
 function sendCurrentState() {
-	storage.getAccounts(password, function (error, accounts) {
-		if (error) {
-			sendMessageToPage({
-				type: "setState",
-				data: {
-					selectedAddress: "",
-					channels: [],
-					isLocked: true,
-				}
-			});
-		} else {
-			if (accounts.length > 0) {
-				storage.getChannels(function (error, channels) {
-					sendMessageToPage({
-						type: "setState",
-						data: {
-							selectedAddress: accounts[0].publicKey,
-							channels: channels,
-							isLocked: false
-						}
-					})
-				})
-			} else {
+	storage.getSelectedNetwork(function (error, network) {
+		storage.getAccounts(password, function (error, accounts) {
+			if (error) {
 				sendMessageToPage({
 					type: "setState",
 					data: {
 						selectedAddress: "",
 						channels: [],
-						isLocked: false
+						isLocked: true,
+						network: network,
 					}
-				})
+				});
+			} else {
+				if (accounts.length > 0) {
+					storage.getChannels(function (error, channels) {
+						sendMessageToPage({
+							type: "setState",
+							data: {
+								selectedAddress: accounts[0].publicKey,
+								channels: channels,
+								isLocked: false,
+								network: network,
+							}
+						})
+					})
+				} else {
+					sendMessageToPage({
+						type: "setState",
+						data: {
+							selectedAddress: "",
+							channels: [],
+							isLocked: false,
+							network: network,
+						}
+					})
+				}
 			}
-		}
+		});
 	});
 }
 

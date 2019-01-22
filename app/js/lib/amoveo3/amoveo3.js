@@ -4,6 +4,9 @@ function Amoveo3(provider) {
     this.currentProvider = provider;
     this.api = new Api();
     this.channels = [];
+    this.network = "";
+    this.coinbase = "";
+    this.isLocked = true;
 }
 
 Amoveo3.prototype.setProvider = function (provider) {
@@ -27,7 +30,19 @@ Amoveo3.prototype.setLocked = function (locked) {
 };
 
 Amoveo3.prototype.isLocked = function() {
-    return this.isLocked;
+	return this.isLocked;
+};
+
+Amoveo3.prototype.setNetwork = function (network) {
+    this.network = network;
+};
+
+Amoveo3.prototype.getNetwork = function() {
+    return this.network;
+};
+
+Amoveo3.prototype.getSelectedAccount = function() {
+    return this.coinbase;
 };
 
 Amoveo3.prototype.getTopHeader = function(callback) {
