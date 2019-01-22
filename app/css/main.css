@@ -265,6 +265,12 @@
     width: 100px;
 }
 
+#network-switch {
+    padding: 4px;
+    height: 30px;
+    margin-left: 36px;
+}
+
 .channel-cell {
     float: left;
     padding: 4px;

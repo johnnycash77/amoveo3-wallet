@@ -1,6 +1,8 @@
 var cryptoUtility = require('./crypto-utility.js')
 var config = require('../config')
 
+let network = "mainnet";
+
 function setStorage(values, callback) {
     chrome.storage.local.set(values, callback);
 }
@@ -70,7 +72,7 @@ function clearAccounts(callback) {
 }
 
 function getTopHeader(callback) {
-	if (config.isTestnet) {
+	if (network === "testnet") {
 		getStorage({testnetTopHeader: 0}, function (result) {
 			callback(null, result.testnetTopHeader);
 		})
@@ -82,7 +84,7 @@ function getTopHeader(callback) {
 }
 
 function getHeaders(callback) {
-    if (config.isTestnet) {
+	if (network === "testnet") {
 	    getStorage({testnetHeaders: {}}, function(result) {
 		    callback(null, result.testnetHeaders);
 	    })
@@ -94,7 +96,7 @@ function getHeaders(callback) {
 }
 
 function setTopHeader(topHeader, callback) {
-	if (config.isTestnet) {
+	if (network === "testnet") {
 		setStorage({testnetTopHeader: topHeader}, function() {
 			callback();
 		})
@@ -106,7 +108,7 @@ function setTopHeader(topHeader, callback) {
 }
 
 function setHeaders(headersDb, callback) {
-	if (config.isTestnet) {
+	if (network === "testnet") {
 		setStorage({testnetHeaders:headersDb}, function() {
 			callback();
 		})
@@ -125,6 +127,22 @@ function getConnectionInfo(callback) {
 
 function setConnectionInfo(info, callback) {
     setStorage({connectionInfo: info}, function() {
+        callback();
+    });
+}
+
+function getSelectedNetwork(callback) {
+    getStorage({selectedNetwork: network}, function (result) {
+	    const selected = result.selectedNetwork;
+	    network = selected;
+
+        callback(null, selected);
+    });
+}
+
+function setSelectedNetwork(selectedNetwork, callback) {
+	network = selectedNetwork
+    setStorage({selectedNetwork: selectedNetwork}, function() {
         callback();
     });
 }
@@ -152,6 +170,8 @@ exports.setHeaders = setHeaders;
 exports.getHeaders = getHeaders;
 exports.getAccounts = getAccounts;
 exports.setAccounts = setAccounts;
+exports.getSelectedNetwork = getSelectedNetwork;
+exports.setSelectedNetwork = setSelectedNetwork;
 exports.clearAccounts = clearAccounts;
 exports.getConnectionInfo = getConnectionInfo;
 exports.setConnectionInfo = setConnectionInfo;

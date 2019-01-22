@@ -41,6 +41,27 @@ function init(password) {
     setVersion();
 }
 
+function initSwitchNetwork() {
+	views.show(views.ids.settings.switchNetwork);
+	const switchNetworks = views.find(views.ids.settings.switchNetwork);
+	storage.getSelectedNetwork(function(error, selectedNetwork) {
+		if (selectedNetwork === "mainnet") {
+			switchNetworks.options[0].selected = 'selected';
+		} else {
+			switchNetworks.options[1].selected = 'selected';
+		}
+	});
+
+	switchNetworks.onchange = function(e) {
+		const switchNetworks = views.find(views.ids.settings.switchNetwork);
+		const newNetwork = switchNetworks.selectedIndex === 0 ? "mainnet" : "testnet";
+		storage.setSelectedNetwork(newNetwork, function() {
+			views.setText(views.ids.latestBlock, "Latest Block: 0");
+			chrome.extension.sendMessage({ type: "resync"});
+		});
+	}
+}
+
 function initUnlocked(password) {
     storage.getAccounts(password, function(error, accounts) {
         if (accounts.length > 0) {
@@ -54,6 +75,8 @@ function initUnlocked(password) {
             initAddAccountButton(password);
 
             initImportAccount(password, accounts);
+
+	        initSwitchNetwork();
         } else {
             welcomeController.init(password, function() {
                 createNewAccount(function(account) {

@@ -89,11 +89,15 @@ function initResync() {
     resyncButton.onclick = function (e) {
         storage.setTopHeader(0, function () {
             storage.setHeaders({}, function () {
-                views.setText(views.ids.latestBlock, "Latest Block: 0");
-                chrome.extension.sendMessage({ type: "resync"});
+	            doResync();
             });
         });
     };
+}
+
+function doResync() {
+	views.setText(views.ids.latestBlock, "Latest Block: 0");
+	chrome.extension.sendMessage({ type: "resync"});
 }
 
 function showConnectError(text) {

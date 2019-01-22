@@ -92,7 +92,8 @@ var ids = {
             current: "node-current",
             button: "node-connect",
             error: "node-error",
-        }
+        },
+	    switchNetwork: "network-switch"
     },
     send: {
         max: "send-max-amount",

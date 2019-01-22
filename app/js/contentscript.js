@@ -6,51 +6,30 @@ const inpageContent = fs.readFileSync(path.join(__dirname, 'build', 'inpage_bund
 const inpageSuffix = '//# sourceURL=' + extension.extension.getURL('inpage_bundle.js?v=1.6.2') + '\n'
 const inpageBundle = inpageContent + inpageSuffix
 
-// Eventually this streaming injection could be replaced with:
-// https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Language_Bindings/Components.utils.exportFunction
-//
-// But for now that is only Firefox
-// If we create a FireFox-only code path using that API,
-// MetaMask will be much faster loading and performant on Firefox.
-
 if (shouldInjectAmoveo3()) {
     setupInjection()
 }
 
-/**
- * Creates a script tag that injects inpage.js
- */
 function setupInjection() {
     try {
-        // inject in-page script
         var scriptTag = document.createElement('script')
         scriptTag.textContent = inpageBundle
         scriptTag.onload = function () {
             this.parentNode.removeChild(this)
         }
         var container = document.head || document.documentElement
-        // append as first child
+
         container.insertBefore(scriptTag, container.children[0])
     } catch (e) {
         console.error('Amoveo injection failed.', e)
     }
 }
 
-/**
- * Determines if Web3 should be injected
- *
- * @returns {boolean} {@code true} if Web3 should be injected
- */
 function shouldInjectAmoveo3() {
     return doctypeCheck() && suffixCheck()
         && documentElementCheck() && whitelistedDomainCheck();
 }
 
-/**
- * Checks the doctype of the current document if it exists
- *
- * @returns {boolean} {@code true} if the doctype is html or if none exists
- */
 function doctypeCheck() {
     const doctype = window.document.doctype
     if (doctype) {
@@ -60,11 +39,6 @@ function doctypeCheck() {
     }
 }
 
-/**
- * Checks the current document extension
- *
- * @returns {boolean} {@code true} if the current extension is not prohibited
- */
 function suffixCheck() {
     var prohibitedTypes = ['xml', 'pdf']
     var currentUrl = window.location.href
@@ -78,11 +52,6 @@ function suffixCheck() {
     return true
 }
 
-/**
- * Checks the documentElement of the current document
- *
- * @returns {boolean} {@code true} if the documentElement is an html node or if none exists
- */
 function documentElementCheck() {
     var documentElement = document.documentElement.nodeName
     if (documentElement) {
@@ -91,11 +60,6 @@ function documentElementCheck() {
     return true
 }
 
-/**
- * Checks if the current domain is blacklisted
- *
- * @returns {boolean} {@code true} if the current domain is blacklisted
- */
 function blacklistedDomainCheck() {
     var blacklistedDomains = [
         'uscourts.gov',
@@ -115,11 +79,6 @@ function blacklistedDomainCheck() {
     return false
 }
 
-/**
- * Checks if the current domain is blacklisted
- *
- * @returns {boolean} {@code true} if the current domain is whitelisted
- */
 function whitelistedDomainCheck() {
     var whitelistedDomains = [
         'localhost',

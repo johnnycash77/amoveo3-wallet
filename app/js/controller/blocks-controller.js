@@ -11,28 +11,41 @@ class BlocksController {
         this.reset();
     }
 
-    reset() {
-        this.topHeader = 0;
-        this.lastHeader = -1;
-        this.lastSavedHeader = -1;
-        this.headersDb = {};
-        this.accumulatingDifficulty = 0;
-        this.topDifficulty = 0;
-        this.syncing = false;
-	    this.checkPointHeader = config.checkPointHeader;
-	    this.checkPointEwah = config.checkPointEwah;
+    reset(callback) {
+    	const instance = this;
+	    instance.topHeader = 0;
+	    instance.lastHeader = -1;
+	    instance.lastSavedHeader = -1;
+	    instance.headersDb = {};
+	    instance.accumulatingDifficulty = 0;
+	    instance.topDifficulty = 0;
+	    instance.syncing = false;
+	    instance.syncing = false;
+
+	    storage.getSelectedNetwork(function(error, selectedNetwork) {
+		    instance.checkPointHeader = config[selectedNetwork].checkPointHeader;
+		    instance.checkPointEwah = config[selectedNetwork].checkPointEwah;
+		    instance.forks = config[selectedNetwork].forks;
+		    instance.headersBatch = config[selectedNetwork].headersBatch;
+		    instance.retargetFrequency = config[selectedNetwork].retargetFrequency;
+		    instance.initialDifficulty = config[selectedNetwork].initialDifficulty;
+
+		    if (callback) {
+			    callback();
+		    }
+	    });
     }
 
     clearCache(callback) {
-	    this.reset();
-
-	    storage.setHeaders({}, function() {
-		    storage.setTopHeader(0, function() {
-		    	if (callback) {
-				    callback();
-			    }
+	    this.reset(function() {
+		    storage.setHeaders({}, function() {
+			    storage.setTopHeader(0, function() {
+				    if (callback) {
+					    callback();
+				    }
+			    })
 		    })
-	    })
+	    });
     }
 
     getHeight(callback) {
@@ -84,7 +97,7 @@ class BlocksController {
     doSync(callback) {
 	    var instance = this;
 	    instance.getHeight(function(height) {
-		    network.send(["headers", config.headersBatch, height + 1], function(error, headers) {
+		    network.send(["headers", instance.headersBatch, height + 1], function(error, headers) {
 			    if (!Array.isArray(headers)) {
 				    headers = JSON.parse(headers)
 			    }
@@ -200,7 +213,7 @@ class BlocksController {
                 var s1 = formatUtility.serializeHeader(data);
                 var h1 = cryptoUtility.hash(cryptoUtility.hash(s1));
                 var foo, h2, I;
-                if (height > config.forks.two - 1) {
+                if (height > this.forks.two - 1) {
                     var nonce2 = nonce.slice(-23),
                         foo = h1.concat(formatUtility.stringToArray(nonce2));
                     h2 = cryptoUtility.hash(foo);
@@ -226,11 +239,11 @@ class BlocksController {
             return "unknown parent";
         } else {
             var Diff = header[6];
-            var RF = config.retargetFrequency;
+            var RF = this.retargetFrequency;
             var height = header[1];
             var x = height % RF;
 
-	        if (height > config.forks.four) {
+	        if (height > this.forks.four) {
 		        x = height % Math.floor(RF / 2);
 	        } else {
 		        x = height % RF;
@@ -239,7 +252,7 @@ class BlocksController {
 	        var PrevEWAH = this.getHeaderEwah(hash);
 	        var EWAH = this.calculateEwah(nextHeader, header, PrevEWAH);
 
-	        if (height > config.forks.seven)  {
+	        if (height > this.forks.seven)  {
 		        return [this.newTarget(header, EWAH), EWAH];
 	        } else if (x === 0 && height >= 10) {
 		        return [this.calculateDifficultyRecursive(header), EWAH];
@@ -263,7 +276,7 @@ class BlocksController {
 		} else if (estimate < LL) {
 			ND = this.powRecalculate(diff, LL, estimate);
 		}
-		return Math.max(ND, config.initialDifficulty);
+		return Math.max(ND, this.initialDifficulty);
 	}
 
 	hashrateConverter() {
@@ -296,7 +309,7 @@ class BlocksController {
 
     calculateDifficultyRecursive(header) {
         var period = header[10];
-        var f = Math.floor(config.retargetFrequency / 2);
+        var f = Math.floor(this.retargetFrequency / 2);
         var a1 = this.retargetRecursive(header, f - 1, []);
         var times1 = a1.times;
         var header2000 = a1.header;
@@ -313,7 +326,7 @@ class BlocksController {
             old_diff,
             period,
             Math.max(1, t));
-        return Math.max(nt, config.initialDifficulty);
+        return Math.max(nt, this.initialDifficulty);
     }
 
     retargetRecursive(header, n, ts) {
