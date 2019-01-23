@@ -1,4 +1,3 @@
-const config = require('../config.js');
 const views = require('../lib/views.js');
 const storage = require('../lib/storage.js');
 const setPasswordController = require('../ui/set-password.js');

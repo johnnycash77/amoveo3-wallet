@@ -1,4 +1,4 @@
-var sjcl = require('../ui/sjcl.js');
+var sjcl = require('sjcl');
 var formatUtility = require('./format-utility.js');
 
 /** @fileOverview Bit array codec implementations.

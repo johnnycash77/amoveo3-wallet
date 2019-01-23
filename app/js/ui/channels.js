@@ -1,8 +1,8 @@
-var merkle = require('../lib/merkle-proofs.js');
-var storage = require('../lib/storage.js');
-var views = require('../lib/views.js');
-var fileUtility = require('../lib/file-utility.js');
-var passwordController = require('../controller/password-controller.js');
+const merkle = require('../lib/merkle-proofs.js');
+const storage = require('../lib/storage.js');
+const views = require('../lib/views.js');
+const fileUtility = require('../lib/file-utility.js');
+const passwordController = require('../controller/password-controller.js');
 
 function initChannels(account) {
     storage.getChannels(function(error, channels) {

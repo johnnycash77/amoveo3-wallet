@@ -2,12 +2,10 @@ const fs = require('fs')
 const path = require('path')
 const makeTemplate = require('../lib/template.js')
 
-const navbarController = require('./navbar.js');
 const initTransactionsTab = require('./transactions.js');
 const initChannelsTab = require('./channels.js');
 const initMarketsTab = require('./markets.js');
 const welcomeController = require('./welcome.js');
-const settingsController = require('./settings.js');
 const accountController = require('./account.js');
 const spendController = require('./send.js');
 const lockedController = require('./locked.js');

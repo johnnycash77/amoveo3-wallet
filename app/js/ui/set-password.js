@@ -1,10 +1,8 @@
-const config = require('../config.js');
 const views = require('../lib/views.js');
 const storage = require('../lib/storage.js');
 const welcomeController = require('../ui/welcome.js');
-const alertController = require('../ui/alert.js');
 const Main = require('../ui/popup.js');
-var passwordController = require('../controller/password-controller.js');
+const passwordController = require('../controller/password-controller.js');
 
 function init() {
     views.hide(views.ids.accountContainer);

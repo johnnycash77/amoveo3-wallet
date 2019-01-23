@@ -1,8 +1,5 @@
-var views = require('../lib/views.js');
-var formatUtility = require('../lib/format-utility.js');
-var storage = require('../lib/storage.js');
-const accountController = require('./account.js');
-const elliptic = require('elliptic');
+const views = require('../lib/views.js');
+const storage = require('../lib/storage.js');
 const fileUtility = require('../lib/file-utility.js');
 const network = require('../controller/network-controller.js');
 
