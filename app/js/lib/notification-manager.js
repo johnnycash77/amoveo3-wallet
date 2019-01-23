@@ -2,7 +2,6 @@ const extension = require('extensionizer')
 const height = 620
 const width = 360
 
-
 class NotificationManager {
 
 	showPopup(opts) {

@@ -7,7 +7,7 @@ const userController = require('./controller/user-controller');
 const passwordController = require('./controller/password-controller');
 const merkle = require('./lib/merkle-proofs');
 const network = require('./controller/network-controller');
-const elliptic = require('./lib/elliptic.min.js');
+const elliptic = require('elliptic');
 
 const lightningFee = 20;
 const fee = 152050;

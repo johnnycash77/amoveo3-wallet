@@ -1,5 +1,4 @@
-var cryptoUtility = require('./crypto-utility.js')
-var config = require('../config')
+const cryptoUtility = require('./crypto-utility.js')
 
 let network = "mainnet";
 

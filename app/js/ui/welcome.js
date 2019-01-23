@@ -1,6 +1,6 @@
 const config = require('../config.js');
 const views = require('../lib/views.js');
-const elliptic = require('../lib/elliptic.min.js');
+const elliptic = require('elliptic');
 const storage = require('../lib/storage.js');
 const formatUtility = require('../lib/format-utility.js');
 const Main = require('./popup.js');

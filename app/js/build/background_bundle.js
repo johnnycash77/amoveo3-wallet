@@ -548,32 +548,24 @@ const storage = require('../lib/storage.js');
 const config = require('../config');
 
 function send(data, callback) {
-	retry(data, callback, 3);
-}
-
-function retry(data, callback, attempts) {
-	if (attempts === 0) {
-		callback(new Error("Server overloaded"), null);
-	} else {
-		storage.getSelectedNetwork(function(error, selectedNetwork) {
-			const url = config[selectedNetwork].defaultNodeUrl;
-			fetch(url,
-				{
-					method: 'POST',
-					body: JSON.stringify(data)
-				}
-			)
-			.then(function(response) {
-				return response.json();
-			})
-			.then(function(json) {
-				callback(null, json[1]);
-			})
-			.catch(err => {
-				callback(err, null);
-			});
+	storage.getSelectedNetwork(function(error, selectedNetwork) {
+		const url = config[selectedNetwork].defaultNodeUrl;
+		fetch(url,
+			{
+				method: 'POST',
+				body: JSON.stringify(data)
+			}
+		)
+		.then(function(response) {
+			return response.json();
+		})
+		.then(function(json) {
+			callback(null, json[1]);
+		})
+		.catch(err => {
+			callback(err, null);
 		});
-	}
+	});
 }
 
 exports.send = send;
@@ -2494,7 +2486,6 @@ const extension = require('extensionizer')
 const height = 620
 const width = 360
 
-
 class NotificationManager {
 
 	showPopup(opts) {
@@ -2573,8 +2564,7 @@ class NotificationManager {
 
 module.exports = NotificationManager
 },{"extensionizer":12}],9:[function(require,module,exports){
-var cryptoUtility = require('./crypto-utility.js')
-var config = require('../config')
+const cryptoUtility = require('./crypto-utility.js')
 
 let network = "mainnet";
 
@@ -2753,7 +2743,7 @@ exports.setConnectionInfo = setConnectionInfo;
 exports.hasPasswordBeenSet = hasPasswordBeenSet;
 exports.setPasswordBeenSet = setPasswordBeenSet;
 
-},{"../config":2,"./crypto-utility.js":6}],10:[function(require,module,exports){
+},{"./crypto-utility.js":6}],10:[function(require,module,exports){
 "use strict";var sjcl={cipher:{},hash:{},keyexchange:{},mode:{},misc:{},codec:{},exception:{corrupt:function(a){this.toString=function(){return"CORRUPT: "+this.message};this.message=a},invalid:function(a){this.toString=function(){return"INVALID: "+this.message};this.message=a},bug:function(a){this.toString=function(){return"BUG: "+this.message};this.message=a},notReady:function(a){this.toString=function(){return"NOT READY: "+this.message};this.message=a}}};
 sjcl.cipher.aes=function(a){this.s[0][0][0]||this.O();var b,c,d,e,f=this.s[0][4],g=this.s[1];b=a.length;var h=1;if(4!==b&&6!==b&&8!==b)throw new sjcl.exception.invalid("invalid aes key size");this.b=[d=a.slice(0),e=[]];for(a=b;a<4*b+28;a++){c=d[a-1];if(0===a%b||8===b&&4===a%b)c=f[c>>>24]<<24^f[c>>16&255]<<16^f[c>>8&255]<<8^f[c&255],0===a%b&&(c=c<<8^c>>>24^h<<24,h=h<<1^283*(h>>7));d[a]=d[a-b]^c}for(b=0;a;b++,a--)c=d[b&3?a:a-4],e[b]=4>=a||4>b?c:g[0][f[c>>>24]]^g[1][f[c>>16&255]]^g[2][f[c>>8&255]]^g[3][f[c&
 255]]};

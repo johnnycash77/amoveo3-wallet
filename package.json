@@ -11,6 +11,7 @@
     "debounce": "^1.0.0",
     "debounce-stream": "^2.0.0",
     "dnode": "^1.2.2",
+    "elliptic": "^6.4.1",
     "end-of-stream": "^1.1.0",
     "extensionizer": "^1.0.0",
     "fs-promise": "^2.0.3",

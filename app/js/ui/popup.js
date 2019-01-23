@@ -17,7 +17,7 @@ const passwordController = require('../controller/password-controller.js');
 const formatUtility = require('../lib/format-utility.js');
 const userController = require('../controller/user-controller.js');
 const storage = require('../lib/storage.js');
-const elliptic = require('../lib/elliptic.min.js');
+const elliptic = require('elliptic');
 
 function init(password) {
     if (!password) {
