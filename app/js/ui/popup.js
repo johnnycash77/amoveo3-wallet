@@ -41,7 +41,7 @@ function init(password) {
     setVersion();
 }
 
-function initSwitchNetwork() {
+function initSwitchNetwork(account) {
 	views.show(views.ids.settings.switchNetwork);
 	const switchNetworks = views.find(views.ids.settings.switchNetwork);
 	storage.getSelectedNetwork(function(error, selectedNetwork) {
@@ -58,6 +58,8 @@ function initSwitchNetwork() {
 		storage.setSelectedNetwork(newNetwork, function() {
 			views.setText(views.ids.latestBlock, "Latest Block: 0");
 			chrome.extension.sendMessage({ type: "resync"});
+
+			setSelectedAccount(account);
 		});
 	}
 }
@@ -76,7 +78,7 @@ function initUnlocked(password) {
 
             initImportAccount(password, accounts);
 
-	        initSwitchNetwork();
+	        initSwitchNetwork(account);
         } else {
             welcomeController.init(password, function() {
                 createNewAccount(function(account) {
@@ -117,11 +119,14 @@ function initAccountSwitchButton(password) {
 }
 
 function setSelectedAccount(account) {
-    storage.getChannels(function(error, channels) {
-        passwordController.setState({
-            selectedAddress: account.publicKey,
-            channels: channels,
-            isLocked: false
+    storage.getSelectedNetwork(function(error, network) {
+        storage.getChannels(function(error, channels) {
+            passwordController.setState({
+                selectedAddress: account.publicKey,
+                channels: channels,
+                isLocked: false,
+	            network: network,
+            })
         })
     })
 }
