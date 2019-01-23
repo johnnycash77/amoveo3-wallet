@@ -2697,7 +2697,7 @@ function initFee(timeValue) {
 		rate.innerHTML = timeValueFee;
 		blocks.innerHTML = length;
 		locked.innerHTML = amount;
-		let totalFee = 0.0015205 + timeValueFee * amount * length;
+		let totalFee = (0.0015205 + timeValueFee * amount * length).toFixed(4);
 		total.innerHTML = totalFee + " " + "VEO";
 		total2.innerHTML = totalFee + " " + "VEO";
 	}
