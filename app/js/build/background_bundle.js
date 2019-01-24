@@ -556,6 +556,7 @@ function send(data, callback) {
 				body: JSON.stringify(data)
 			}
 		)
+		.then(handleErrors)
 		.then(function(response) {
 			return response.json();
 		})
@@ -566,6 +567,13 @@ function send(data, callback) {
 			callback(err, null);
 		});
 	});
+}
+
+function handleErrors(response) {
+	if (!response.ok) {
+		throw Error(response.statusText);
+	}
+	return response;
 }
 
 exports.send = send;
@@ -2566,8 +2574,6 @@ module.exports = NotificationManager
 },{"extensionizer":11}],9:[function(require,module,exports){
 const cryptoUtility = require('./crypto-utility.js')
 
-let network = "mainnet";
-
 function setStorage(values, callback) {
     chrome.storage.local.set(values, callback);
 }
@@ -2637,51 +2643,59 @@ function clearAccounts(callback) {
 }
 
 function getTopHeader(callback) {
-	if (network === "testnet") {
-		getStorage({testnetTopHeader: 0}, function (result) {
-			callback(null, result.testnetTopHeader);
-		})
-	} else {
-		getStorage({topHeader: 0}, function (result) {
-			callback(null, result.topHeader);
-		})
-	}
+	getSelectedNetwork(function(error, network) {
+		if (network === "testnet") {
+			getStorage({testnetTopHeader: 0}, function (result) {
+				callback(null, result.testnetTopHeader);
+			})
+		} else {
+			getStorage({topHeader: 0}, function (result) {
+				callback(null, result.topHeader);
+			})
+		}
+	});
 }
 
 function getHeaders(callback) {
-	if (network === "testnet") {
-	    getStorage({testnetHeaders: {}}, function(result) {
-		    callback(null, result.testnetHeaders);
-	    })
-    } else {
-	    getStorage({headers: {}}, function(result) {
-		    callback(null, result.headers);
-	    })
-    }
+	getSelectedNetwork(function(error, network) {
+		if (network === "testnet") {
+		    getStorage({testnetHeaders: {}}, function(result) {
+			    callback(null, result.testnetHeaders);
+		    })
+	    } else {
+		    getStorage({headers: {}}, function(result) {
+			    callback(null, result.headers);
+		    })
+	    }
+	});
 }
 
 function setTopHeader(topHeader, callback) {
-	if (network === "testnet") {
-		setStorage({testnetTopHeader: topHeader}, function() {
-			callback();
-		})
-	} else {
-		setStorage({topHeader: topHeader}, function () {
-			callback();
-		})
-	}
+	getSelectedNetwork(function(error, network) {
+		if (network === "testnet") {
+			setStorage({testnetTopHeader: topHeader}, function() {
+				callback();
+			})
+		} else {
+			setStorage({topHeader: topHeader}, function () {
+				callback();
+			})
+		}
+	});
 }
 
 function setHeaders(headersDb, callback) {
-	if (network === "testnet") {
-		setStorage({testnetHeaders:headersDb}, function() {
-			callback();
-		})
-	} else {
-		setStorage({headers: headersDb}, function () {
-			callback();
-		})
-	}
+	getSelectedNetwork(function(error, network) {
+		if (network === "testnet") {
+			setStorage({testnetHeaders:headersDb}, function() {
+				callback();
+			})
+		} else {
+			setStorage({headers: headersDb}, function () {
+				callback();
+			})
+		}
+	});
 }
 
 function getConnectionInfo(callback) {
@@ -2697,7 +2711,7 @@ function setConnectionInfo(info, callback) {
 }
 
 function getSelectedNetwork(callback) {
-    getStorage({selectedNetwork: network}, function (result) {
+    getStorage({selectedNetwork: "mainnet"}, function (result) {
 	    const selected = result.selectedNetwork;
 	    network = selected;
 

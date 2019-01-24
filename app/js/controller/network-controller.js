@@ -10,6 +10,7 @@ function send(data, callback) {
 				body: JSON.stringify(data)
 			}
 		)
+		.then(handleErrors)
 		.then(function(response) {
 			return response.json();
 		})
@@ -20,6 +21,13 @@ function send(data, callback) {
 			callback(err, null);
 		});
 	});
+}
+
+function handleErrors(response) {
+	if (!response.ok) {
+		throw Error(response.statusText);
+	}
+	return response;
 }
 
 exports.send = send;

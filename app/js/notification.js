@@ -3,20 +3,19 @@ let notificationManager = new NotificationManager();
 const cryptoUtility = require('./lib/crypto-utility');
 const formatUtility = require('./lib/format-utility');
 const storage = require('./lib/storage');
+const config = require('./config');
 const userController = require('./controller/user-controller');
 const passwordController = require('./controller/password-controller');
 const merkle = require('./lib/merkle-proofs');
 const network = require('./controller/network-controller');
 const elliptic = require('elliptic');
-
-const lightningFee = 20;
-const fee = 152050;
-const DECIMALS = 100000000
-
-let messageSent = false;
-
 let ec = new elliptic.ec('secp256k1');
 
+const lightningFee = 20;
+const fee = 76025;
+const tokenDecimals = config.decimalMultiplier;
+
+let messageSent = false;
 let notificationType = parseParam('type')
 
 if (notificationType === "channel") {
@@ -301,7 +300,7 @@ function makeChannel(amount, delay, length, timeValue) {
 								showChannelError("Please open the wallet and create an account.")
 							} else {
 								let account = accounts[0];
-								amount = Math.floor(parseFloat(amount, 10) * DECIMALS) - fee;
+								amount = Math.floor(parseFloat(amount, 10) * tokenDecimals) - fee;
 								delay = parseInt(delay, 10);
 								let expiration = parseInt(length, 10) + topHeader[1];
 								let bal2 = amount - 1;
@@ -310,7 +309,7 @@ function makeChannel(amount, delay, length, timeValue) {
 								let acc2 = pubkey;
 
 								userController.getBalance(account, topHeader, function (error, balance) {
-									if ((amount / DECIMALS) > balance) {
+									if ((amount / tokenDecimals) > balance) {
 										showChannelError("You do not have enough VEO.")
 									} else {
 										network.send(["new_channel_tx", acc1, pubkey, amount, bal2, delay, fee],
@@ -345,7 +344,7 @@ function makeChannelCallback2(tx, amount, bal2, acc1, acc2, delay, expiration, p
 		console.log("server edited the tx. aborting");
 	} else {
 		let lifespan = expiration - topHeader[1];
-		let spk_amount = Math.floor((timeValue * (delay + lifespan) * (amount + bal2) ) / DECIMALS);
+		let spk_amount = Math.floor((timeValue * (delay + lifespan) * (amount + bal2) ) / tokenDecimals);
 		let spk = ["spk", acc1, acc2, [-6], 0, 0, cid, spk_amount, 0, delay];
 		passwordController.getPassword(function(password) {
 			if (!password) {
@@ -482,7 +481,7 @@ function makeBet(amount, price, type, oid, callback) {
 			type_final = 2;
 		}
 
-		let amount_final = Math.floor(parseFloat(amount, 10) * DECIMALS);
+		let amount_final = Math.floor(parseFloat(amount, 10) * tokenDecimals);
 		let oid_final = oid;
 		let expires = marketData[1];
 		let server_pubkey = marketData[2];
@@ -502,11 +501,12 @@ function makeBet(amount, price, type, oid, callback) {
 							if (marketData[4][0] === "binary") {
 								sc = marketContract(type_final, expires, price_final, server_pubkey, period, amount_final, oid_final, topHeader[1]);
 							} else {
-								let lower_limit = marketData[4][1];
-								let upper_limit = marketData[4][2];
+								const lower_limit = marketData[4][2];
+								const upper_limit = marketData[4][1];
+								const many = marketData[4][3];
 								// sanity-check, verify 10 == l[4][3];
 								//all scalar markets currently use 10 binary oracles to measure values.
-								sc = scalarMarketContract(type_final, expires, price_final, server_pubkey, period, amount_final, oid_final, topHeader[1], lower_limit, upper_limit, 10);
+								sc = scalarMarketContract(type_final, expires, price_final, server_pubkey, period, amount_final, oid_final, topHeader[1], lower_limit, upper_limit, many);
 							}
 
 							storage.getChannels(function (error, channels) {
@@ -536,7 +536,7 @@ function makeBet(amount, price, type, oid, callback) {
 											let amount = spk[7];
 											let betAmount = sumBets(spk[3]);
 											let mybalance = ((val[4] - amount - betAmount));
-											let serverbalance = ((val[5] + amount) / DECIMALS);
+											let serverbalance = ((val[5] + amount) / tokenDecimals);
 
 											if (amount_final + lightningFee > mybalance) {
 												showBetError("You do not have enough VEO in this channel.")
@@ -544,9 +544,15 @@ function makeBet(amount, price, type, oid, callback) {
 												showBetError("Your channel is expiring before this market closes. This market requires a channel that is open to block " + marketExpiration + ".");
 											} else {
 												try {
-													return network.send(["trade", account.publicKey, price_final, type_final, amount_final, oid_final, sspk, lightningFee], function (error, x) {
-														make_bet3(x, sspk, server_pubkey, oid_final, callback);
-													});
+													return network.send(["trade", account.publicKey, price_final, type_final, amount_final, oid_final, sspk, lightningFee],
+														function (error, trade) {
+															if (error) {
+																console.error(error);
+																showBetError("An error occurred.  Please try again later.")
+															} else {
+																make_bet3(trade, sspk, server_pubkey, oid_final, callback);
+															}
+														});
 												} catch (e) {
 													console.error(e);
 													showBetError("An error occurred.  Please verify you have a channel open and the \"new channel\" transaction has been added to the blockchain.")
@@ -658,7 +664,7 @@ function scalarMarketContract(direction, expires, maxprice, server_pubkey, perio
 	let contract2 =  btoa(formatUtility.arrayToString(contract));
 	let codekey = ["market", 2, oid, expires, server_pubkey, period, oid, lower_limit, upper_limit];
 	let amount2 = Math.floor(amount * ((10000 + maxprice) / 10000));
-	return ["bet", contract, amount2, codekey, [-7, direction, maxprice]]; //codekey is insttructions on how to re-create the contract, so we can do pattern matching when updating channels.
+	return ["bet", contract2, amount2, codekey, [-7, direction, maxprice]]; //codekey is insttructions on how to re-create the contract, so we can do pattern matching when updating channels.
 }
 
 function marketTrade(channel, amount, price, bet, oid) { //oid unused
@@ -718,7 +724,7 @@ function initCancel() {
 	document.getElementById('cancel-container').classList.remove('hidden');
 
 	let index = parseInt(getParameterByName('index'));
-	let amount = parseInt(getParameterByName('amount'));
+	let amount = parseFloat(getParameterByName('amount'));
 	let price = parseFloat(getParameterByName('price'));
 	let side = getParameterByName('side');
 
@@ -764,8 +770,12 @@ function cancelTrade(n, server_pubkey) {
 							let pubPoint = keys.getPublic("hex");
 							let pubKey = btoa(formatUtility.fromHex(pubPoint));
 							let msg = ["cancel_trade", pubKey, n, sspk2];
-							network.send(msg, function (error, x) {
-								return cancelTradeResponse(x, sspk2, server_pubkey, n - 2);
+							network.send(msg, function (error, response) {
+								if (error) {
+									showCancelError("An error occurred, please try again later.");
+								} else {
+									return cancelTradeResponse(response, sspk2, server_pubkey, n - 2);
+								}
 							});
 						})
 					}
@@ -871,7 +881,7 @@ function showMaxBalance() {
 										let spk = channel.them[1];
 										let amount = spk[7];
 										let betAmount = sumBets(spk[3]);
-										let mybalance = ((val[4] - amount - betAmount)) / DECIMALS
+										let mybalance = ((val[4] - amount - betAmount)) / tokenDecimals
 
 										let userBalance = document.getElementById("bet-user-balance");
 										userBalance.classList.remove("invisible");
