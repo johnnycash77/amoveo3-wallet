@@ -2955,8 +2955,8 @@ function newSs(code, prove, meta) {
 
 function makeBet(amount, price, type, oid, callback) {
 	network.send(["market_data", oid], function (error, marketData) {
-		let price_final = Math.floor(100 * parseFloat(price, 10));
-		let type_final;
+		let finalPrice = Math.floor(100 * parseFloat(price, 10));
+		let finalType;
 		let ttv = type;
 		if ((ttv == "true") ||
 			(ttv == "long") ||
@@ -2967,7 +2967,7 @@ function makeBet(amount, price, type, oid, callback) {
 			(ttv == "lon") ||
 			(ttv == "真正") ||
 			(ttv == "既不是")) {
-			type_final = 1;
+			finalType = 1;
 		} else if ((ttv == "false") ||
 			(ttv == "short") ||
 			(ttv == 0) ||
@@ -2977,13 +2977,13 @@ function makeBet(amount, price, type, oid, callback) {
 			(ttv == "lon ala") ||
 			(ttv == "也不是") ||
 			(ttv == "假")) {
-			type_final = 2;
+			finalType = 2;
 		}
 
-		let amount_final = Math.floor(parseFloat(amount, 10) * tokenDecimals);
-		let oid_final = oid;
+		let finalAmount = Math.floor(parseFloat(amount, 10) * tokenDecimals);
+		let finalOid = oid;
 		let expires = marketData[1];
-		let server_pubkey = marketData[2];
+		let serverAddress = marketData[2];
 		let period = marketData[3];
 
 		storage.getTopHeader(function(error, topHeader) {
@@ -2995,17 +2995,16 @@ function makeBet(amount, price, type, oid, callback) {
 						storage.getAccounts(password, function(error, accounts) {
 							let account = accounts[0];
 
-							let sc;
+							let betContract;
 							console.log(JSON.stringify(marketData));
 							if (marketData[4][0] === "binary") {
-								sc = marketContract(type_final, expires, price_final, server_pubkey, period, amount_final, oid_final, topHeader[1]);
+								betContract = marketContract(finalType, expires, finalPrice, serverAddress, period, finalAmount, finalOid, topHeader[1]);
 							} else {
-								const lower_limit = marketData[4][2];
-								const upper_limit = marketData[4][1];
+								const lowerLimit = marketData[4][1];
+								const upperLimit = marketData[4][2];
 								const many = marketData[4][3];
-								// sanity-check, verify 10 == l[4][3];
-								//all scalar markets currently use 10 binary oracles to measure values.
-								sc = scalarMarketContract(type_final, expires, price_final, server_pubkey, period, amount_final, oid_final, topHeader[1], lower_limit, upper_limit, many);
+
+								betContract = scalarMarketContract(finalType, expires, finalPrice, serverAddress, period, finalAmount, finalOid, topHeader[1], lowerLimit, upperLimit, many);
 							}
 
 							storage.getChannels(function (error, channels) {
@@ -3013,15 +3012,15 @@ function makeBet(amount, price, type, oid, callback) {
 								let channel;
 								for (let i = 0; i < channels.length; i++) {
 									channel = channels[i];
-									if (channel.me[1] === account.publicKey && channel.serverPubKey === server_pubkey) {
+									if (channel.me[1] === account.publicKey && channel.serverPubKey === serverAddress) {
 										channelFound = true;
 										break;
 									}
 								}
 
 								if (channelFound) {
-									let marketExpiration = sc[3][3]
-									let spk = marketTrade(channel, amount_final, price_final, sc, server_pubkey, oid_final);
+									let marketExpiration = betContract[3][3]
+									let spk = marketTrade(channel, finalAmount, finalPrice, betContract, serverAddress, finalOid);
 									let keys = ec.keyFromPrivate(account.privateKey, "hex");
 									let sspk = cryptoUtility.signTx(keys, spk);
 
@@ -3037,19 +3036,19 @@ function makeBet(amount, price, type, oid, callback) {
 											let mybalance = ((val[4] - amount - betAmount));
 											let serverbalance = ((val[5] + amount) / tokenDecimals);
 
-											if (amount_final + lightningFee > mybalance) {
+											if (finalAmount + lightningFee > mybalance) {
 												showBetError("You do not have enough VEO in this channel.")
 											} if (expiration < marketExpiration) {
 												showBetError("Your channel is expiring before this market closes. This market requires a channel that is open to block " + marketExpiration + ".");
 											} else {
 												try {
-													return network.send(["trade", account.publicKey, price_final, type_final, amount_final, oid_final, sspk, lightningFee],
+													return network.send(["trade", account.publicKey, finalPrice, finalType, finalAmount, finalOid, sspk, lightningFee],
 														function (error, trade) {
 															if (error) {
 																console.error(error);
 																showBetError("An error occurred.  Please try again later.")
 															} else {
-																make_bet3(trade, sspk, server_pubkey, oid_final, callback);
+																make_bet3(trade, sspk, serverAddress, finalOid, callback);
 															}
 														});
 												} catch (e) {
@@ -3123,7 +3122,7 @@ function scalarMarketContract(direction, expires, maxprice, server_pubkey, perio
 	} else if (direction == 2) {
 		a = formatUtility.stringToArray(atob("AAAAAAAAAAAAAngA"));
 	}
-	let b = formatUtility.stringToArray(atob("/wAAAAADeAA="));
+	let b = formatUtility.stringToArray(atob("AAAAAAN4AA=="));
 	let c = formatUtility.stringToArray(atob("AAAAAAR4AA=="));
 	let d = formatUtility.stringToArray(atob("AAAAAAV4AA=="));
 	let e = formatUtility.stringToArray(atob("AAAAAAZ4AA=="));
@@ -3131,6 +3130,7 @@ function scalarMarketContract(direction, expires, maxprice, server_pubkey, perio
 	let g = formatUtility.stringToArray(atob("AAAAAAF4AA=="));
 	let h = formatUtility.stringToArray(atob("AAAAAAh4AgAAAEE="));
 	let i;
+
 	if (direction == 1) {
 		i = formatUtility.stringToArray(atob("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"));
 	} else if (direction == 2) {
@@ -3223,7 +3223,7 @@ function initCancel() {
 	document.getElementById('cancel-container').classList.remove('hidden');
 
 	let index = parseInt(getParameterByName('index'));
-	let amount = parseInt(getParameterByName('amount'));
+	let amount = parseFloat(getParameterByName('amount'));
 	let price = parseFloat(getParameterByName('price'));
 	let side = getParameterByName('side');
 
@@ -3269,8 +3269,12 @@ function cancelTrade(n, server_pubkey) {
 							let pubPoint = keys.getPublic("hex");
 							let pubKey = btoa(formatUtility.fromHex(pubPoint));
 							let msg = ["cancel_trade", pubKey, n, sspk2];
-							network.send(msg, function (error, x) {
-								return cancelTradeResponse(x, sspk2, server_pubkey, n - 2);
+							network.send(msg, function (error, response) {
+								if (error) {
+									showCancelError("An error occurred, please try again later.");
+								} else {
+									return cancelTradeResponse(response, sspk2, server_pubkey, n - 2);
+								}
 							});
 						})
 					}
