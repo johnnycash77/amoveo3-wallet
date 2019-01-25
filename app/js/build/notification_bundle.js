@@ -2512,6 +2512,7 @@ let ec = new elliptic.ec('secp256k1');
 
 const lightningFee = 20;
 const fee = 152050;
+const channelFee = 76025;
 const tokenDecimals = config.decimalMultiplier;
 
 let messageSent = false;
@@ -2808,7 +2809,7 @@ function makeChannel(amount, delay, length, timeValue) {
 								let acc2 = pubkey;
 
 								userController.getBalance(account, topHeader, function (error, balance) {
-									if ((amount / tokenDecimals) > balance) {
+									if (((amount - channelFee) / tokenDecimals) > balance) {
 										showChannelError("You do not have enough VEO.")
 									} else {
 										network.send(["new_channel_tx", acc1, pubkey, amount, bal2, delay, fee],
@@ -2886,7 +2887,7 @@ function makeChannelCallback2(tx, amount, bal2, acc1, acc2, delay, expiration, p
 function channels3(x, expiration, pubkey, spk, tx_original) {
 	let sstx = x[1];
 
-	if (!sstx || sstx.lenght < 1) {
+	if (!sstx || sstx.length < 1) {
 		showChannelError("An error occurred.");
 		return;
 	}
@@ -3046,7 +3047,7 @@ function makeBet(amount, price, type, oid, callback) {
 
 											if (finalAmount + lightningFee > mybalance) {
 												showBetError("You do not have enough VEO in this channel.")
-											} if (expiration < marketExpiration) {
+											} else if (expiration < marketExpiration) {
 												showBetError("Your channel is expiring before this market closes. This market requires a channel that is open to block " + marketExpiration + ".");
 											} else {
 												try {
@@ -3423,9 +3424,10 @@ function getUserBalance() {
 						} else {
 							let account = accounts[0];
 							userController.getBalance(account, topHeader, function (error, balance) {
+								const max = balance - channelFee;
 								let userBalance = document.getElementById("channel-user-balance");
 								userBalance.classList.remove("invisible");
-								userBalance.innerHTML = "Max: " + balance + " VEO";
+								userBalance.innerHTML = "Max: " + max + " VEO";
 							});
 						}
 					})
