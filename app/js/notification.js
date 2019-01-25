@@ -227,6 +227,7 @@ function initBet() {
 	setTitle("Confirm Bet");
 
 	document.getElementById('make-bet-container').classList.remove('hidden');
+	document.getElementById('bet-tooltip').classList.remove('hidden');
 
 	let amountText = document.getElementById('bet-amount');
 	let oddsText = document.getElementById('bet-price');
