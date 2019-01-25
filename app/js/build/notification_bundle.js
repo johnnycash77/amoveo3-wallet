@@ -2511,7 +2511,7 @@ const elliptic = require('elliptic');
 let ec = new elliptic.ec('secp256k1');
 
 const lightningFee = 20;
-const fee = 76025;
+const fee = 152050;
 const tokenDecimals = config.decimalMultiplier;
 
 let messageSent = false;
@@ -2641,7 +2641,6 @@ function initChannel() {
 	network.send(["time_value"], function(error, timeValue) {
 		initFee(timeValue);
 
-
 		initButtons(function() {
 			let locked = safeFloat(lockedInput.value);
 			let delay = safeFloat(delayInput.value);
@@ -2726,6 +2725,7 @@ function initBet() {
 	setTitle("Confirm Bet");
 
 	document.getElementById('make-bet-container').classList.remove('hidden');
+	document.getElementById('bet-tooltip').classList.remove('hidden');
 
 	let amountText = document.getElementById('bet-amount');
 	let oddsText = document.getElementById('bet-price');
@@ -2799,7 +2799,7 @@ function makeChannel(amount, delay, length, timeValue) {
 								showChannelError("Please open the wallet and create an account.")
 							} else {
 								let account = accounts[0];
-								amount = Math.floor(parseFloat(amount, 10) * tokenDecimals) - fee;
+								amount = Math.floor(parseFloat(amount, 10) * tokenDecimals);
 								delay = parseInt(delay, 10);
 								let expiration = parseInt(length, 10) + topHeader[1];
 								let bal2 = amount - 1;
@@ -2813,7 +2813,11 @@ function makeChannel(amount, delay, length, timeValue) {
 									} else {
 										network.send(["new_channel_tx", acc1, pubkey, amount, bal2, delay, fee],
 											function (error, x) {
-												makeChannelCallback2(x, amount, bal2, acc1, acc2, delay, expiration, pubkey, topHeader, timeValue);
+												if (error) {
+													showChannelError("An error occurred, please try again later.")
+												} else {
+													makeChannelCallback2(x, amount, bal2, acc1, acc2, delay, expiration, pubkey, topHeader, timeValue);
+												}
 											}
 										);
 									}
@@ -2861,7 +2865,11 @@ function makeChannelCallback2(tx, amount, bal2, acc1, acc2, delay, expiration, p
 						try {
 							network.send(["new_channel", stx, sspk, expiration],
 								function(error, x) {
-									return channels3(x, expiration, pubkey, spk, tx)
+									if (error) {
+										showChannelError("An error occurred, please try again later");
+									} else {
+										return channels3(x, expiration, pubkey, spk, tx)
+									}
 								}
 							);
 						} catch(e) {
@@ -3256,7 +3264,7 @@ function cancelTrade(n, server_pubkey) {
 			let ss = oldCD.ssme[n - 2];
 
 			if (JSON.stringify(ss.code) === JSON.stringify([0,0,0,0,4])) {//this is what an unmatched trade looks like.
-				let spk2 = removeBet(n-1, spk);
+				let spk2 = removeBet(n - 1, spk);
 				spk2[8] += 1000000;
 				passwordController.getPassword(function(password) {
 					if (!password) {

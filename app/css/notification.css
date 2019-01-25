@@ -19,6 +19,7 @@ p {
 #new-channel-container {
     text-align: center;
     margin: 0px;
+    margin-top: 32px;
 }
 
 #channel-ip-container {
