@@ -7,7 +7,11 @@ body {
     margin: 4px 32px;
 }
 
-.new-channel-container .form-row label {
+#new-channel-container .form-row label {
+    min-width: 100px;
+}
+
+#make-bet-container .form-row label {
     min-width: 100px;
 }
 

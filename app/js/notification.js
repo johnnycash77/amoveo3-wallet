@@ -465,121 +465,125 @@ function newSs(code, prove, meta) {
 
 function makeBet(amount, price, type, oid, callback) {
 	network.send(["market_data", oid], function (error, marketData) {
-		let finalPrice = Math.floor(100 * parseFloat(price, 10));
-		let finalType;
-		let ttv = type;
-		if ((ttv == "true") ||
-			(ttv == "long") ||
-			(ttv == 1) ||
-			(ttv == "yes") ||
-			(ttv == "si") ||
-			(ttv == "cierto") ||
-			(ttv == "lon") ||
-			(ttv == "真正") ||
-			(ttv == "既不是")) {
-			finalType = 1;
-		} else if ((ttv == "false") ||
-			(ttv == "short") ||
-			(ttv == 0) ||
-			(ttv == 2) ||
-			(ttv == "falso") ||
-			(ttv == "no") ||
-			(ttv == "lon ala") ||
-			(ttv == "也不是") ||
-			(ttv == "假")) {
-			finalType = 2;
-		}
-
-		let finalAmount = Math.floor(parseFloat(amount, 10) * tokenDecimals);
-		let finalOid = oid;
-		let expires = marketData[1];
-		let serverAddress = marketData[2];
-		let period = marketData[3];
-
-		storage.getTopHeader(function(error, topHeader) {
-			if (topHeader !== 0) {
-				passwordController.getPassword(function(password) {
-					if (!password) {
-						showBetError("Your wallet is locked.  Please unlock your wallet and try again.")
-					} else {
-						storage.getAccounts(password, function(error, accounts) {
-							let account = accounts[0];
-
-							let betContract;
-							console.log(JSON.stringify(marketData));
-							if (marketData[4][0] === "binary") {
-								betContract = marketContract(finalType, expires, finalPrice, serverAddress, period, finalAmount, finalOid, topHeader[1]);
-							} else {
-								const lowerLimit = marketData[4][1];
-								const upperLimit = marketData[4][2];
-								const many = marketData[4][3];
-
-								betContract = scalarMarketContract(finalType, expires, finalPrice, serverAddress, period, finalAmount, finalOid, topHeader[1], lowerLimit, upperLimit, many);
-							}
-
-							storage.getChannels(function (error, channels) {
-								let channelFound = false;
-								let channel;
-								for (let i = 0; i < channels.length; i++) {
-									channel = channels[i];
-									if (channel.me[1] === account.publicKey && channel.serverPubKey === serverAddress) {
-										channelFound = true;
-										break;
-									}
-								}
-
-								if (channelFound) {
-									let marketExpiration = betContract[3][3]
-									let spk = marketTrade(channel, finalAmount, finalPrice, betContract, serverAddress, finalOid);
-									let keys = ec.keyFromPrivate(account.privateKey, "hex");
-									let sspk = cryptoUtility.signTx(keys, spk);
-
-									let trie_key = channel.me[6];
-
-									try {
-										merkle.requestProof(topHeader, "channels", trie_key, function(error, val) {
-											let spk = channel.them[1];
-											let expiration = channel.expiration;
-											let height = topHeader[1];
-											let amount = spk[7];
-											let betAmount = sumBets(spk[3]);
-											let mybalance = ((val[4] - amount - betAmount));
-											let serverbalance = ((val[5] + amount) / tokenDecimals);
-
-											if (finalAmount + lightningFee > mybalance) {
-												showBetError("You do not have enough VEO in this channel.")
-											} else if (expiration < marketExpiration) {
-												showBetError("Your channel is expiring before this market closes. This market requires a channel that is open to block " + marketExpiration + ".");
-											} else {
-												try {
-													return network.send(["trade", account.publicKey, finalPrice, finalType, finalAmount, finalOid, sspk, lightningFee],
-														function (error, trade) {
-															if (error) {
-																console.error(error);
-																showBetError("An error occurred.  Please try again later.")
-															} else {
-																make_bet3(trade, sspk, serverAddress, finalOid, callback);
-															}
-														});
-												} catch (e) {
-													console.error(e);
-													showBetError("An error occurred.  Please verify you have a channel open and the \"new channel\" transaction has been added to the blockchain.")
-												}
-											}
-										});
-									} catch(e) {
-										console.error(e);
-										callback(row);
-									}
-								} else {
-									showBetError("No channel found.  You must first open a channel in order to make bets.")
-								}
-							});
-						});
-					}
-				});
+		if (error) {
+			showBetError("An error occurred, please try again later.")
+		} else {
+			let finalPrice = Math.floor(100 * parseFloat(price, 10));
+			let finalType;
+			let ttv = type;
+			if ((ttv == "true") ||
+				(ttv == "long") ||
+				(ttv == 1) ||
+				(ttv == "yes") ||
+				(ttv == "si") ||
+				(ttv == "cierto") ||
+				(ttv == "lon") ||
+				(ttv == "真正") ||
+				(ttv == "既不是")) {
+				finalType = 1;
+			} else if ((ttv == "false") ||
+				(ttv == "short") ||
+				(ttv == 0) ||
+				(ttv == 2) ||
+				(ttv == "falso") ||
+				(ttv == "no") ||
+				(ttv == "lon ala") ||
+				(ttv == "也不是") ||
+				(ttv == "假")) {
+				finalType = 2;
 			}
-		});
+
+			let finalAmount = Math.floor(parseFloat(amount, 10) * tokenDecimals);
+			let finalOid = oid;
+			let expires = marketData[1];
+			let serverAddress = marketData[2];
+			let period = marketData[3];
+
+			storage.getTopHeader(function (error, topHeader) {
+				if (topHeader !== 0) {
+					passwordController.getPassword(function (password) {
+						if (!password) {
+							showBetError("Your wallet is locked.  Please unlock your wallet and try again.")
+						} else {
+							storage.getAccounts(password, function (error, accounts) {
+								let account = accounts[0];
+
+								let betContract;
+								console.log(JSON.stringify(marketData));
+								if (marketData[4][0] === "binary") {
+									betContract = marketContract(finalType, expires, finalPrice, serverAddress, period, finalAmount, finalOid, topHeader[1]);
+								} else {
+									const lowerLimit = marketData[4][1];
+									const upperLimit = marketData[4][2];
+									const many = marketData[4][3];
+
+									betContract = scalarMarketContract(finalType, expires, finalPrice, serverAddress, period, finalAmount, finalOid, topHeader[1], lowerLimit, upperLimit, many);
+								}
+
+								storage.getChannels(function (error, channels) {
+									let channelFound = false;
+									let channel;
+									for (let i = 0; i < channels.length; i++) {
+										channel = channels[i];
+										if (channel.me[1] === account.publicKey && channel.serverPubKey === serverAddress) {
+											channelFound = true;
+											break;
+										}
+									}
+
+									if (channelFound) {
+										let marketExpiration = betContract[3][3]
+										let spk = marketTrade(channel, finalAmount, finalPrice, betContract, serverAddress, finalOid);
+										let keys = ec.keyFromPrivate(account.privateKey, "hex");
+										let sspk = cryptoUtility.signTx(keys, spk);
+
+										let trie_key = channel.me[6];
+
+										try {
+											merkle.requestProof(topHeader, "channels", trie_key, function (error, val) {
+												let spk = channel.them[1];
+												let expiration = channel.expiration;
+												let height = topHeader[1];
+												let amount = spk[7];
+												let betAmount = sumBets(spk[3]);
+												let mybalance = ((val[4] - amount - betAmount));
+												let serverbalance = ((val[5] + amount) / tokenDecimals);
+
+												if (finalAmount + lightningFee > mybalance) {
+													showBetError("You do not have enough VEO in this channel.")
+												} else if (expiration < marketExpiration) {
+													showBetError("Your channel is expiring before this market closes. This market requires a channel that is open to block " + marketExpiration + ".");
+												} else {
+													try {
+														return network.send(["trade", account.publicKey, finalPrice, finalType, finalAmount, finalOid, sspk, lightningFee],
+															function (error, trade) {
+																if (error) {
+																	console.error(error);
+																	showBetError("An error occurred.  Please try again later.")
+																} else {
+																	verifyBetAndSave(trade, sspk, serverAddress, finalOid, callback);
+																}
+															});
+													} catch (e) {
+														console.error(e);
+														showBetError("An error occurred.  Please verify you have a channel open and the \"new channel\" transaction has been added to the blockchain.")
+													}
+												}
+											});
+										} catch (e) {
+											console.error(e);
+											showBetError("An error occurred, please try again later");
+										}
+									} else {
+										showBetError("No channel found.  You must first open a channel in order to make bets.")
+									}
+								});
+							});
+						}
+					});
+				}
+			});
+		}
 	});
 }
 
@@ -696,7 +700,7 @@ function marketTrade(channel, amount, price, bet, oid) { //oid unused
 	return market_spk;
 }
 
-function make_bet3(sspk2, sspk, server_pubkey, oid_final, callback) {
+function verifyBetAndSave(sspk2, sspk, server_pubkey, oid_final, callback) {
 	if (!verifyBoth(sspk2)) {
 		throw("make bet3, badly signed sspk2");
 	}
@@ -925,10 +929,10 @@ function getUserBalance() {
 						} else {
 							let account = accounts[0];
 							userController.getBalance(account, topHeader, function (error, balance) {
-								const max = balance - channelFee;
+								const max = balance - (channelFee / tokenDecimals);
 								let userBalance = document.getElementById("channel-user-balance");
 								userBalance.classList.remove("invisible");
-								userBalance.innerHTML = "Max: " + max + " VEO";
+								userBalance.innerHTML = "Max: " + max.toFixed(4) + " VEO";
 							});
 						}
 					})
