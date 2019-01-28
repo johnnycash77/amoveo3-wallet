@@ -335,6 +335,7 @@ class BlocksController {
                 if (powIsValid) {
                     this.writeHeader(header, ewah);
                 } else {
+	                this.syncing = false;
                     console.log("bad header" + JSON.stringify(headers[i]));
                 }
             }
