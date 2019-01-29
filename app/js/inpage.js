@@ -3,6 +3,7 @@ global = window;
 
 cleanContextForImports()
 
+const extension = require('extensionizer')
 const Amoveo3 = require('./lib/amoveo3/amoveo3.js')
 const log = require('loglevel')
 const LocalMessageDuplexStream = require('post-message-stream')

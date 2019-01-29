@@ -10,9 +10,9 @@ class NotificationManager {
 				throw err
 			}
 
-			// Bring focus to chrome popup
+			// Bring focus to popup
 			if (popup) {
-				// bring focus to existing chrome popup
+				// bring focus to existing popup
 				this.closePopup();
 			}
 

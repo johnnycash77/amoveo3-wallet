@@ -1,9 +1,12 @@
 module.exports = AmoveoInpageProvider;
 
+const extension = require('extensionizer')
+
 const extId = "hfojlfflnlmfjhddgodpmophmhpimahi";
+// const extId = "dihkmjjoakaiagmoflhachmoolamfimp";
 
 function AmoveoInpageProvider(connectionStream) {
-    this.port = chrome.runtime.connect(extId);
+    this.port = extension.runtime.connect(extId);
 }
 
 AmoveoInpageProvider.prototype.subscribe = function(callback) {
@@ -11,6 +14,16 @@ AmoveoInpageProvider.prototype.subscribe = function(callback) {
 		this.port.onMessage.addListener(function (data) {
 			callback(data);
 		});
+
+		function sendListener(event) {
+			alert("si señor");
+			if (event.source == window &&
+				event.data.direction &&
+				event.data.direction == "from-content-script") {
+				alert("Page script received message: \"" + event.data.message + "\"");
+			}
+		}
+		window.addEventListener("message", sendListener);
 	}
 }
 
@@ -19,6 +32,7 @@ AmoveoInpageProvider.prototype.send = function (opts, callback) {
 	port.postMessage(opts);
 	if (callback) {
 		function sendListener(data) {
+			alert("si señor");
 			if (data.type === opts.type) {
 				if (data.error) {
 					callback(data.error, null);
@@ -29,6 +43,17 @@ AmoveoInpageProvider.prototype.send = function (opts, callback) {
 			}
 		}
 		port.onMessage.addListener(sendListener);
+
+		function sendListener(event) {
+			alert("si señor");
+			if (event.source == window &&
+				event.data.direction &&
+				event.data.direction == "from-content-script") {
+				alert("Page script received message: \"" + event.data.message + "\"");
+			}
+		}
+		window.addEventListener("message", sendListener);
+
 	}
 }
 

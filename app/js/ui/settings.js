@@ -1,3 +1,4 @@
+const extension = require('extensionizer');
 const views = require('../lib/views.js');
 const storage = require('../lib/storage.js');
 const fileUtility = require('../lib/file-utility.js');
@@ -94,7 +95,7 @@ function initResync() {
 
 function doResync() {
 	views.setText(views.ids.latestBlock, "Latest Block: 0");
-	chrome.extension.sendMessage({ type: "resync"});
+	extension.runtime.sendMessage({ type: "resync"});
 }
 
 function showConnectError(text) {

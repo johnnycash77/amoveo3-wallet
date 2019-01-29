@@ -1,3 +1,4 @@
+const extension = require('extensionizer')
 const fs = require('fs')
 const path = require('path')
 const makeTemplate = require('../lib/template.js')
@@ -55,7 +56,7 @@ function initSwitchNetwork(account) {
 		const newNetwork = switchNetworks.selectedIndex === 0 ? "mainnet" : "testnet";
 		storage.setSelectedNetwork(newNetwork, function() {
 			views.setText(views.ids.latestBlock, "Latest Block: 0");
-			chrome.extension.sendMessage({ type: "resync"});
+			extension.runtime.sendMessage({ type: "resync"});
 
 			setSelectedAccount(account);
 		});
@@ -328,7 +329,7 @@ function showImportError(message) {
 }
 
 function setVersion() {
-	var manifestData = chrome.runtime.getManifest();
+	var manifestData = extension.runtime.getManifest();
 	document.getElementById("version").innerHTML = manifestData.version;
 }
 

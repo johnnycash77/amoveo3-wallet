@@ -1,3 +1,4 @@
+const extension = require('extensionizer')
 let NotificationManager = require('./lib/notification-manager.js');
 let notificationManager = new NotificationManager();
 const cryptoUtility = require('./lib/crypto-utility');
@@ -31,7 +32,7 @@ if (notificationType === "channel") {
 
 window.onunload = function(e) {
 	if (!messageSent) {
-		chrome.extension.sendMessage({type: notificationType, error: "Rejected by user"});
+		extension.runtime.sendMessage({type: notificationType, error: "Rejected by user"});
 	}
 }
 
@@ -168,11 +169,11 @@ function safeFloat(f) {
 }
 
 function reloadWeb() {
-	chrome.tabs.query({}, function (tabs) {
+	extension.tabs.query({}, function (tabs) {
 		for (let i = 0; i < tabs.length; i++) {
 			let tab = tabs[i];
 			if (tab.url.indexOf("localhost:8000") !== -1 || tab.url.indexOf("amoveobook") !== -1) {
-				chrome.tabs.reload(tab.id);
+				extension.tabs.reload(tab.id);
 			}
 		}
 	});
@@ -945,7 +946,7 @@ function getUserBalance() {
 }
 
 function sendMessageAndClose(message) {
-	chrome.extension.sendMessage(message);
+	extension.runtime.sendMessage(message);
 	messageSent = true;
 	notificationManager.closePopup();
 }

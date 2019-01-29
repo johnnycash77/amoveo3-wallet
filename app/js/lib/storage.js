@@ -1,11 +1,12 @@
+const extension = require('extensionizer')
 const cryptoUtility = require('./crypto-utility.js')
 
 function setStorage(values, callback) {
-    chrome.storage.local.set(values, callback);
+    extension.storage.local.set(values, callback);
 }
 
 function getStorage(key, callback) {
-    chrome.storage.local.get(key, callback);
+    extension.storage.local.get(key, callback);
 }
 
 function getChannels(callback) {

@@ -44,7 +44,7 @@
 
 #toolbar-container i {
     font-size: 1.5em;
-    margin-top: 6px;
+    margin-top: 4px;
 }
 
 #back-button {
@@ -267,8 +267,9 @@
 
 #network-switch {
     padding: 4px;
-    height: 30px;
-    margin-left: 36px;
+    margin-left: 20px;
+    height: 28px;
+    margin-top: 2px
 }
 
 .channel-cell {
@@ -295,6 +296,7 @@
 .address {
     overflow: hidden;
     text-overflow: ellipsis;
+    height: 28px;
 }
 
 .section-heading {
