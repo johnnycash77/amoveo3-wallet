@@ -72,39 +72,41 @@ function handleErrors(response) {
 
 exports.send = send;
 },{"../config":1,"../lib/storage.js":10}],3:[function(require,module,exports){
+const extension = require('extensionizer')
+
 function getPassword(callback) {
-    chrome.extension.onMessage.addListener(
+	extension.runtime.onMessage.addListener(
         function listener(request, sender, sendResponse) {
             if (request.type === "getPassword") {
-                chrome.runtime.onMessage.removeListener(listener);
+	            extension.runtime.onMessage.removeListener(listener);
                 callback(request.data);
             }
         }
     );
-    chrome.extension.sendMessage({ type: "getPassword" });
+	extension.runtime.sendMessage({ type: "getPassword" });
 }
 
 function unlock(password, callback) {
-    chrome.extension.sendMessage({ type: "password", data: password });
+	extension.runtime.sendMessage({ type: "password", data: password });
     callback();
 }
 
 function setState(state, callback) {
-    chrome.extension.onMessage.addListener(
+	extension.runtime.onMessage.addListener(
         function listener(request, sender, sendResponse) {
             if (request.type === "setState") {
-                chrome.runtime.onMessage.removeListener(listener);
+	            extension.runtime.onMessage.removeListener(listener);
                 callback(request.data);
             }
         }
     );
-    chrome.extension.sendMessage({ type: "setState", data: state });
+	extension.runtime.sendMessage({ type: "setState", data: state });
 }
 
 exports.unlock = unlock;
 exports.getPassword = getPassword;
 exports.setState = setState;
-},{}],4:[function(require,module,exports){
+},{"extensionizer":31}],4:[function(require,module,exports){
 var merkle = require('../lib/merkle-proofs.js');
 
 function getBalance(account, header, callback) {
@@ -2241,9 +2243,9 @@ class NotificationManager {
 				throw err
 			}
 
-			// Bring focus to chrome popup
+			// Bring focus to popup
 			if (popup) {
-				// bring focus to existing chrome popup
+				// bring focus to existing popup
 				this.closePopup();
 			}
 
@@ -2311,14 +2313,15 @@ class NotificationManager {
 
 module.exports = NotificationManager
 },{"extensionizer":31}],10:[function(require,module,exports){
+const extension = require('extensionizer')
 const cryptoUtility = require('./crypto-utility.js')
 
 function setStorage(values, callback) {
-    chrome.storage.local.set(values, callback);
+    extension.storage.local.set(values, callback);
 }
 
 function getStorage(key, callback) {
-    chrome.storage.local.get(key, callback);
+    extension.storage.local.get(key, callback);
 }
 
 function getChannels(callback) {
@@ -2496,7 +2499,8 @@ exports.setConnectionInfo = setConnectionInfo;
 exports.hasPasswordBeenSet = hasPasswordBeenSet;
 exports.setPasswordBeenSet = setPasswordBeenSet;
 
-},{"./crypto-utility.js":6}],11:[function(require,module,exports){
+},{"./crypto-utility.js":6,"extensionizer":31}],11:[function(require,module,exports){
+const extension = require('extensionizer')
 let NotificationManager = require('./lib/notification-manager.js');
 let notificationManager = new NotificationManager();
 const cryptoUtility = require('./lib/crypto-utility');
@@ -2530,7 +2534,7 @@ if (notificationType === "channel") {
 
 window.onunload = function(e) {
 	if (!messageSent) {
-		chrome.extension.sendMessage({type: notificationType, error: "Rejected by user"});
+		extension.runtime.sendMessage({type: notificationType, error: "Rejected by user"});
 	}
 }
 
@@ -2667,11 +2671,11 @@ function safeFloat(f) {
 }
 
 function reloadWeb() {
-	chrome.tabs.query({}, function (tabs) {
+	extension.tabs.query({}, function (tabs) {
 		for (let i = 0; i < tabs.length; i++) {
 			let tab = tabs[i];
 			if (tab.url.indexOf("localhost:8000") !== -1 || tab.url.indexOf("amoveobook") !== -1) {
-				chrome.tabs.reload(tab.id);
+				extension.tabs.reload(tab.id);
 			}
 		}
 	});
@@ -3444,12 +3448,12 @@ function getUserBalance() {
 }
 
 function sendMessageAndClose(message) {
-	chrome.extension.sendMessage(message);
+	extension.runtime.sendMessage(message);
 	messageSent = true;
 	notificationManager.closePopup();
 }
 
-},{"./config":1,"./controller/network-controller":2,"./controller/password-controller":3,"./controller/user-controller":4,"./lib/crypto-utility":6,"./lib/format-utility":7,"./lib/merkle-proofs":8,"./lib/notification-manager.js":9,"./lib/storage":10,"elliptic":14}],12:[function(require,module,exports){
+},{"./config":1,"./controller/network-controller":2,"./controller/password-controller":3,"./controller/user-controller":4,"./lib/crypto-utility":6,"./lib/format-utility":7,"./lib/merkle-proofs":8,"./lib/notification-manager.js":9,"./lib/storage":10,"elliptic":14,"extensionizer":31}],12:[function(require,module,exports){
 (function (module, exports) {
   'use strict';
 

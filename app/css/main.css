@@ -297,6 +297,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     height: 28px;
+    white-space: nowrap;
 }
 
 .section-heading {

@@ -236,28 +236,28 @@ module.exports = AmoveoInpageProvider;
 
 const extension = require('extensionizer')
 
+const isFirefox = typeof InstallTrigger !== 'undefined';
+
+// const extId = "3f01d4ba001fe1cbda4d720c5f7e9a612d5963d0";
+
 const extId = "hfojlfflnlmfjhddgodpmophmhpimahi";
 // const extId = "dihkmjjoakaiagmoflhachmoolamfimp";
 
 function AmoveoInpageProvider(connectionStream) {
+	// this.port = browser.runtime.connect(extId);
     this.port = extension.runtime.connect(extId);
+    // this.port = browser.runtime.connect(extId);
 }
 
 AmoveoInpageProvider.prototype.subscribe = function(callback) {
 	if (callback) {
+		window.addEventListener("message", (event) => {
+			alert(JSON.stringify(event));
+		});
+
 		this.port.onMessage.addListener(function (data) {
 			callback(data);
 		});
-
-		function sendListener(event) {
-			alert("si señor");
-			if (event.source == window &&
-				event.data.direction &&
-				event.data.direction == "from-content-script") {
-				alert("Page script received message: \"" + event.data.message + "\"");
-			}
-		}
-		window.addEventListener("message", sendListener);
 	}
 }
 
@@ -266,7 +266,6 @@ AmoveoInpageProvider.prototype.send = function (opts, callback) {
 	port.postMessage(opts);
 	if (callback) {
 		function sendListener(data) {
-			alert("si señor");
 			if (data.type === opts.type) {
 				if (data.error) {
 					callback(data.error, null);
@@ -278,16 +277,7 @@ AmoveoInpageProvider.prototype.send = function (opts, callback) {
 		}
 		port.onMessage.addListener(sendListener);
 
-		function sendListener(event) {
-			alert("si señor");
-			if (event.source == window &&
-				event.data.direction &&
-				event.data.direction == "from-content-script") {
-				alert("Page script received message: \"" + event.data.message + "\"");
-			}
-		}
 		window.addEventListener("message", sendListener);
-
 	}
 }
 
@@ -306,6 +296,8 @@ AmoveoInpageProvider.prototype.sign = function (opts, callback) {
 			}
 		}
 		port.onMessage.addListener(signListener);
+
+		window.addEventListener("message", sendListener);
 	}
 }
 

@@ -72,39 +72,41 @@ function handleErrors(response) {
 
 exports.send = send;
 },{"../config":1,"../lib/storage.js":10}],3:[function(require,module,exports){
+const extension = require('extensionizer')
+
 function getPassword(callback) {
-    chrome.extension.onMessage.addListener(
+	extension.runtime.onMessage.addListener(
         function listener(request, sender, sendResponse) {
             if (request.type === "getPassword") {
-                chrome.runtime.onMessage.removeListener(listener);
+	            extension.runtime.onMessage.removeListener(listener);
                 callback(request.data);
             }
         }
     );
-    chrome.extension.sendMessage({ type: "getPassword" });
+	extension.runtime.sendMessage({ type: "getPassword" });
 }
 
 function unlock(password, callback) {
-    chrome.extension.sendMessage({ type: "password", data: password });
+	extension.runtime.sendMessage({ type: "password", data: password });
     callback();
 }
 
 function setState(state, callback) {
-    chrome.extension.onMessage.addListener(
+	extension.runtime.onMessage.addListener(
         function listener(request, sender, sendResponse) {
             if (request.type === "setState") {
-                chrome.runtime.onMessage.removeListener(listener);
+	            extension.runtime.onMessage.removeListener(listener);
                 callback(request.data);
             }
         }
     );
-    chrome.extension.sendMessage({ type: "setState", data: state });
+	extension.runtime.sendMessage({ type: "setState", data: state });
 }
 
 exports.unlock = unlock;
 exports.getPassword = getPassword;
 exports.setState = setState;
-},{}],4:[function(require,module,exports){
+},{"extensionizer":43}],4:[function(require,module,exports){
 var merkle = require('../lib/merkle-proofs.js');
 
 function getBalance(account, header, callback) {
@@ -2250,14 +2252,15 @@ exports.serialize = serialize;
 exports.serializeKey = serializeKey;
 
 },{"../controller/network-controller.js":2,"./crypto-utility.js":6,"./format-utility.js":8}],10:[function(require,module,exports){
+const extension = require('extensionizer')
 const cryptoUtility = require('./crypto-utility.js')
 
 function setStorage(values, callback) {
-    chrome.storage.local.set(values, callback);
+    extension.storage.local.set(values, callback);
 }
 
 function getStorage(key, callback) {
-    chrome.storage.local.get(key, callback);
+    extension.storage.local.get(key, callback);
 }
 
 function getChannels(callback) {
@@ -2435,7 +2438,7 @@ exports.setConnectionInfo = setConnectionInfo;
 exports.hasPasswordBeenSet = hasPasswordBeenSet;
 exports.setPasswordBeenSet = setPasswordBeenSet;
 
-},{"./crypto-utility.js":6}],11:[function(require,module,exports){
+},{"./crypto-utility.js":6,"extensionizer":43}],11:[function(require,module,exports){
 module.exports = makeTemplate
 
 function makeTemplate(template, id, data) {
@@ -3094,13 +3097,13 @@ const extension = require('extensionizer');
 
 function initMarketsTab() {
     document.getElementById('view-markets-link').onclick = function(e) {
-        chrome.tabs.query({}, function (tabs) {
+        extension.tabs.query({}, function (tabs) {
             var tabExists = false;
             for (var i = 0; i < tabs.length; i++) {
                 var tab = tabs[i];
                 if (tab.url.indexOf("amoveobook") !== -1) {
                     tabExists = true;
-                    chrome.tabs.update(tab.id, { highlighted: true });
+                    extension.tabs.update(tab.id, { highlighted: true });
                     break;
                 }
             }
@@ -3114,6 +3117,7 @@ function initMarketsTab() {
 
 module.exports = initMarketsTab;
 },{"extensionizer":43}],18:[function(require,module,exports){
+const extension = require('extensionizer')
 
 const path = require('path')
 const makeTemplate = require('../lib/template.js')
@@ -3171,7 +3175,7 @@ function initSwitchNetwork(account) {
 		const newNetwork = switchNetworks.selectedIndex === 0 ? "mainnet" : "testnet";
 		storage.setSelectedNetwork(newNetwork, function() {
 			views.setText(views.ids.latestBlock, "Latest Block: 0");
-			chrome.extension.sendMessage({ type: "resync"});
+			extension.runtime.sendMessage({ type: "resync"});
 
 			setSelectedAccount(account);
 		});
@@ -3444,7 +3448,7 @@ function showImportError(message) {
 }
 
 function setVersion() {
-	var manifestData = chrome.runtime.getManifest();
+	var manifestData = extension.runtime.getManifest();
 	document.getElementById("version").innerHTML = manifestData.version;
 }
 
@@ -3453,7 +3457,7 @@ init();
 exports.init = init;
 exports.createNewAccount = createNewAccount;
 exports.setSelectedAccount = setSelectedAccount;
-},{"../controller/password-controller.js":3,"../controller/user-controller.js":4,"../lib/format-utility.js":8,"../lib/storage.js":10,"../lib/template.js":11,"../lib/views.js":12,"./account.js":13,"./channels.js":15,"./locked.js":16,"./markets.js":17,"./send.js":19,"./set-password.js":20,"./transactions.js":22,"./welcome.js":23,"elliptic":26,"path":171}],19:[function(require,module,exports){
+},{"../controller/password-controller.js":3,"../controller/user-controller.js":4,"../lib/format-utility.js":8,"../lib/storage.js":10,"../lib/template.js":11,"../lib/views.js":12,"./account.js":13,"./channels.js":15,"./locked.js":16,"./markets.js":17,"./send.js":19,"./set-password.js":20,"./transactions.js":22,"./welcome.js":23,"elliptic":26,"extensionizer":43,"path":171}],19:[function(require,module,exports){
 const views = require('../lib/views.js');
 const network = require('../controller/network-controller.js');
 const storage = require('../lib/storage.js');
@@ -3692,6 +3696,7 @@ function onButtonClick() {
 
 exports.init = init;
 },{"../controller/password-controller.js":3,"../lib/storage.js":10,"../lib/views.js":12,"../ui/popup.js":18,"../ui/welcome.js":23}],21:[function(require,module,exports){
+const extension = require('extensionizer');
 const views = require('../lib/views.js');
 const storage = require('../lib/storage.js');
 const fileUtility = require('../lib/file-utility.js');
@@ -3788,7 +3793,7 @@ function initResync() {
 
 function doResync() {
 	views.setText(views.ids.latestBlock, "Latest Block: 0");
-	chrome.extension.sendMessage({ type: "resync"});
+	extension.runtime.sendMessage({ type: "resync"});
 }
 
 function showConnectError(text) {
@@ -3797,7 +3802,7 @@ function showConnectError(text) {
 }
 
 exports.init = initSettingsContainer;
-},{"../controller/network-controller.js":2,"../lib/file-utility.js":7,"../lib/storage.js":10,"../lib/views.js":12}],22:[function(require,module,exports){
+},{"../controller/network-controller.js":2,"../lib/file-utility.js":7,"../lib/storage.js":10,"../lib/views.js":12,"extensionizer":43}],22:[function(require,module,exports){
 const extension = require('extensionizer');
 var network = require('../controller/network-controller.js');
 var storage = require('../lib/storage.js');

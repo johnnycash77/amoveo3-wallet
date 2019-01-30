@@ -96,3 +96,29 @@ function whitelistedDomainCheck() {
     }
     return false
 }
+
+
+window.addEventListener("message", (event) => {
+	console.log("yesssir");
+	console.log(event);
+
+	// alert("Content script received asdfdasf message:");
+
+	// alert("Content script received message: \"" + event.data.message + "\"");
+	// if (event.source == window &&
+	// 	event.data &&
+	// 	event.data.direction == "from-page-script") {
+	// 	alert("Content script received message: \"" + event.data.message + "\"");
+	// }
+});
+
+
+var myPort = browser.runtime.connect({name:"port-from-cs"});
+// myPort.postMessage({greeting: "hello from content script"});
+
+myPort.onMessage.addListener(function(request) {
+	console.log("In content script, received message from background script: ");
+	console.log(request);
+
+	window.postMessage(request, "*");
+});

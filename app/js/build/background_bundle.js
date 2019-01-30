@@ -1,4 +1,5 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+const extension = require('extensionizer')
 const BlocksController = require('./controller/blocks-controller')
 const storage = require('./lib/storage')
 const NotificationManager = require('./lib/notification-manager')
@@ -34,25 +35,27 @@ function resetPasswordTimer() {
     }, 30 * 60 * 1000);
 }
 
-chrome.extension.onMessage.addListener(
+extension.runtime.onMessage.addListener(
     function onSync(request, sender, sendResponse) {
+	    console.log("message");
+
         if (request.type === "sync") {
             sync(function() {
-                chrome.extension.sendMessage({ type: "stopSync" });
-                // chrome.extension.onMessage.removeListener(onSync);
+	            extension.runtime.sendMessage({ type: "stopSync" });
+                // extension.runtime.onMessage.removeListener(onSync);
             });
         } if (request.type === "resync") {
             blocksController.clearCache(function() {
 	            sync(function() {
-		            chrome.extension.sendMessage({ type: "stopSync" });
-		            // chrome.extension.onMessage.removeListener(onSync);
+		            extension.runtime.sendMessage({ type: "stopSync" });
+		            // extension.runtime.onMessage.removeListener(onSync);
 	            });
             });
         } else if (request.type === "password") {
             password = request.data;
             resetPasswordTimer();
         } else if (request.type === "getPassword") {
-            chrome.extension.sendMessage({ type: "getPassword", data: password });
+		    extension.runtime.sendMessage({ type: "getPassword", data: password });
             resetPasswordTimer();
         } else if (request.type === "setState" || request.type === "sign" || request.type === "channel") {
             sendMessageToPage(request)
@@ -65,15 +68,38 @@ chrome.extension.onMessage.addListener(
     }
 );
 
+var portFromCS;
+
+function connected(port) {
+	console.log("CONNECTTED " + port);
+	portFromCS = port;
+	portFromCS.postMessage({greeting: "hi there content script!"});
+	portFromCS.onMessage.addListener(function(request) {
+		console.log("In background script, received message from content script")
+		console.log(request);
+	});
+}
+
+browser.runtime.onConnect.addListener(connected);
+
+browser.browserAction.onClicked.addListener(function() {
+	portFromCS.postMessage({greeting: "they clicked the button!"});
+});
+
+
 function sendMessageToPage(data) {
     if (openPort) {
         openPort.postMessage(data);
     } else {
         console.error("Port not connected");
+
+	    portFromCS.postMessage(data);
     }
 }
 
-chrome.runtime.onConnectExternal.addListener(function(port) {
+extension.runtime.onConnectExternal.addListener(function(port) {
+	console.log("CONNECTTED EXTERNAL");
+
     openPort = port;
 
     openPort.onMessage.addListener(function(data) {
@@ -128,17 +154,17 @@ function sendCurrentState() {
 }
 
 function reloadWeb() {
-    chrome.tabs.query({}, function (tabs) {
+    extension.tabs.query({}, function (tabs) {
         for (var i = 0; i < tabs.length; i++) {
             var tab = tabs[i];
             if (tab.url.indexOf("localhost") !== -1 || tab.url.indexOf("amoveobook") !== -1) {
-                chrome.tabs.reload(tab.id);
+                extension.tabs.reload(tab.id);
             }
         }
     });
 };
 
-},{"./controller/blocks-controller":3,"./lib/notification-manager":8,"./lib/storage":9}],2:[function(require,module,exports){
+},{"./controller/blocks-controller":3,"./lib/notification-manager":8,"./lib/storage":9,"extensionizer":11}],2:[function(require,module,exports){
 const mainnet = {
     isTestnet: false,
     defaultFee: 0.00151168,
@@ -2503,9 +2529,9 @@ class NotificationManager {
 				throw err
 			}
 
-			// Bring focus to chrome popup
+			// Bring focus to popup
 			if (popup) {
-				// bring focus to existing chrome popup
+				// bring focus to existing popup
 				this.closePopup();
 			}
 
@@ -2573,14 +2599,15 @@ class NotificationManager {
 
 module.exports = NotificationManager
 },{"extensionizer":11}],9:[function(require,module,exports){
+const extension = require('extensionizer')
 const cryptoUtility = require('./crypto-utility.js')
 
 function setStorage(values, callback) {
-    chrome.storage.local.set(values, callback);
+    extension.storage.local.set(values, callback);
 }
 
 function getStorage(key, callback) {
-    chrome.storage.local.get(key, callback);
+    extension.storage.local.get(key, callback);
 }
 
 function getChannels(callback) {
@@ -2758,7 +2785,7 @@ exports.setConnectionInfo = setConnectionInfo;
 exports.hasPasswordBeenSet = hasPasswordBeenSet;
 exports.setPasswordBeenSet = setPasswordBeenSet;
 
-},{"./crypto-utility.js":6}],10:[function(require,module,exports){
+},{"./crypto-utility.js":6,"extensionizer":11}],10:[function(require,module,exports){
 const apis = [
   'alarms',
   'bookmarks',
