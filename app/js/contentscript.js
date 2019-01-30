@@ -3,7 +3,7 @@ const path = require('path')
 const extension = require('extensionizer')
 
 const inpageContent = fs.readFileSync(path.join(__dirname, 'build', 'inpage_bundle.js')).toString()
-const inpageSuffix = '//# sourceURL=' + extension.extension.getURL('inpage_bundle.js?v=1.6.2') + '\n'
+const inpageSuffix = '//# sourceURL=' + extension.extension.getURL('inpage_bundle.js?v=1.2.0') + '\n'
 const inpageBundle = inpageContent + inpageSuffix
 
 if (shouldInjectAmoveo3()) {
@@ -101,19 +101,9 @@ function whitelistedDomainCheck() {
 window.addEventListener("message", (event) => {
 	console.log("yesssir");
 	console.log(event);
-
-	// alert("Content script received asdfdasf message:");
-
-	// alert("Content script received message: \"" + event.data.message + "\"");
-	// if (event.source == window &&
-	// 	event.data &&
-	// 	event.data.direction == "from-page-script") {
-	// 	alert("Content script received message: \"" + event.data.message + "\"");
-	// }
 });
 
-
-var myPort = browser.runtime.connect({name:"port-from-cs"});
+var myPort = extension.runtime.connect({name:"port-from-cs"});
 // myPort.postMessage({greeting: "hello from content script"});
 
 myPort.onMessage.addListener(function(request) {
