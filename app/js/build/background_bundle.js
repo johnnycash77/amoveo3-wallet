@@ -34,38 +34,39 @@ function resetPasswordTimer() {
         password = "";
     }, 30 * 60 * 1000);
 }
+function onMessageListener(request, sender, sendResponse) {
+	console.log(JSON.stringify(request));
+
+	if (request.type === "sync") {
+		sync(function() {
+			extension.runtime.sendMessage({ type: "stopSync" });
+			// extension.runtime.onMessage.removeListener(onSync);
+		});
+	} if (request.type === "resync") {
+		blocksController.clearCache(function() {
+			sync(function() {
+				extension.runtime.sendMessage({ type: "stopSync" });
+				// extension.runtime.onMessage.removeListener(onSync);
+			});
+		});
+	} else if (request.type === "password") {
+		password = request.data;
+		resetPasswordTimer();
+	} else if (request.type === "getPassword") {
+		extension.runtime.sendMessage({ type: "getPassword", data: password });
+		resetPasswordTimer();
+	} else if (request.type === "setState" || request.type === "sign" || request.type === "channel") {
+		sendMessageToPage(request)
+	} else if (request.type === "market" || request.type === "cancel") {
+		sendMessageToPage(request);
+		sendCurrentState();
+	} else if (request.type === "reload") {
+		sendMessageToPage(request)
+	}
+}
 
 extension.runtime.onMessage.addListener(
-    function onSync(request, sender, sendResponse) {
-	    console.log("message");
-
-        if (request.type === "sync") {
-            sync(function() {
-	            extension.runtime.sendMessage({ type: "stopSync" });
-                // extension.runtime.onMessage.removeListener(onSync);
-            });
-        } if (request.type === "resync") {
-            blocksController.clearCache(function() {
-	            sync(function() {
-		            extension.runtime.sendMessage({ type: "stopSync" });
-		            // extension.runtime.onMessage.removeListener(onSync);
-	            });
-            });
-        } else if (request.type === "password") {
-            password = request.data;
-            resetPasswordTimer();
-        } else if (request.type === "getPassword") {
-		    extension.runtime.sendMessage({ type: "getPassword", data: password });
-            resetPasswordTimer();
-        } else if (request.type === "setState" || request.type === "sign" || request.type === "channel") {
-            sendMessageToPage(request)
-        } else if (request.type === "market" || request.type === "cancel") {
-		    sendMessageToPage(request);
-		    sendCurrentState();
-	    } else if (request.type === "reload") {
-		    sendMessageToPage(request)
-        }
-    }
+	onMessageListener
 );
 
 var portFromCS;
@@ -77,14 +78,18 @@ function connected(port) {
 	portFromCS.onMessage.addListener(function(request) {
 		console.log("In background script, received message from content script")
 		console.log(request);
+
+		if (request.direction && request.direction === "from-inpage-provider") {
+			notificationManager.showPopup(request.message);
+		} else {
+			onMessageListener(request);
+		}
 	});
+
+	sendCurrentState();
 }
 
 browser.runtime.onConnect.addListener(connected);
-
-browser.browserAction.onClicked.addListener(function() {
-	portFromCS.postMessage({greeting: "they clicked the button!"});
-});
 
 
 function sendMessageToPage(data) {
@@ -143,7 +148,7 @@ function sendCurrentState() {
 						data: {
 							selectedAddress: "",
 							channels: [],
-							isLocked: false,
+							isLocked: true,
 							network: network,
 						}
 					})

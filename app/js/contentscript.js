@@ -99,16 +99,28 @@ function whitelistedDomainCheck() {
 
 
 window.addEventListener("message", (event) => {
-	console.log("yesssir");
+	console.log("in content page, listener received event");
 	console.log(event);
+
+	if (event.data.direction && event.data.direction === "from-inpage-provider") {
+		myPort.postMessage(event.data);
+	}
 });
 
-var myPort = extension.runtime.connect({name:"port-from-cs"});
-// myPort.postMessage({greeting: "hello from content script"});
+let myPort = extension.runtime.connect({name:"port-from-cs"});
+myPort.postMessage({greeting: "hello from content script"});
 
 myPort.onMessage.addListener(function(request) {
 	console.log("In content script, received message from background script: ");
 	console.log(request);
 
-	window.postMessage(request, "*");
+	const whitelistedDomains = [
+		'http://localhost:5000',
+		'https://amoveobook.com',
+	];
+
+	for (let i = 0; i < whitelistedDomains.length; i++) {
+	    const target = whitelistedDomains[i];
+		window.postMessage(request, target);
+    }
 });

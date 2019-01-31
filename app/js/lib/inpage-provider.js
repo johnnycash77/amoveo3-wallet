@@ -29,6 +29,11 @@ AmoveoInpageProvider.prototype.send = function (opts, callback) {
 	const port = this.port;
 	if (port) {
 		port.postMessage(opts);
+	} else {
+		window.postMessage({
+			direction: "from-inpage-provider",
+			message: opts
+		}, "*");
 	}
 
 	if (callback) {
@@ -59,6 +64,11 @@ AmoveoInpageProvider.prototype.sign = function (opts, callback) {
 	const port = this.port;
 	if (port) {
 		port.postMessage(opts);
+	} else {
+		window.postMessage({
+			direction: "from-inpage-provider",
+			message: opts
+		}, "*");
 	}
 
 	if (callback) {
