@@ -89,8 +89,7 @@ function connected(port) {
 	sendCurrentState();
 }
 
-browser.runtime.onConnect.addListener(connected);
-
+extension.runtime.onConnect.addListener(connected);
 
 function sendMessageToPage(data) {
     if (openPort) {

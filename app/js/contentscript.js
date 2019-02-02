@@ -3,7 +3,7 @@ const path = require('path')
 const extension = require('extensionizer')
 
 const inpageContent = fs.readFileSync(path.join(__dirname, 'build', 'inpage_bundle.js')).toString()
-const inpageSuffix = '//# sourceURL=' + extension.extension.getURL('inpage_bundle.js?v=1.2.0') + '\n'
+const inpageSuffix = '//# sourceURL=' + extension.extension.getURL('inpage_bundle.js?v=1.2.2') + '\n'
 const inpageBundle = inpageContent + inpageSuffix
 
 if (shouldInjectAmoveo3()) {
@@ -97,30 +97,34 @@ function whitelistedDomainCheck() {
     return false
 }
 
+const isFirefox = typeof InstallTrigger !== 'undefined';
 
-window.addEventListener("message", (event) => {
-	console.log("in content page, listener received event");
-	console.log(event);
+if (isFirefox) {
+	let myPort = extension.runtime.connect({name: "port-from-cs"});
+	myPort.postMessage({greeting: "hello from content script"});
 
-	if (event.data.direction && event.data.direction === "from-inpage-provider") {
-		myPort.postMessage(event.data);
-	}
-});
+	window.addEventListener("message", (event) => {
+		console.log("in content page, listener received event");
+		console.log(event);
 
-let myPort = extension.runtime.connect({name:"port-from-cs"});
-myPort.postMessage({greeting: "hello from content script"});
+		if (event.data.direction && event.data.direction === "from-inpage-provider") {
+			myPort.postMessage(event.data);
+		}
+	});
 
-myPort.onMessage.addListener(function(request) {
-	console.log("In content script, received message from background script: ");
-	console.log(request);
+	myPort.onMessage.addListener(function (request) {
+		console.log("In content script, received message from background script: ");
+		console.log(request);
 
-	const whitelistedDomains = [
-		'http://localhost:5000',
-		'https://amoveobook.com',
-	];
+		const whitelistedDomains = [
+			'http://localhost:5000',
+			'http://amoveobook.com',
+			'https://amoveobook.com',
+		];
 
-	for (let i = 0; i < whitelistedDomains.length; i++) {
-	    const target = whitelistedDomains[i];
-		window.postMessage(request, target);
-    }
-});
+		for (let i = 0; i < whitelistedDomains.length; i++) {
+			const target = whitelistedDomains[i];
+			window.postMessage(request, target);
+		}
+	});
+}

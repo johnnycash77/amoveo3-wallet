@@ -2965,8 +2965,11 @@ function initImportChannel(account) {
             try {
                 var channel = JSON.parse(reader.result);
                 var serverPubKey = Object.keys(channel)[0];
-                channel = channel[serverPubKey];
-                channel["serverPubKey"] = serverPubKey;
+                if (serverPubKey !== "me") {
+	                channel = channel[serverPubKey];
+	                channel["serverPubKey"] = serverPubKey;
+                }
+
                 storage.getChannels(function(error, channels) {
                     if (channels.length > 0) {
                         var isDuplicate = false;
