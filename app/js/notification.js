@@ -245,13 +245,18 @@ function initBet() {
 	amountText.value = amount;
 
 	if (marketType === "scalar") {
-		oddsText.value = (upperBound - lowerBound) * price
+		let displayPrice =  (upperBound - lowerBound) * price;
+		if (side === "short") {
+			displayPrice = (upperBound - lowerBound) * (1 - price);
+		}
+		oddsText.value = displayPrice
 		document.getElementById("price-tooltip").innerHTML = "You are betting the price will be " + (side === "long" ? "higher" : "lower") + " than this value."
 	} else {
 		oddsText.value = price;
 	}
 
-	totalText.value = roundOff(amount + (amount * price), 4) + " VEO";
+	const total = parseFloat((amount + (amount * price)).toFixed(4));
+	totalText.value = total + " VEO";
 
 	document.getElementById("bet-side").innerText = capitalize(side);
 
