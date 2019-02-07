@@ -567,7 +567,7 @@ function makeBet(amount, price, type, oid, callback) {
 																	console.error(error);
 																	showBetError("An error occurred.  Please try again later.")
 																} else {
-																	verifyBetAndSave(trade, sspk, serverAddress, finalOid, callback);
+																	verifyBetAndSave(trade, sspk, serverAddress, finalOid, account.publicKey, callback);
 																}
 															});
 													} catch (e) {
@@ -706,7 +706,7 @@ function marketTrade(channel, amount, price, bet, oid) { //oid unused
 	return market_spk;
 }
 
-function verifyBetAndSave(sspk2, sspk, server_pubkey, oid_final, callback) {
+function verifyBetAndSave(sspk2, sspk, serverPubkey, oidFinal, accountPubkey, callback) {
 	if (!verifyBoth(sspk2)) {
 		throw("make bet3, badly signed sspk2");
 	}
@@ -722,10 +722,10 @@ function verifyBetAndSave(sspk2, sspk, server_pubkey, oid_final, callback) {
 	storage.getChannels(function(error, channels) {
 		for (let i = 0; i < channels.length; i++) {
 			let channel = channels[i];
-			if (channel.serverPubKey === server_pubkey) {
+			if (channel.me[1] === accountPubkey && channel.serverPubKey === serverPubkey) {
 				channel.me = sspk[1];
 				channel.them = sspk2;
-				let newss = newSs([0,0,0,0,4], [-6, ["oracles", oid_final]]);
+				let newss = newSs([0,0,0,0,4], [-6, ["oracles", oidFinal]]);
 				channel.ssme = ([newss]).concat(channel.ssme);
 				channel.ssthem = ([newss]).concat(channel.ssthem);
 				break;
