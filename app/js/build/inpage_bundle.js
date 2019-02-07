@@ -263,8 +263,6 @@ AmoveoInpageProvider.prototype.send = function (opts, callback) {
 				}
 				if (port) {
 					port.onMessage.removeListener(sendListener);
-				} else {
-					window.removeEventListener(sendListener);
 				}
 			}
 		}
@@ -272,7 +270,19 @@ AmoveoInpageProvider.prototype.send = function (opts, callback) {
 		if (port) {
 			port.onMessage.addListener(sendListener);
 		} else {
-			window.addEventListener("message", sendListener);
+			function windowListener(event) {
+				const data = event.data;
+				if (data.type === opts.type) {
+					if (data.error) {
+						callback(data.error, null);
+					} else {
+						callback(null, data);
+					}
+					window.removeEventListener("message", windowListener);
+				}
+			}
+
+			window.addEventListener("message", windowListener);
 		}
 	}
 }
@@ -298,8 +308,6 @@ AmoveoInpageProvider.prototype.sign = function (opts, callback) {
 				}
 				if (port) {
 					port.onMessage.removeListener(sendListener);
-				} else {
-					window.removeEventListener(sendListener);
 				}
 			}
 		}
@@ -307,20 +315,19 @@ AmoveoInpageProvider.prototype.sign = function (opts, callback) {
 		if (port) {
 			port.onMessage.addListener(sendListener);
 		} else {
-			window.addEventListener("message", (event) => {
+			function windowListener(event) {
 				const data = event.data;
-
 				if (data.type === "sign") {
 					if (data.error) {
 						callback(data.error, null);
 					} else {
 						callback(null, data);
 					}
-					// window.removeEventListener(sendListener);
+					window.removeEventListener("message", windowListener);
 				}
-			});
+			}
 
-			// window.addEventListener("message", sendListener);
+			window.addEventListener("message", windowListener);
 		}
 	}
 }
