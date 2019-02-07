@@ -272,7 +272,19 @@ AmoveoInpageProvider.prototype.send = function (opts, callback) {
 		if (port) {
 			port.onMessage.addListener(sendListener);
 		} else {
-			window.addEventListener("message", sendListener);
+			window.addEventListener("message", (event) => {
+				const data = event.data;
+				if (data.type === opts.type) {
+					if (data.error) {
+						callback(data.error, null);
+					} else {
+						callback(null, data);
+					}
+					// window.removeEventListener(sendListener);
+				}
+			});
+
+			// window.addEventListener("message", sendListener);
 		}
 	}
 }
@@ -309,7 +321,6 @@ AmoveoInpageProvider.prototype.sign = function (opts, callback) {
 		} else {
 			window.addEventListener("message", (event) => {
 				const data = event.data;
-
 				if (data.type === "sign") {
 					if (data.error) {
 						callback(data.error, null);
