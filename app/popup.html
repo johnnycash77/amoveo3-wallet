@@ -147,7 +147,7 @@
                                 <div id="import-error-text" class="error hidden"><p>Invalid account data</p></div>
                             </div>
                             <div class="hidden">
-                                <input type="file" id="import-account" />
+                                <input type="file" id="import-account" value="" />
                             </div>
                         </div>
 
@@ -192,6 +192,27 @@
                     <p>Version: <span id="version"></span></p>
                 </div>
             </div>
+        </div>
+
+        <div id="firefox-import-container" class='hidden'>
+
+            <div class="section-heading">
+                <h4>Import Private Key</h4>
+            </div>
+
+            <div>
+                <input id="firefox-import" type="text" />
+
+                <p id="firefox-import-error"></p>
+            </div>
+
+            <div class='row'>
+                <div>
+                    <button class="btn btn-success" id="firefox-import-button">Import</button>
+                </div>
+
+            </div>
+
         </div>
 
         <div id="welcome-container" class='hidden'>

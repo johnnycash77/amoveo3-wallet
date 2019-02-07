@@ -274,45 +274,23 @@ function initImportAccount(password, accounts) {
     var importFile = views.find(views.ids.settings.import);
     var importButton = views.find(views.ids.settings.importButton);
     importButton.onclick = function () {
-        importFile.click();
+	    const isFirefox = typeof InstallTrigger !== 'undefined';
+	    if (isFirefox) {
+		    showFirefoxImport(password, accounts);
+	    } else {
+		    importFile.click();
+        }
     };
+
     importFile.onchange = function () {
         var file = (importFile.files)[0];
         var reader = new FileReader();
         reader.onload = function (e) {
             var contents = reader.result.replace(/^\s+|\s+$/g, '');
-            var ec = new elliptic.ec('secp256k1');
-            var keys = ec.keyFromPrivate(contents, "hex");
-            var pubPoint = keys.getPublic("hex");
-            var pubKey = btoa(formatUtility.fromHex(pubPoint));
-            var privKey = keys.getPrivate("hex");
 
-            var account = {
-                publicKey: pubKey,
-                privateKey: privKey
-            };
-
-            var isDuplicate = false;
-            for (var i = 0; i < accounts.length; i++) {
-                if (accounts[i].publicKey === account.publicKey) {
-                    isDuplicate = true;
-                    break;
-                }
-            }
-            if (isDuplicate) {
-                console.log("Duplicate account");
-                showImportError("This account has already been imported");
-            } else {
-                accounts.unshift(account);
-                storage.setAccounts(password, accounts, function () {
-                    console.log("Account imported");
-                    accountController.init(account);
-                    setSelectedAccount(account);
-	                initUnlocked(password);
-                });
-            }
+	        importPrivateKey(password, accounts, contents)
         };
-
+        
         if (file.type !== "text/plain" || !(file.size === 64 || file.size === 65)) {
             console.log("Invalid account data");
             showImportError("Invalid file format");
@@ -320,6 +298,63 @@ function initImportAccount(password, accounts) {
             reader.readAsText(file);
         }
     }
+}
+
+function importPrivateKey(password, accounts, privateKey) {
+	var ec = new elliptic.ec('secp256k1');
+	var keys = ec.keyFromPrivate(privateKey, "hex");
+	var pubPoint = keys.getPublic("hex");
+	var pubKey = btoa(formatUtility.fromHex(pubPoint));
+	var privKey = keys.getPrivate("hex");
+
+	var account = {
+		publicKey: pubKey,
+		privateKey: privKey
+	};
+
+	var isDuplicate = false;
+	for (var i = 0; i < accounts.length; i++) {
+		if (accounts[i].publicKey === account.publicKey) {
+			isDuplicate = true;
+			break;
+		}
+	}
+	if (isDuplicate) {
+		console.log("Duplicate account");
+		showImportError("This account has already been imported");
+	} else {
+		accounts.unshift(account);
+		storage.setAccounts(password, accounts, function () {
+			console.log("Account imported");
+			accountController.init(account);
+			setSelectedAccount(account);
+			initUnlocked(password);
+		});
+	}
+}
+
+function showFirefoxImport(password, accounts) {
+	views.hide(views.ids.settingsContainer);
+	views.show(views.ids.firefoxImportContainer);
+
+	var button = views.find(views.ids.firefoxImport.button);
+
+	button.onclick = function() {
+		var privateKey = views.find(views.ids.firefoxImport.import).value;
+
+		if (!(privateKey.length === 64 || privateKey.length === 65)) {
+			console.log("Invalid account data");
+			showFirefoxImportError("Invalid key (should be 64 characters long");
+		} else {
+			importPrivateKey(password, accounts, privateKey)
+        }
+    }
+}
+
+function showFirefoxImportError(message) {
+    var error = views.find(views.ids.firefoxImport.error);
+    error.innerHTML = message;
+    views.show(views.ids.firefoxImport.error);
 }
 
 function showImportError(message) {

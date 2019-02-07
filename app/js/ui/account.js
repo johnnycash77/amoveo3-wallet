@@ -15,6 +15,7 @@ function initAccountsPage(account) {
 
     views.show(views.ids.accountContainer);
     views.hide(views.ids.settingsContainer);
+    views.hide(views.ids.firefoxImportContainer);
     views.hide(views.ids.accountSwitchContainer);
 
     addListeners(account);

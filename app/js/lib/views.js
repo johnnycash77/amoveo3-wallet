@@ -51,6 +51,7 @@ var ids = {
     accountContainer: "account-container",
     welcomeContainer: "welcome-container",
     settingsContainer: "settings-container",
+    firefoxImportContainer: "firefox-import-container",
     refreshContainer: "refresh-button",
     accountSwitchContainer: "account-switch-container",
     alertContainer: "alert-container",
@@ -94,6 +95,11 @@ var ids = {
             error: "node-error",
         },
 	    switchNetwork: "network-switch"
+    },
+    firefoxImport: {
+	    import: "firefox-import",
+	    error: "firefox-import-error",
+	    button: "firefox-import-button",
     },
     send: {
         max: "send-max-amount",
