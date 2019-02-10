@@ -129,7 +129,7 @@ function sendCurrentState() {
 				});
 			} else {
 				if (accounts.length > 0) {
-					storage.getChannels(function (error, channels) {
+					storage.getUserChannels(accounts[0].publicKey, function (error, channels) {
 						sendMessageToPage({
 							type: "setState",
 							data: {

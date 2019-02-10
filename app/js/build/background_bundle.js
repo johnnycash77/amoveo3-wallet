@@ -130,7 +130,7 @@ function sendCurrentState() {
 				});
 			} else {
 				if (accounts.length > 0) {
-					storage.getChannels(function (error, channels) {
+					storage.getUserChannels(accounts[0].publicKey, function (error, channels) {
 						sendMessageToPage({
 							type: "setState",
 							data: {
@@ -2620,6 +2620,20 @@ function getChannels(callback) {
     })
 }
 
+function getUserChannels(publicKey, callback) {
+    getStorage({channels: []}, function(result) {
+    	var channels = result.channels;
+    	var filteredChannels = [];
+    	for (var i = 0; i < channels.length; i++) {
+    		var channel = channels[i];
+		    if (channel.me[1] === publicKey) {
+			    filteredChannels.push(channel)
+		    }
+	    }
+        callback(null, filteredChannels);
+    })
+}
+
 function setChannels(channels, callback) {
     setStorage({channels: channels}, function() {
         callback();
@@ -2772,6 +2786,7 @@ function setPasswordBeenSet(beenSet, callback) {
 
 exports.set = setStorage;
 exports.get = getStorage;
+exports.getUserChannels = getUserChannels;
 exports.getChannels = getChannels;
 exports.setChannels = setChannels;
 exports.getCurrentAccount = getCurrentAccount;

@@ -2269,6 +2269,20 @@ function getChannels(callback) {
     })
 }
 
+function getUserChannels(publicKey, callback) {
+    getStorage({channels: []}, function(result) {
+    	var channels = result.channels;
+    	var filteredChannels = [];
+    	for (var i = 0; i < channels.length; i++) {
+    		var channel = channels[i];
+		    if (channel.me[1] === publicKey) {
+			    filteredChannels.push(channel)
+		    }
+	    }
+        callback(null, filteredChannels);
+    })
+}
+
 function setChannels(channels, callback) {
     setStorage({channels: channels}, function() {
         callback();
@@ -2421,6 +2435,7 @@ function setPasswordBeenSet(beenSet, callback) {
 
 exports.set = setStorage;
 exports.get = getStorage;
+exports.getUserChannels = getUserChannels;
 exports.getChannels = getChannels;
 exports.setChannels = setChannels;
 exports.getCurrentAccount = getCurrentAccount;
@@ -2830,19 +2845,9 @@ const fileUtility = require('../lib/file-utility.js');
 const passwordController = require('../controller/password-controller.js');
 
 function initChannels(account) {
-    storage.getChannels(function(error, channels) {
-        var parsedChannels = [];
+    storage.getUserChannels(account.publicKey, function(error, channels) {
         if (channels.length > 0) {
-            for (var i = 0; i < channels.length; i++) {
-                var channel = channels[i];
-                if (channel && channel.me && channel.me.length > 1 && channel.me[1] === account.publicKey) {
-                    parsedChannels.push(channel);
-                }
-            }
-        }
-
-        if (parsedChannels.length > 0) {
-            showChannels(parsedChannels, account, false);
+            showChannels(channels, account, false);
         } else {
             views.show(views.ids.channels.blank);
         }
@@ -2977,7 +2982,7 @@ function initImportChannel(account) {
 	                channel["serverPubKey"] = serverPubKey;
                 }
 
-                storage.getChannels(function(error, channels) {
+                storage.getUserChannels(account.publicKey, function(error, channels) {
                     if (channels.length > 0) {
                         var isDuplicate = false;
                         for (var i = 0; i < channels.length; i++) {
@@ -3248,7 +3253,7 @@ function initAccountSwitchButton(password) {
 
 function setSelectedAccount(account) {
     storage.getSelectedNetwork(function(error, network) {
-        storage.getChannels(function(error, channels) {
+        storage.getUserChannels(account.publicKey, function(error, channels) {
             passwordController.setState({
                 selectedAddress: account.publicKey,
                 channels: channels,
@@ -3419,7 +3424,7 @@ function initImportAccount(password, accounts) {
 
 	        importPrivateKey(password, accounts, contents)
         };
-        
+
         if (file.type !== "text/plain" || !(file.size === 64 || file.size === 65)) {
             console.log("Invalid account data");
             showImportError("Invalid file format");

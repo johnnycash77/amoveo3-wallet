@@ -5,19 +5,9 @@ const fileUtility = require('../lib/file-utility.js');
 const passwordController = require('../controller/password-controller.js');
 
 function initChannels(account) {
-    storage.getChannels(function(error, channels) {
-        var parsedChannels = [];
+    storage.getUserChannels(account.publicKey, function(error, channels) {
         if (channels.length > 0) {
-            for (var i = 0; i < channels.length; i++) {
-                var channel = channels[i];
-                if (channel && channel.me && channel.me.length > 1 && channel.me[1] === account.publicKey) {
-                    parsedChannels.push(channel);
-                }
-            }
-        }
-
-        if (parsedChannels.length > 0) {
-            showChannels(parsedChannels, account, false);
+            showChannels(channels, account, false);
         } else {
             views.show(views.ids.channels.blank);
         }
@@ -152,7 +142,7 @@ function initImportChannel(account) {
 	                channel["serverPubKey"] = serverPubKey;
                 }
 
-                storage.getChannels(function(error, channels) {
+                storage.getUserChannels(account.publicKey, function(error, channels) {
                     if (channels.length > 0) {
                         var isDuplicate = false;
                         for (var i = 0; i < channels.length; i++) {

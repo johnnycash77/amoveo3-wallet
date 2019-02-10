@@ -2330,6 +2330,20 @@ function getChannels(callback) {
     })
 }
 
+function getUserChannels(publicKey, callback) {
+    getStorage({channels: []}, function(result) {
+    	var channels = result.channels;
+    	var filteredChannels = [];
+    	for (var i = 0; i < channels.length; i++) {
+    		var channel = channels[i];
+		    if (channel.me[1] === publicKey) {
+			    filteredChannels.push(channel)
+		    }
+	    }
+        callback(null, filteredChannels);
+    })
+}
+
 function setChannels(channels, callback) {
     setStorage({channels: channels}, function() {
         callback();
@@ -2482,6 +2496,7 @@ function setPasswordBeenSet(beenSet, callback) {
 
 exports.set = setStorage;
 exports.get = getStorage;
+exports.getUserChannels = getUserChannels;
 exports.getChannels = getChannels;
 exports.setChannels = setChannels;
 exports.getCurrentAccount = getCurrentAccount;
@@ -2751,6 +2766,8 @@ function initBet() {
 		if (side === "short") {
 			displayPrice = (upperBound - lowerBound) * (1 - price);
 		}
+		displayPrice = parseFloat(displayPrice.toFixed(2));
+
 		oddsText.value = displayPrice
 		document.getElementById("price-tooltip").innerHTML = "You are betting the price will be " + (side === "long" ? "higher" : "lower") + " than this value."
 	} else {
@@ -2933,6 +2950,7 @@ function channels3(x, expiration, pubkey, spk, tx_original) {
 }
 
 function saveChannel(channel, callback) {
+	// need to get all channels to save appropriately
 	storage.getChannels(function(error, channels) {
 		channels.push(channel);
 		storage.setChannels(channels, function() {
@@ -3028,12 +3046,12 @@ function makeBet(amount, price, type, oid, callback) {
 									betContract = scalarMarketContract(finalType, expires, finalPrice, serverAddress, period, finalAmount, finalOid, topHeader[1], lowerLimit, upperLimit, many);
 								}
 
-								storage.getChannels(function (error, channels) {
+								storage.getUserChannels(account.publicKey, function (error, channels) {
 									let channelFound = false;
 									let channel;
 									for (let i = 0; i < channels.length; i++) {
 										channel = channels[i];
-										if (channel.me[1] === account.publicKey && channel.serverPubKey === serverAddress) {
+										if (channel.serverPubKey === serverAddress) {
 											channelFound = true;
 											break;
 										}
@@ -3221,10 +3239,10 @@ function verifyBetAndSave(sspk2, sspk, serverPubkey, oidFinal, accountPubkey, ca
 		console.log(JSON.stringify(sspk2[1]));
 	}
 
-	storage.getChannels(function(error, channels) {
+	storage.getUserChannels(accountPubkey, function(error, channels) {
 		for (let i = 0; i < channels.length; i++) {
 			let channel = channels[i];
-			if (channel.me[1] === accountPubkey && channel.serverPubKey === serverPubkey) {
+			if (channel.serverPubKey === serverPubkey) {
 				channel.me = sspk[1];
 				channel.them = sspk2;
 				let newss = newSs([0,0,0,0,4], [-6, ["oracles", oidFinal]]);
@@ -3263,51 +3281,53 @@ function initCancel() {
 }
 
 function cancelTrade(n, server_pubkey) {
-	storage.getChannels(function(error, channels) {
-		let oldCD;
-		for (let i = 0; i < channels.length; i++) {
-			let channel = channels[i];
-			if (channel.serverPubKey === server_pubkey) {
-				oldCD = channel;
-				break;
-			}
-		}
-
-		if (oldCD) {
-			let spk = oldCD.me;
-			let ss = oldCD.ssme[n - 2];
-
-			if (JSON.stringify(ss.code) === JSON.stringify([0,0,0,0,4])) {//this is what an unmatched trade looks like.
-				let spk2 = removeBet(n - 1, spk);
-				spk2[8] += 1000000;
-				passwordController.getPassword(function(password) {
-					if (!password) {
-						showCancelError("Your wallet is locked.  Please unlock your wallet and try again.")
-					} else {
-						storage.getAccounts(password, function (error, accounts) {
-							let account = accounts[0];
-							let keys = ec.keyFromPrivate(account.privateKey, "hex");
-							let sspk2 = cryptoUtility.signTx(keys, spk2);
-							let pubPoint = keys.getPublic("hex");
-							let pubKey = btoa(formatUtility.fromHex(pubPoint));
-							let msg = ["cancel_trade", pubKey, n, sspk2];
-							network.send(msg, function (error, response) {
-								if (error) {
-									showCancelError("An error occurred, please try again later.");
-								} else {
-									return cancelTradeResponse(response, sspk2, server_pubkey, n - 2);
-								}
-							});
-						})
+	passwordController.getPassword(function(password) {
+		storage.getAccounts(password, function (error, accounts) {
+			const account = accounts[0];
+			storage.getUserChannels(account.publicKey, function(error, channels) {
+				let oldCD;
+				for (let i = 0; i < channels.length; i++) {
+					let channel = channels[i];
+					if (channel.serverPubKey === server_pubkey) {
+						oldCD = channel;
+						break;
 					}
-				});
-			} else {
-				console.log(ss);
-				showCancelError("This trade has already been partially or fully matched. It cannot be canceled now.");
-			}
-		} else {
-			showCancelError("Channel not found");
-		}
+				}
+
+				if (oldCD) {
+					let spk = oldCD.me;
+					let ss = oldCD.ssme[n - 2];
+
+					if (JSON.stringify(ss.code) === JSON.stringify([0,0,0,0,4])) {//this is what an unmatched trade looks like.
+						let spk2 = removeBet(n - 1, spk);
+						spk2[8] += 1000000;
+						passwordController.getPassword(function(password) {
+							if (!password) {
+								showCancelError("Your wallet is locked.  Please unlock your wallet and try again.")
+							} else {
+								let keys = ec.keyFromPrivate(account.privateKey, "hex");
+								let sspk2 = cryptoUtility.signTx(keys, spk2);
+								let pubPoint = keys.getPublic("hex");
+								let pubKey = btoa(formatUtility.fromHex(pubPoint));
+								let msg = ["cancel_trade", pubKey, n, sspk2];
+								network.send(msg, function (error, response) {
+									if (error) {
+										showCancelError("An error occurred, please try again later.");
+									} else {
+										return cancelTradeResponse(response, sspk2, server_pubkey, n - 2);
+									}
+								});
+							}
+						});
+					} else {
+						console.log(ss);
+						showCancelError("This trade has already been partially or fully matched. It cannot be canceled now.");
+					}
+				} else {
+					showCancelError("Channel not found");
+				}
+			});
+		});
 	});
 }
 
@@ -3338,33 +3358,37 @@ function removeBet(n, spk0) {
 }
 
 function cancelTradeResponse(sspk2, sspk, server_pubkey, n) {
-	storage.getChannels(function(error, channels) {
-		for (let i = 0; i < channels.length; i++) {
-			let channel = channels[i];
-			if (channel.serverPubKey === server_pubkey) {
-				console.log("cancel trade2, fail to verify this: ");
-				console.log(JSON.stringify(sspk2));
-				let bool = verifyBoth(sspk2);
-				if (!(bool)) {
-					throw("cancel trade badly signed");
+	storage.getAccounts(password, function (error, accounts) {
+		const account = accounts[0];
+		// need to get all channels to save appropriately
+		storage.getChannels(function(error, channels) {
+			for (let i = 0; i < channels.length; i++) {
+				let channel = channels[i];
+				if (channel.me[1] === account.publicKey && channel.serverPubKey === server_pubkey) {
+					console.log("cancel trade2, fail to verify this: ");
+					console.log(JSON.stringify(sspk2));
+					let bool = verifyBoth(sspk2);
+					if (!(bool)) {
+						throw("cancel trade badly signed");
+					}
+					let spk = sspk[1];
+					let spk2 = sspk2[1];
+					if (JSON.stringify(spk) != JSON.stringify(spk2)) {
+						console.log("the server didn't calculate the same update as us");
+						console.log(spk);
+						console.log(spk2);
+						throw("cancel trade spk does not match");
+					}
+					channel.them = sspk2;
+					channel.me = spk;
+					channel.ssme = removeNth(n, channel.ssme);
+					channel.ssthem = removeNth(n, channel.ssthem);
 				}
-				let spk = sspk[1];
-				let spk2 = sspk2[1];
-				if (JSON.stringify(spk) != JSON.stringify(spk2)) {
-					console.log("the server didn't calculate the same update as us");
-					console.log(spk);
-					console.log(spk2);
-					throw("cancel trade spk does not match");
-				}
-				channel.them = sspk2;
-				channel.me = spk;
-				channel.ssme = removeNth(n, channel.ssme);
-				channel.ssthem = removeNth(n, channel.ssthem);
 			}
-		}
 
-		storage.setChannels(channels, function() {
-			sendMessageAndClose({ type: notificationType, message: "Trade cancelled"});
+			storage.setChannels(channels, function() {
+				sendMessageAndClose({ type: notificationType, message: "Trade cancelled"});
+			})
 		})
 	})
 }
@@ -3385,12 +3409,12 @@ function showMaxBalance() {
 					} else {
 						storage.getAccounts(password, function (error, accounts) {
 							let account = accounts[0];
-							storage.getChannels(function (error, channels) {
+							storage.getUserChannels(account.publicKey, function (error, channels) {
 								let channelFound = false;
 								let channel;
 								for (let i = 0; i < channels.length; i++) {
 									channel = channels[i];
-									if (channel.me[1] === account.publicKey && channel.serverPubKey === serverPubkey) {
+									if (channel.serverPubKey === serverPubkey) {
 										channelFound = true;
 										break;
 									}

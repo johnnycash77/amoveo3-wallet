@@ -119,7 +119,7 @@ function initAccountSwitchButton(password) {
 
 function setSelectedAccount(account) {
     storage.getSelectedNetwork(function(error, network) {
-        storage.getChannels(function(error, channels) {
+        storage.getUserChannels(account.publicKey, function(error, channels) {
             passwordController.setState({
                 selectedAddress: account.publicKey,
                 channels: channels,
@@ -290,7 +290,7 @@ function initImportAccount(password, accounts) {
 
 	        importPrivateKey(password, accounts, contents)
         };
-        
+
         if (file.type !== "text/plain" || !(file.size === 64 || file.size === 65)) {
             console.log("Invalid account data");
             showImportError("Invalid file format");
