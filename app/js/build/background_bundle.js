@@ -230,7 +230,6 @@ class BlocksController {
 	    instance.accumulatingDifficulty = 0;
 	    instance.topDifficulty = 0;
 	    instance.syncing = false;
-	    instance.syncing = false;
 
 	    storage.getSelectedNetwork(function(error, selectedNetwork) {
 		    instance.checkPointHeader = config[selectedNetwork].checkPointHeader;

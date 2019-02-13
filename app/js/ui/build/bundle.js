@@ -2982,7 +2982,7 @@ function initImportChannel(account) {
 	                channel["serverPubKey"] = serverPubKey;
                 }
 
-                storage.getUserChannels(account.publicKey, function(error, channels) {
+                storage.getChannels(function(error, channels) {
                     if (channels.length > 0) {
                         var isDuplicate = false;
                         for (var i = 0; i < channels.length; i++) {
