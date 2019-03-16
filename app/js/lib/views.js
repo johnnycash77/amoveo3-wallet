@@ -52,6 +52,7 @@ var ids = {
     welcomeContainer: "welcome-container",
     settingsContainer: "settings-container",
     firefoxImportContainer: "firefox-import-container",
+	firefoxChannelImportContainer: "firefox-import-channel-container",
     refreshContainer: "refresh-button",
     accountSwitchContainer: "account-switch-container",
     alertContainer: "alert-container",
@@ -95,6 +96,11 @@ var ids = {
             error: "node-error",
         },
 	    switchNetwork: "network-switch"
+    },
+    firefoxChannelImport: {
+	    import: "firefox-channel-import",
+	    error: "firefox-channel-import-error",
+	    button: "firefox-channel-import-button",
     },
     firefoxImport: {
 	    import: "firefox-import",

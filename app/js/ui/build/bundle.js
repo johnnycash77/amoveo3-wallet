@@ -2522,6 +2522,7 @@ var ids = {
     welcomeContainer: "welcome-container",
     settingsContainer: "settings-container",
     firefoxImportContainer: "firefox-import-container",
+	firefoxChannelImportContainer: "firefox-import-channel-container",
     refreshContainer: "refresh-button",
     accountSwitchContainer: "account-switch-container",
     alertContainer: "alert-container",
@@ -2565,6 +2566,11 @@ var ids = {
             error: "node-error",
         },
 	    switchNetwork: "network-switch"
+    },
+    firefoxChannelImport: {
+	    import: "firefox-channel-import",
+	    error: "firefox-channel-import-error",
+	    button: "firefox-channel-import-button",
     },
     firefoxImport: {
 	    import: "firefox-import",
@@ -2673,6 +2679,7 @@ function initAccountsPage(account) {
     views.show(views.ids.accountContainer);
     views.hide(views.ids.settingsContainer);
     views.hide(views.ids.firefoxImportContainer);
+    views.hide(views.ids.firefoxChannelImportContainer);
     views.hide(views.ids.accountSwitchContainer);
 
     addListeners(account);
@@ -2857,6 +2864,9 @@ function initChannels(account) {
 }
 
 function showChannels(channels, account, shouldReload) {
+	views.show(views.ids.accountContainer);
+    views.hide(views.ids.firefoxChannelImportContainer);
+
     if (channels.length > 0) {
         views.hide(views.ids.channels.blank);
     }
@@ -2968,57 +2978,18 @@ function initImportChannel(account) {
     var importFile = views.find(views.ids.channels.import);
     var importButton = views.find(views.ids.channels.importButton);
     importButton.onclick = function () {
-        importFile.click();
+	    const isFirefox = typeof InstallTrigger !== 'undefined';
+	    if (isFirefox) {
+		    showFirefoxImport(account);
+	    } else {
+		    importFile.click();
+	    }
     };
     importFile.onchange = function () {
         var file = (importFile.files)[0];
         var reader = new FileReader();
         reader.onload = function (e) {
-            try {
-                var channel = JSON.parse(reader.result);
-                var serverPubKey = Object.keys(channel)[0];
-                if (serverPubKey !== "me") {
-	                channel = channel[serverPubKey];
-	                channel["serverPubKey"] = serverPubKey;
-                }
-
-                storage.getChannels(function(error, channels) {
-                    if (channels.length > 0) {
-                        var isDuplicate = false;
-                        for (var i = 0; i < channels.length; i++) {
-                            if (channels[i].serverPubKey === channel.serverPubKey) {
-                                isDuplicate = true;
-                                break;
-                            }
-                        }
-                        if (isDuplicate) {
-                            channels[i] = channel;
-                            storage.setChannels(channels, function () {
-                                console.log("Channel imported");
-
-                                showChannels(channels, account, true);
-                            });
-                            console.log("Duplicate channel - Overwriting");
-                            // showImportError("This channel has already been imported");
-                        } else {
-                            channels.unshift(channel);
-                            storage.setChannels(channels, function () {
-                                console.log("Channel imported");
-
-                                showChannels(channels, account, true);
-                            });
-                        }
-                    } else {
-                        storage.setChannels([channel], function () {
-                            console.log("Channel imported");
-
-                            showChannels([channel], account, true);
-                        });
-                    }
-                });
-            } catch(e) {
-                showImportError("Invalid file format")
-            }
+	        importChannelText(account, reader.result);
         };
 
         if (file.type !== "text/plain") {
@@ -3028,6 +2999,83 @@ function initImportChannel(account) {
             reader.readAsText(file);
         }
     }
+}
+
+function importChannelText(account, channelText) {
+	try {
+		var channel = JSON.parse(channelText);
+		var serverPubKey = Object.keys(channel)[0];
+		if (serverPubKey !== "me") {
+			channel = channel[serverPubKey];
+			channel["serverPubKey"] = serverPubKey;
+		}
+
+		storage.getChannels(function(error, channels) {
+			if (channels.length > 0) {
+				var isDuplicate = false;
+				for (var i = 0; i < channels.length; i++) {
+				    var thisChannel = channels[i];
+					if (thisChannel.me[1] === account.publicKey && thisChannel.serverPubKey === thisChannel.serverPubKey) {
+						isDuplicate = true;
+						break;
+					}
+				}
+				if (isDuplicate) {
+					channels[i] = channel;
+					storage.setChannels(channels, function () {
+						console.log("Channel imported");
+
+						showChannels(channels, account, true);
+					});
+					console.log("Duplicate channel - Overwriting");
+					// showImportError("This channel has already been imported");
+				} else {
+					channels.unshift(channel);
+					storage.setChannels(channels, function () {
+						console.log("Channel imported");
+
+						showChannels(channels, account, true);
+					});
+				}
+			} else {
+				storage.setChannels([channel], function () {
+					console.log("Channel imported");
+
+					showChannels([channel], account, true);
+				});
+			}
+		});
+	} catch(e) {
+		const isFirefox = typeof InstallTrigger !== 'undefined';
+		if (isFirefox) {
+			showFirefoxImportError("Invalid file format")
+		} else {
+			showImportError("Invalid file format")
+		}
+	}
+}
+
+function showFirefoxImport(account) {
+	views.hide(views.ids.accountContainer);
+	views.show(views.ids.firefoxChannelImportContainer);
+
+	var button = views.find(views.ids.firefoxChannelImport.button);
+
+	button.onclick = function() {
+		var channelText = views.find(views.ids.firefoxChannelImport.import).value;
+
+		if (channelText.length === 0) {
+			showFirefoxImportError("Invalid format");
+		} else {
+			importChannelText(account, channelText);
+		}
+	}
+}
+
+function showFirefoxImportError(message) {
+	var error = views.find(views.ids.firefoxChannelImport.error);
+	error.innerHTML = message;
+	views.show(views.ids.firefoxChannelImport.error);
 }
 
 function showImportError(message) {
@@ -3754,6 +3802,10 @@ const network = require('../controller/network-controller.js');
 
 function initSettingsContainer(account) {
     views.hide(views.ids.accountContainer);
+	views.hide(views.ids.accountSwitchContainer);
+	views.hide(views.ids.firefoxChannelImportContainer);
+	views.hide(views.ids.firefoxImportContainer);
+
     views.show(views.ids.settingsContainer);
 
     views.setText(views.ids.title, "Settings");
@@ -3776,9 +3828,14 @@ function initBackButton() {
     var backButton = views.find(views.ids.navbar.backButton);
     backButton.onclick = function (e) {
 	    views.hideBackButton();
-	    views.show(views.ids.accountContainer);
+
 	    views.hide(views.ids.settingsContainer);
 	    views.hide(views.ids.accountSwitchContainer);
+	    views.hide(views.ids.firefoxChannelImportContainer);
+	    views.hide(views.ids.firefoxImportContainer);
+
+	    views.show(views.ids.accountContainer);
+
 	    resetTitle();
     };
 }

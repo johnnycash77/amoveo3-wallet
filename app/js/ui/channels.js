@@ -17,18 +17,24 @@ function initChannels(account) {
 }
 
 function showChannels(channels, account, shouldReload) {
+	views.show(views.ids.accountContainer);
+    views.hide(views.ids.firefoxChannelImportContainer);
+
     if (channels.length > 0) {
         views.hide(views.ids.channels.blank);
     }
     var container = views.find(views.ids.channels.list);
     views.removeAllChildren(views.ids.channels.list);
+
     storage.getTopHeader(function(error, topHeader) {
         if (topHeader !== 0) {
             for (var i = 0; i < channels.length; i++) {
                 var channel = channels[i];
-                makeChannelRow(topHeader, channel, function(row) {
-                    container.appendChild(row);
-                })
+	            if (channel.me[1] === account.publicKey) {
+		            makeChannelRow(topHeader, channel, function (row) {
+			            container.appendChild(row);
+		            })
+	            }
             }
 
             if (shouldReload) {
@@ -53,7 +59,7 @@ function makeChannelRow(topHeader, channel, callback) {
             var cid = channel.cid;
             var expiration = channel.expiration;
             var amount = spk[7];
-            var betAmount = sum_bets(spk[3]) / 100000000;
+            var betAmount = sumBets(spk[3]) / 100000000;
             var mybalance = ((val[4] - amount - betAmount) / 100000000).toString();
             var serverBalance = ((val[5] + amount) / 100000000).toString();
 
@@ -97,7 +103,7 @@ function initExportButton(channel) {
     return container;
 }
 
-function sum_bets(bets) {
+function sumBets(bets) {
     var x = 0;
     for (var i = 1; i < bets.length; i++) {
         x += bets[i][2];
@@ -128,57 +134,18 @@ function initImportChannel(account) {
     var importFile = views.find(views.ids.channels.import);
     var importButton = views.find(views.ids.channels.importButton);
     importButton.onclick = function () {
-        importFile.click();
+	    const isFirefox = typeof InstallTrigger !== 'undefined';
+	    if (isFirefox) {
+		    showFirefoxImport(account);
+	    } else {
+		    importFile.click();
+	    }
     };
     importFile.onchange = function () {
         var file = (importFile.files)[0];
         var reader = new FileReader();
         reader.onload = function (e) {
-            try {
-                var channel = JSON.parse(reader.result);
-                var serverPubKey = Object.keys(channel)[0];
-                if (serverPubKey !== "me") {
-	                channel = channel[serverPubKey];
-	                channel["serverPubKey"] = serverPubKey;
-                }
-
-                storage.getChannels(function(error, channels) {
-                    if (channels.length > 0) {
-                        var isDuplicate = false;
-                        for (var i = 0; i < channels.length; i++) {
-                            if (channels[i].serverPubKey === channel.serverPubKey) {
-                                isDuplicate = true;
-                                break;
-                            }
-                        }
-                        if (isDuplicate) {
-                            channels[i] = channel;
-                            storage.setChannels(channels, function () {
-                                console.log("Channel imported");
-
-                                showChannels(channels, account, true);
-                            });
-                            console.log("Duplicate channel - Overwriting");
-                            // showImportError("This channel has already been imported");
-                        } else {
-                            channels.unshift(channel);
-                            storage.setChannels(channels, function () {
-                                console.log("Channel imported");
-
-                                showChannels(channels, account, true);
-                            });
-                        }
-                    } else {
-                        storage.setChannels([channel], function () {
-                            console.log("Channel imported");
-
-                            showChannels([channel], account, true);
-                        });
-                    }
-                });
-            } catch(e) {
-                showImportError("Invalid file format")
-            }
+	        importChannelText(account, reader.result);
         };
 
         if (file.type !== "text/plain") {
@@ -188,6 +155,83 @@ function initImportChannel(account) {
             reader.readAsText(file);
         }
     }
+}
+
+function importChannelText(account, channelText) {
+	try {
+		var channel = JSON.parse(channelText);
+		var serverPubKey = Object.keys(channel)[0];
+		if (serverPubKey !== "me") {
+			channel = channel[serverPubKey];
+			channel["serverPubKey"] = serverPubKey;
+		}
+
+		storage.getChannels(function(error, channels) {
+			if (channels.length > 0) {
+				var isDuplicate = false;
+				for (var i = 0; i < channels.length; i++) {
+				    var thisChannel = channels[i];
+					if (thisChannel.me[1] === account.publicKey && serverPubKey === thisChannel.serverPubKey) {
+						isDuplicate = true;
+						break;
+					}
+				}
+				if (isDuplicate) {
+					channels[i] = channel;
+					storage.setChannels(channels, function () {
+						console.log("Channel imported");
+
+						showChannels(channels, account, true);
+					});
+					console.log("Duplicate channel - Overwriting");
+					// showImportError("This channel has already been imported");
+				} else {
+					channels.unshift(channel);
+					storage.setChannels(channels, function () {
+						console.log("Channel imported");
+
+						showChannels(channels, account, true);
+					});
+				}
+			} else {
+				storage.setChannels([channel], function () {
+					console.log("Channel imported");
+
+					showChannels([channel], account, true);
+				});
+			}
+		});
+	} catch(e) {
+		const isFirefox = typeof InstallTrigger !== 'undefined';
+		if (isFirefox) {
+			showFirefoxImportError("Invalid file format")
+		} else {
+			showImportError("Invalid file format")
+		}
+	}
+}
+
+function showFirefoxImport(account) {
+	views.hide(views.ids.accountContainer);
+	views.show(views.ids.firefoxChannelImportContainer);
+
+	var button = views.find(views.ids.firefoxChannelImport.button);
+
+	button.onclick = function() {
+		var channelText = views.find(views.ids.firefoxChannelImport.import).value;
+
+		if (channelText.length === 0) {
+			showFirefoxImportError("Invalid format");
+		} else {
+			importChannelText(account, channelText);
+		}
+	}
+}
+
+function showFirefoxImportError(message) {
+	var error = views.find(views.ids.firefoxChannelImport.error);
+	error.innerHTML = message;
+	views.show(views.ids.firefoxChannelImport.error);
 }
 
 function showImportError(message) {

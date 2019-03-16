@@ -6,6 +6,10 @@ const network = require('../controller/network-controller.js');
 
 function initSettingsContainer(account) {
     views.hide(views.ids.accountContainer);
+	views.hide(views.ids.accountSwitchContainer);
+	views.hide(views.ids.firefoxChannelImportContainer);
+	views.hide(views.ids.firefoxImportContainer);
+
     views.show(views.ids.settingsContainer);
 
     views.setText(views.ids.title, "Settings");
@@ -28,9 +32,14 @@ function initBackButton() {
     var backButton = views.find(views.ids.navbar.backButton);
     backButton.onclick = function (e) {
 	    views.hideBackButton();
-	    views.show(views.ids.accountContainer);
+
 	    views.hide(views.ids.settingsContainer);
 	    views.hide(views.ids.accountSwitchContainer);
+	    views.hide(views.ids.firefoxChannelImportContainer);
+	    views.hide(views.ids.firefoxImportContainer);
+
+	    views.show(views.ids.accountContainer);
+
 	    resetTitle();
     };
 }

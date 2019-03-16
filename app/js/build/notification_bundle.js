@@ -3051,7 +3051,7 @@ function makeBet(amount, price, type, oid, callback) {
 									let channel;
 									for (let i = 0; i < channels.length; i++) {
 										channel = channels[i];
-										if (channel.serverPubKey === serverAddress) {
+										if (channel.me[1] === account.publicKey && channel.serverPubKey === serverAddress) {
 											channelFound = true;
 											break;
 										}
@@ -3242,7 +3242,7 @@ function verifyBetAndSave(sspk2, sspk, serverPubkey, oidFinal, accountPubkey, ca
 	storage.getUserChannels(accountPubkey, function(error, channels) {
 		for (let i = 0; i < channels.length; i++) {
 			let channel = channels[i];
-			if (channel.serverPubKey === serverPubkey) {
+			if (channel.me[1] === accountPubkey && channel.serverPubKey === serverPubkey) {
 				channel.me = sspk[1];
 				channel.them = sspk2;
 				let newss = newSs([0,0,0,0,4], [-6, ["oracles", oidFinal]]);
@@ -3288,7 +3288,7 @@ function cancelTrade(n, server_pubkey) {
 				let oldCD;
 				for (let i = 0; i < channels.length; i++) {
 					let channel = channels[i];
-					if (channel.serverPubKey === server_pubkey) {
+					if (channel.me[1] === account.publicKey && channel.serverPubKey === server_pubkey) {
 						oldCD = channel;
 						break;
 					}
@@ -3414,7 +3414,7 @@ function showMaxBalance() {
 								let channel;
 								for (let i = 0; i < channels.length; i++) {
 									channel = channels[i];
-									if (channel.serverPubKey === serverPubkey) {
+									if (channel.me[1] === account.publicKey && channel.serverPubKey === serverPubkey) {
 										channelFound = true;
 										break;
 									}
