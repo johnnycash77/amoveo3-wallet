@@ -88,10 +88,14 @@ function showChannelSyncPrompt(accountPubkey, index, serverChannel, callback) {
 			const expiration = cd[7];
 			const channelData = {"me": me, "them": themSpk, "ssme": ss, "ssthem": ss, "cid": cid, "expiration": expiration, "serverPubKey": me[2]};
 
-			const a = JSON.stringify(channelData);
 
-			channels[index] = channelData;
-
+			for (let i = 0; i < channels.length; i++) {
+				let channel = channels[i];
+				if (channel.me[1] === accountPubkey && channel.serverPubKey === me[2]) {
+					channels[i] = channelData
+					break;
+				}
+			}
 			storage.setChannels(channels, function() {
 				document.getElementById('channel-sync-container').classList.add('hidden');
 				if (callback) {
