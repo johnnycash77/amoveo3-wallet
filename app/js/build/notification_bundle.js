@@ -2654,7 +2654,7 @@ function checkChannelState(callback) {
 						const address = accounts[0].publicKey;
 						network.send(["spk", address], function(error, serverChannel) {
 							storage.getChannels(function(error, channels) {
-								let channelsMatch = false;
+								let channelsMatch = true;
 								let i;
 								for (i = 0; i < channels.length; i++) {
 									let channel = channels[i];
@@ -3519,36 +3519,38 @@ function removeBet(n, spk0) {
 }
 
 function cancelTradeResponse(sspk2, sspk, server_pubkey, n) {
-	storage.getAccounts(password, function (error, accounts) {
-		const account = accounts[0];
-		// need to get all channels to save appropriately
-		storage.getChannels(function(error, channels) {
-			for (let i = 0; i < channels.length; i++) {
-				let channel = channels[i];
-				if (channel.me[1] === account.publicKey && channel.serverPubKey === server_pubkey) {
-					console.log("cancel trade2, fail to verify this: ");
-					console.log(JSON.stringify(sspk2));
-					let bool = verifyBoth(sspk2);
-					if (!(bool)) {
-						throw("cancel trade badly signed");
+	passwordController.getPassword(function (password) {
+		storage.getAccounts(password, function (error, accounts) {
+			const account = accounts[0];
+			// need to get all channels to save appropriately
+			storage.getChannels(function(error, channels) {
+				for (let i = 0; i < channels.length; i++) {
+					let channel = channels[i];
+					if (channel.me[1] === account.publicKey && channel.serverPubKey === server_pubkey) {
+						console.log("cancel trade2, fail to verify this: ");
+						console.log(JSON.stringify(sspk2));
+						let bool = verifyBoth(sspk2);
+						if (!(bool)) {
+							throw("cancel trade badly signed");
+						}
+						let spk = sspk[1];
+						let spk2 = sspk2[1];
+						if (JSON.stringify(spk) != JSON.stringify(spk2)) {
+							console.log("the server didn't calculate the same update as us");
+							console.log(spk);
+							console.log(spk2);
+							throw("cancel trade spk does not match");
+						}
+						channel.them = sspk2;
+						channel.me = spk;
+						channel.ssme = removeNth(n, channel.ssme);
+						channel.ssthem = removeNth(n, channel.ssthem);
 					}
-					let spk = sspk[1];
-					let spk2 = sspk2[1];
-					if (JSON.stringify(spk) != JSON.stringify(spk2)) {
-						console.log("the server didn't calculate the same update as us");
-						console.log(spk);
-						console.log(spk2);
-						throw("cancel trade spk does not match");
-					}
-					channel.them = sspk2;
-					channel.me = spk;
-					channel.ssme = removeNth(n, channel.ssme);
-					channel.ssthem = removeNth(n, channel.ssthem);
 				}
-			}
 
-			storage.setChannels(channels, function() {
-				sendMessageAndClose({ type: notificationType, message: "Trade cancelled"});
+				storage.setChannels(channels, function() {
+					sendMessageAndClose({ type: notificationType, message: "Trade cancelled"});
+				})
 			})
 		})
 	})

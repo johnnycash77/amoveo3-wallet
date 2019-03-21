@@ -2,8 +2,8 @@ module.exports = AmoveoInpageProvider;
 
 const extension = require('extensionizer')
 
-const extId = "hfojlfflnlmfjhddgodpmophmhpimahi";
-// const extId = "dihkmjjoakaiagmoflhachmoolamfimp";
+// const extId = "hfojlfflnlmfjhddgodpmophmhpimahi";
+const extId = "dihkmjjoakaiagmoflhachmoolamfimp";
 
 function AmoveoInpageProvider() {
 	if (extension.runtime) {
