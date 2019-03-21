@@ -16,7 +16,7 @@ const passwordController = require('../controller/password-controller.js');
 const formatUtility = require('../lib/format-utility.js');
 const userController = require('../controller/user-controller.js');
 const storage = require('../lib/storage.js');
-const elliptic = require('elliptic');
+const elliptic = require('../lib/elliptic.min.js');
 
 function init(password) {
     if (!password) {
@@ -118,16 +118,19 @@ function initAccountSwitchButton(password) {
 }
 
 function setSelectedAccount(account) {
-    storage.getSelectedNetwork(function(error, network) {
-        storage.getUserChannels(account.publicKey, function(error, channels) {
-            passwordController.setState({
-                selectedAddress: account.publicKey,
-                channels: channels,
-                isLocked: false,
-	            network: network,
-            })
-        })
-    })
+	storage.getTopHeader(function(error, topHeader) {
+		storage.getSelectedNetwork(function(error, network) {
+			storage.getUserChannels(account.publicKey, function(error, channels) {
+				passwordController.setState({
+					selectedAddress: account.publicKey,
+					channels: channels,
+					isLocked: false,
+					network: network,
+					topHeader: topHeader,
+				})
+			})
+		})
+	})
 }
 
 function initTabsContainer(account) {

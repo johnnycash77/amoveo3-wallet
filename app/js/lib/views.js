@@ -53,6 +53,7 @@ var ids = {
     settingsContainer: "settings-container",
     firefoxImportContainer: "firefox-import-container",
 	firefoxChannelImportContainer: "firefox-import-channel-container",
+	firefoxWelcomeImportContainer: "firefox-welcome-import-container",
     refreshContainer: "refresh-button",
     accountSwitchContainer: "account-switch-container",
     alertContainer: "alert-container",
@@ -106,6 +107,11 @@ var ids = {
 	    import: "firefox-import",
 	    error: "firefox-import-error",
 	    button: "firefox-import-button",
+    },
+    firefoxWelcomeImport: {
+	    import: "firefox-welcome-import",
+	    error: "firefox-welcome-import-error",
+	    button: "firefox-welcome-import-button",
     },
     send: {
         max: "send-max-amount",

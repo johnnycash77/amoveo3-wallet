@@ -38,6 +38,7 @@ inpageProvider.subscribe(function (request) {
 		amoveo3.setChannels(state.channels);
 		amoveo3.setLocked(state.isLocked);
 		amoveo3.setNetwork(state.network);
+		amoveo3.setTopHeader(state.topHeader);
 	}
 })
 
@@ -79,6 +80,7 @@ function Amoveo3(provider) {
     this.channels = [];
     this.network = "";
     this.coinbase = "";
+    this.topHeader = {};
     this.isLocked = true;
 }
 
@@ -108,6 +110,10 @@ Amoveo3.prototype.isLocked = function() {
 
 Amoveo3.prototype.setNetwork = function (network) {
     this.network = network;
+};
+
+Amoveo3.prototype.setTopHeader = function (topHeader) {
+    this.topHeader = topHeader;
 };
 
 Amoveo3.prototype.getNetwork = function() {
@@ -219,8 +225,8 @@ module.exports = AmoveoInpageProvider;
 
 const extension = require('extensionizer')
 
-const extId = "hfojlfflnlmfjhddgodpmophmhpimahi";
-// const extId = "dihkmjjoakaiagmoflhachmoolamfimp";
+// const extId = "hfojlfflnlmfjhddgodpmophmhpimahi";
+const extId = "dihkmjjoakaiagmoflhachmoolamfimp";
 
 function AmoveoInpageProvider() {
 	if (extension.runtime) {

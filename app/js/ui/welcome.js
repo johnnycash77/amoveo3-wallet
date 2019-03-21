@@ -1,6 +1,6 @@
 const config = require('../config.js');
 const views = require('../lib/views.js');
-const elliptic = require('elliptic');
+const elliptic = require('../lib/elliptic.min.js');
 const storage = require('../lib/storage.js');
 const formatUtility = require('../lib/format-utility.js');
 const Main = require('./popup.js');
@@ -36,36 +36,21 @@ function initWelcomeCreateAccount(callback) {
 function initWelcomeImportAccount(password) {
     var importFile = document.getElementById(views.ids.welcome.importAccount);
     var importButton = document.getElementById(views.ids.welcome.importAccountButton);
-    importButton.onclick = function() {
-        importFile.click();
-    };
+	importButton.onclick = function () {
+		const isFirefox = typeof InstallTrigger !== 'undefined';
+		if (isFirefox) {
+			showFirefoxImport(password);
+		} else {
+			importFile.click();
+		}
+	};
+
     importFile.onchange = function() {
-        storage.getAccounts(password, function(error, accounts) {
-            var i = 0;
-        })
         var file = (importFile.files)[0];
         var reader = new FileReader();
         reader.onload = function(e) {
 	        var contents = reader.result.replace(/^\s+|\s+$/g, '');
-            var keys = ec.keyFromPrivate(contents, "hex");
-            var pubPoint = keys.getPublic("hex");
-            var pubKey = btoa(formatUtility.fromHex(pubPoint));
-            var privKey = keys.getPrivate("hex");
-
-            var account = {
-                publicKey: pubKey,
-                privateKey: privKey
-            };
-
-            storage.setAccounts(password, [account], function() {
-                console.log("Account imported");
-
-                views.hide((views.ids.welcomeContainer));
-
-                Main.setSelectedAccount(account);
-
-                Main.init(password);
-            });
+	        importPrivateKey(password, contents);
         };
 
         if (file.type !== "text/plain" || !(file.size === 64 || file.size === 65)) {
@@ -75,6 +60,53 @@ function initWelcomeImportAccount(password) {
             reader.readAsText(file);
         }
     }
+}
+
+function showFirefoxImport(password) {
+	views.hide(views.ids.welcomeContainer);
+	views.show(views.ids.firefoxWelcomeImportContainer);
+
+	var button = views.find(views.ids.firefoxWelcomeImport.button);
+
+	button.onclick = function() {
+		var privateKey = views.find(views.ids.firefoxWelcomeImport.import).value;
+
+		if (!(privateKey.length === 64 || privateKey.length === 65)) {
+			console.log("Invalid account data");
+			showFirefoxImportError("Invalid key (should be 64 characters long");
+		} else {
+			importPrivateKey(password, privateKey)
+		}
+	}
+}
+
+function showFirefoxImportError(message) {
+	var error = views.find(views.ids.firefoxWelcomeImport.error);
+	error.innerHTML = message;
+	views.show(views.ids.firefoxWelcomeImport.error);
+}
+
+function importPrivateKey(password, privateKey) {
+	var keys = ec.keyFromPrivate(privateKey, "hex");
+	var pubPoint = keys.getPublic("hex");
+	var pubKey = btoa(formatUtility.fromHex(pubPoint));
+	var privKey = keys.getPrivate("hex");
+
+	var account = {
+		publicKey: pubKey,
+		privateKey: privKey
+	};
+
+	storage.setAccounts(password, [account], function() {
+		console.log("Account imported");
+
+		views.hide((views.ids.welcomeContainer));
+		views.hide((views.ids.firefoxWelcomeImportContainer));
+
+		Main.setSelectedAccount(account);
+
+		Main.init(password);
+	});
 }
 
 function showWelcomeError(message) {

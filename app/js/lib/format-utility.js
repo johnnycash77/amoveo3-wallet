@@ -98,7 +98,24 @@ function hashToInt(h) {
     }
     return hash2integer2(h.concat([255]), 0, 0);
 }
+function ssToInternal(ess) {
+	let ss = [];
+	for (let i = 1; i < ess.length; i++) {
+		if (JSON.stringify(ess[i][2]) === JSON.stringify([-6, -6])) {
+			ess[i][2] = [-6];
+			ess[i][3] = [-6];
+		}
+		ss = ss.concat([newSS(stringToArray(atob(ess[i][1])), ess[i][2], ess[i][3])]);
+	}
+	return ss;
+}
 
+function newSS(code, prove, meta) {
+	if (meta === undefined) {
+		meta = 0;
+	}
+	return {"code": code, "prove": prove, "meta": meta};
+}
 function newHashToInteger(h) {
     function hash2integer2(h, i, n) {
         var x = h[i];
@@ -255,3 +272,5 @@ exports.fromHex = fromHex;
 exports.toHex = toHex;
 exports.serializeHeader = serializeHeader;
 exports.binToRs = binToRs;
+exports.ssToInternal = ssToInternal;
+exports.newSS = newSS;

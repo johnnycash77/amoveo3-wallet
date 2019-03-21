@@ -36,6 +36,7 @@ inpageProvider.subscribe(function (request) {
 		amoveo3.setChannels(state.channels);
 		amoveo3.setLocked(state.isLocked);
 		amoveo3.setNetwork(state.network);
+		amoveo3.setTopHeader(state.topHeader);
 	}
 })
 

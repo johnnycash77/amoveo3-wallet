@@ -33,6 +33,7 @@ function resetPasswordTimer() {
         password = "";
     }, 30 * 60 * 1000);
 }
+
 function onMessageListener(request, sender, sendResponse) {
 	console.log(JSON.stringify(request));
 
@@ -115,32 +116,10 @@ extension.runtime.onConnectExternal.addListener(function(port) {
 });
 
 function sendCurrentState() {
-	storage.getSelectedNetwork(function (error, network) {
-		storage.getAccounts(password, function (error, accounts) {
-			if (error) {
-				sendMessageToPage({
-					type: "setState",
-					data: {
-						selectedAddress: "",
-						channels: [],
-						isLocked: true,
-						network: network,
-					}
-				});
-			} else {
-				if (accounts.length > 0) {
-					storage.getUserChannels(accounts[0].publicKey, function (error, channels) {
-						sendMessageToPage({
-							type: "setState",
-							data: {
-								selectedAddress: accounts[0].publicKey,
-								channels: channels,
-								isLocked: false,
-								network: network,
-							}
-						})
-					})
-				} else {
+	storage.getTopHeader(function (error, topHeader) {
+		storage.getSelectedNetwork(function (error, network) {
+			storage.getAccounts(password, function (error, accounts) {
+				if (error) {
 					sendMessageToPage({
 						type: "setState",
 						data: {
@@ -148,12 +127,39 @@ function sendCurrentState() {
 							channels: [],
 							isLocked: true,
 							network: network,
+							topHeader: topHeader,
 						}
-					})
+					});
+				} else {
+					if (accounts.length > 0) {
+						storage.getUserChannels(accounts[0].publicKey, function (error, channels) {
+							sendMessageToPage({
+								type: "setState",
+								data: {
+									selectedAddress: accounts[0].publicKey,
+									channels: channels,
+									isLocked: false,
+									network: network,
+									topHeader: topHeader,
+								}
+							})
+						})
+					} else {
+						sendMessageToPage({
+							type: "setState",
+							data: {
+								selectedAddress: "",
+								channels: [],
+								isLocked: true,
+								network: network,
+								topHeader: topHeader,
+							}
+						})
+					}
 				}
-			}
+			});
 		});
-	});
+	})
 }
 
 function reloadWeb() {

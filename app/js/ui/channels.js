@@ -41,7 +41,8 @@ function showChannels(channels, account, shouldReload) {
                 passwordController.setState({
                     selectedAddress: account.publicKey,
                     channels: channels,
-                    isLocked: false
+                    isLocked: false,
+	                topHeader: topHeader
                 });
             }
         }

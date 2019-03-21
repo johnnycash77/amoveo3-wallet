@@ -36,6 +36,11 @@ p {
     text-align: center;
 }
 
+#channel-sync-container {
+    padding: 32px;
+    text-align: center;
+}
+
 #cancel-container {
     padding: 32px;
     text-align: center;
