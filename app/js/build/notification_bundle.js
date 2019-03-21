@@ -2656,7 +2656,7 @@ function checkChannelState(callback) {
 								for (i = 0; i < channels.length; i++) {
 									let channel = channels[i];
 									if (channel.me[1] === address && channel.serverPubKey === pubkey) {
-										channelsMatch = channel.them[1][3].length === serverChannel[2][1][3].length;
+										channelsMatch = JSON.stringify(channel.them[1]) === JSON.stringify(serverChannel[2][1]);
 									}
 								}
 
