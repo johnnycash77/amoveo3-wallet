@@ -2,8 +2,6 @@
 const mainnet = {
     isTestnet: false,
     defaultFee: 0.00151168,
-    decimalMultiplier: 100000000,
-	priceMultiplier: 10000,
     defaultNodeUrl: "https://amoveobook-api.herokuapp.com/api/v1/node/",
     retargetFrequency: 2000,
     forks: {two: 9000, four: 26900, seven:28135},
@@ -17,8 +15,6 @@ const mainnet = {
 const testnet = {
     isTestnet: true,
     defaultFee: 0.00151168,
-    decimalMultiplier: 100000000,
-    priceMultiplier: 10000,
     defaultNodeUrl: "http://amoveobook-api.herokuapp.com/api/v1/testnet/node/",
     retargetFrequency: 12,
     forks: {two: 0, four: 12, seven:40},
@@ -34,6 +30,7 @@ const config = {
     "testnet": testnet,
 	defaultFee: 0.00151168,
 	decimalMultiplier: 100000000,
+	priceMultiplier: 10000,
 	appTitle: "Amoveo3 Wallet",
 }
 
@@ -2654,7 +2651,7 @@ function checkChannelState(callback) {
 						const address = accounts[0].publicKey;
 						network.send(["spk", address], function(error, serverChannel) {
 							storage.getChannels(function(error, channels) {
-								let channelsMatch = true;
+								let channelsMatch = false;
 								let i;
 								for (i = 0; i < channels.length; i++) {
 									let channel = channels[i];
@@ -2680,6 +2677,8 @@ function checkChannelState(callback) {
 }
 
 function showChannelSyncPrompt(accountPubkey, index, serverChannel, callback) {
+	document.getElementById('loading').classList.add('hidden');
+
 	document.getElementById('channel-sync-container').classList.remove('hidden');
 
 	initButtons(function() {
@@ -2693,6 +2692,8 @@ function showChannelSyncPrompt(accountPubkey, index, serverChannel, callback) {
 			const cid = spk[6];
 			const expiration = cd[7];
 			const channelData = {"me": me, "them": themSpk, "ssme": ss, "ssthem": ss, "cid": cid, "expiration": expiration, "serverPubKey": me[2]};
+
+			const a = JSON.stringify(channelData);
 
 			channels[index] = channelData;
 
@@ -2737,6 +2738,8 @@ function getParameterByName(name, url) {
 }
 
 function initSigning() {
+	document.getElementById('loading').classList.add('hidden');
+
 	document.getElementById('signing-container').classList.remove('hidden');
 
 	const message = parseParam('message');
@@ -2778,6 +2781,8 @@ function setTitle(title) {
 }
 
 function initButtons(confirmCallback, cancelCallback) {
+	document.getElementById('button-container').classList.remove('hidden');
+
 	const yes = document.getElementById('yes-button');
 	yes.onclick = function() {
 		if (confirmCallback) {
@@ -2794,6 +2799,8 @@ function initButtons(confirmCallback, cancelCallback) {
 }
 
 function initChannel() {
+	document.getElementById('loading').classList.add('hidden');
+
 	setTitle("New Channel");
 
 	//xss safety
@@ -2903,6 +2910,8 @@ function initFee(timeValue) {
 }
 
 function initBet() {
+	document.getElementById('loading').classList.add('hidden');
+
 	setTitle("Confirm Bet");
 
 	document.getElementById('make-bet-container').classList.remove('hidden');
@@ -2920,7 +2929,7 @@ function initBet() {
 	let upperBound = parseFloat(getParameterByName('upperBound'));
 	let lowerBound = parseFloat(getParameterByName('lowerBound'));
 
-	amountText.value = amount;
+	amountText.innerHTML = amount;
 
 	if (marketType === "scalar") {
 		let displayPrice =  (upperBound - lowerBound) * price;
@@ -2929,14 +2938,14 @@ function initBet() {
 		}
 		displayPrice = parseFloat(displayPrice.toFixed(2));
 
-		oddsText.value = displayPrice
+		oddsText.innerHTML = displayPrice
 		document.getElementById("price-tooltip").innerHTML = "You are betting the price will be " + (side === "long" ? "higher" : "lower") + " than this value."
 	} else {
-		oddsText.value = price;
+		oddsText.innerHTML = price;
 	}
 
 	const total = parseFloat((amount + (amount * price)).toFixed(4));
-	totalText.value = total + " VEO";
+	totalText.innerHTML = total + " VEO";
 
 	document.getElementById("bet-side").innerText = capitalize(side);
 
@@ -3419,6 +3428,8 @@ function verifyBetAndSave(sspk2, sspk, serverPubkey, oidFinal, accountPubkey, ca
 }
 
 function initCancel() {
+	document.getElementById('loading').classList.add('hidden');
+
 	setTitle("Are you sure you want to cancel?");
 
 	document.getElementById('cancel-container').classList.remove('hidden');

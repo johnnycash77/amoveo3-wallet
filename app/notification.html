@@ -16,6 +16,8 @@
 </div>
 
 <div id="notification-container">
+    <div id="loading" class="loading"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+
     <div id="new-channel-container" class="hidden">
         <div id="channel-ip-container" class="form-row hidden">
             <label>Channel IP Address</label>
@@ -94,7 +96,7 @@
             </div>
             <div class="form-row">
                 <label>Amount (VEO)</label>
-                <input id="bet-amount" type="number" />
+                <p id="bet-amount"></p>
             </div>
             <div>
                 <p id="bet-user-balance" class="invisible"></p>
@@ -105,11 +107,11 @@
                     <span class="tooltiptext" id="price-tooltip">The price in VEO is equal to the odds</span>
                 </div>
                 <label>Price</label>
-                <input id="bet-price" type="number" />
+                <p id="bet-price"></p>
             </div>
             <div class="form-row">
                 <label>Total</label>
-                <input id="bet-total" readonly="readonly" />
+                <p id="bet-total"></p>
             </div>
         </div>
         <div>
@@ -149,7 +151,7 @@
         </div>
     </div>
 
-    <div id="button-container" class="form-row clearfix">
+    <div id="button-container" class="form-row clearfix hidden">
         <div class="left">
             <button id="yes-button" class="btn btn-success">Confirm</button>
         </div>

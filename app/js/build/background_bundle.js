@@ -178,8 +178,6 @@ function reloadWeb() {
 const mainnet = {
     isTestnet: false,
     defaultFee: 0.00151168,
-    decimalMultiplier: 100000000,
-	priceMultiplier: 10000,
     defaultNodeUrl: "https://amoveobook-api.herokuapp.com/api/v1/node/",
     retargetFrequency: 2000,
     forks: {two: 9000, four: 26900, seven:28135},
@@ -193,8 +191,6 @@ const mainnet = {
 const testnet = {
     isTestnet: true,
     defaultFee: 0.00151168,
-    decimalMultiplier: 100000000,
-    priceMultiplier: 10000,
     defaultNodeUrl: "http://amoveobook-api.herokuapp.com/api/v1/testnet/node/",
     retargetFrequency: 12,
     forks: {two: 0, four: 12, seven:40},
@@ -210,6 +206,7 @@ const config = {
     "testnet": testnet,
 	defaultFee: 0.00151168,
 	decimalMultiplier: 100000000,
+	priceMultiplier: 10000,
 	appTitle: "Amoveo3 Wallet",
 }
 
