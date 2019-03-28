@@ -2969,9 +2969,10 @@ function showChannels(channels, account, shouldReload) {
 
     storage.getTopHeader(function(error, topHeader) {
         if (topHeader !== 0) {
+        	const height = getTopHeader[1];
             for (var i = 0; i < channels.length; i++) {
                 var channel = channels[i];
-	            if (channel.me[1] === account.publicKey) {
+	            if (channel.me[1] === account.publicKey && channel.expiration >= height - 100) {
 		            makeChannelRow(topHeader, channel, function (row) {
 			            container.appendChild(row);
 		            })

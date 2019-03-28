@@ -2682,7 +2682,7 @@ function showChannelSyncPrompt(accountPubkey, index, serverChannel, callback) {
 	document.getElementById('channel-sync-container').classList.remove('hidden');
 
 	initButtons(function() {
-		storage.getUserChannels(accountPubkey, function(error, channels) {
+		storage.getChannels(function(error, channels) {
 			const cd = serverChannel[1];
 			const themSpk = serverChannel[2];
 
@@ -2693,14 +2693,22 @@ function showChannelSyncPrompt(accountPubkey, index, serverChannel, callback) {
 			const expiration = cd[7];
 			const channelData = {"me": me, "them": themSpk, "ssme": ss, "ssthem": ss, "cid": cid, "expiration": expiration, "serverPubKey": me[2]};
 
-
-			for (let i = 0; i < channels.length; i++) {
-				let channel = channels[i];
-				if (channel.me[1] === accountPubkey && channel.serverPubKey === me[2]) {
-					channels[i] = channelData
-					break;
+			let channelFound = false;
+			if (channels.length > 0) {
+				for (let i = 0; i < channels.length; i++) {
+					let channel = channels[i];
+					if (channel.me[1] === accountPubkey && channel.serverPubKey === me[2]) {
+						channels[i] = channelData
+						channelFound = true;
+						break;
+					}
 				}
 			}
+
+			if (!channelFound) {
+				channels.push(channelData)
+			}
+
 			storage.setChannels(channels, function() {
 				document.getElementById('channel-sync-container').classList.add('hidden');
 				if (callback) {
@@ -3141,7 +3149,13 @@ function verify(data, sig0, key) {
 }
 
 function verify1(tx) {
-	return verify(tx[1], tx[2], ec.keyFromPublic(formatUtility.toHex(atob(tx[1][1])), "hex"));
+	var pub;
+	if (tx[1][0] === -7) {
+		pub = tx[1][2];
+	} else {
+		pub = tx[1][1];
+	}
+	return verify(tx[1], tx[2], ec.keyFromPublic(formatUtility.toHex(atob(pub)), "hex"));
 }
 
 function verify2(tx) {
@@ -3413,7 +3427,7 @@ function verifyBetAndSave(sspk2, sspk, serverPubkey, oidFinal, accountPubkey, ca
 		console.log(JSON.stringify(sspk2[1]));
 	}
 
-	storage.getUserChannels(accountPubkey, function(error, channels) {
+	storage.getChannels(function(error, channels) {
 		for (let i = 0; i < channels.length; i++) {
 			let channel = channels[i];
 			if (channel.me[1] === accountPubkey && channel.serverPubKey === serverPubkey) {
