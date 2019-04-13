@@ -1,6 +1,7 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-(function (Buffer){
-
+(function (__dirname){
+const fs = require('fs')
+const Buffer = require('buffer').Buffer
 const path = require('path')
 const extension = require('extensionizer')
 
@@ -130,8 +131,8 @@ if (isFirefox) {
 		}
 	});
 }
-}).call(this,require("buffer").Buffer)
-},{"buffer":5,"extensionizer":3,"path":7}],2:[function(require,module,exports){
+}).call(this,"/app/js")
+},{"buffer":6,"extensionizer":3,"fs":4,"path":8}],2:[function(require,module,exports){
 const apis = [
   'alarms',
   'bookmarks',
@@ -236,6 +237,8 @@ const Extension = require('./extension-instance')
 module.exports = new Extension()
 
 },{"./extension-instance":2}],4:[function(require,module,exports){
+
+},{}],5:[function(require,module,exports){
 'use strict'
 
 exports.byteLength = byteLength
@@ -388,7 +391,7 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -2126,7 +2129,7 @@ function numberIsNaN (obj) {
   return obj !== obj // eslint-disable-line no-self-compare
 }
 
-},{"base64-js":4,"ieee754":6}],6:[function(require,module,exports){
+},{"base64-js":5,"ieee754":7}],7:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = (nBytes * 8) - mLen - 1
@@ -2212,7 +2215,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 (function (process){
 // .dirname, .basename, and .extname methods are extracted from Node.js v8.11.1,
 // backported and transplited with Babel, with backwards-compat fixes
@@ -2518,7 +2521,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":8}],8:[function(require,module,exports){
+},{"_process":9}],9:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 

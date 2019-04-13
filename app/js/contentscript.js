@@ -1,4 +1,5 @@
 const fs = require('fs')
+const Buffer = require('buffer').Buffer
 const path = require('path')
 const extension = require('extensionizer')
 
