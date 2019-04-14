@@ -1,17 +1,21 @@
-const fs = require('fs')
-const Buffer = require('buffer').Buffer
-const path = require('path')
 const extension = require('extensionizer')
 
-const inpageContent = fs.readFileSync(path.join(__dirname, 'build', 'inpage_bundle.js')).toString()
-const inpageSuffix = '//# sourceURL=' + extension.extension.getURL('inpage_bundle.js?v=1.2.4') + '\n'
-const inpageBundle = inpageContent + inpageSuffix
+const url = chrome.runtime.getURL("/js/build/inpage_bundle.js");
 
-if (shouldInjectAmoveo3()) {
-    setupInjection()
-}
+fetch(url)
+.then(function(response) {
+	return response.text()
+})
+.then(function(inpageContent) {
+	const inpageSuffix = '//# sourceURL=' + extension.extension.getURL('inpage_bundle.js?v=1.2.4') + '\n'
+	const inpageBundle = inpageContent + inpageSuffix
 
-function setupInjection() {
+	if (shouldInjectAmoveo3()) {
+		setupInjection(inpageBundle)
+	}
+});
+
+function setupInjection(inpageBundle) {
     try {
         var scriptTag = document.createElement('script')
         scriptTag.textContent = inpageBundle

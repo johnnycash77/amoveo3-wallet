@@ -1,6 +1,6 @@
 {
   "name": "Amoveo Wallet",
-  "version": "1.1.12",
+  "version": "1.1.13",
   "manifest_version": 2,
   "description": "Amoveo Wallet",
   "icons": {
@@ -20,6 +20,9 @@
       "run_at": "document_start",
       "all_frames": true
     }
+  ],
+  "web_accessible_resources": [
+    "js/build/inpage_bundle.js"
   ],
   "permissions": [
     "storage",
